@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+  <!-- Режим сборки сервера (SERVER) или клиента (CLIENT) при разработке (должен быть активным только один). -->
+  <?define SERVER?>
+
+  <!-- Основная версия ПО. -->
+  <?define MajorProductVersion = "1.0"?>
+  <!-- Второстепенная версия ПО. -->
+  <?define MinorProductVersion = "1"?>
+  <!-- Ключи реестра. -->
+  <?define MainRegistryPath = "Software\[Manufacturer]\[UpgradeCode]\[ProductCode]"?>
+  
+  <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ НАЧАЛО *** -->
+  <?ifdef SERVER ?>
+  <?include VariablesServer.wxi ?>
+  <?endif?>
+  <?ifdef CLIENT ?>
+  <?include VariablesClient.wxi ?>
+  <?endif?>
+  <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ КОНЕЦ *** -->
+
+  <!-- Корневой набор компонентов. -->
+  <?define RootFeatureTitle = $(var.ProductName)?>
+  <?define RootFeatureDescription = "Установка $(var.ProductName)"?>
+  <!-- Общий набор компонентов. -->
+  <?define CommonFeatureTitle = "Общие компоненты"?>
+  <?define CommonFeatureDescription = "Общие компоненты"?>
+</Include>

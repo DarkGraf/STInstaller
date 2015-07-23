@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <?include Variables.wxi ?>
+
+  <Fragment>
+    <!-- Виртуальный корневой каталог. -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <!-- Program Files -->
+      <Directory Id="ProgramFilesFolder">
+        <!-- Общий каталог для семейства продуктов. -->
+        <Directory Id="INSTALLLOCATION" Name="$(var.InstallLocationFamilyFolder)">
+          <!-- Каталог для конкретного продукта. -->
+          <Directory Id="ProductFolder" Name="$(var.InstallLocationProductFolder)" />
+        </Directory>
+      </Directory>
+
+      <!-- Пуск. -->
+      <Directory Id="ProgramMenuFolder">
+        <!-- Меню общее для семейства продуктов. -->
+        <Directory Id="ProgramMenuFamilyDir" Name="$(var.ProgramMenuFamilyDirName)">
+          <!-- Меню для конкретного продукта. -->
+          <Directory Id="ProgramMenuProductDir" Name="$(var.ProgramMenuProductDirName)" />
+        </Directory>
+      </Directory>
+
+      <!-- Рабочий стол. -->
+      <Directory Id="DesktopFolder" />
+    </Directory>
+  </Fragment>
+</Wix>

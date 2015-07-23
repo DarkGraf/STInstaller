@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:st="http://www.systemt.ru/STSchema">
+
+  <?include Variables.wxi ?>
+
+  <Fragment>
+    <!-- Каталог в меню Пуск. Для удаления при деинсталляции. -->
+    <DirectoryRef Id="ProgramMenuFamilyDir">
+      <Component Id="ProgramMenuFamilyDirComponent" Guid="$(var.ProgramMenuFamilyDirComponentGuid)">
+        <!-- Используется для удаления пользовательского каталога. -->
+        <RemoveFolder Id="ProgramMenuFamilyDir" On="uninstall" />
+        <!-- KeyPath - признак ключевой сущности, факт установки компонента контролируется по ее наличию или отсутствию. -->
+        <!-- Так как компонент не содержит файлов, для контроля необходимо использовать запись в реестре. -->
+        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="ProgramMenuFamilyDir" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Каталог в меню Пуск. Для удаления при деинсталляции. -->
+    <DirectoryRef Id="ProgramMenuProductDir">
+      <Component Id="ProgramMenuProductDirComponent" Guid="$(var.ProgramMenuProductDirComponentGuid)">
+        <!-- Используется для удаления пользовательского каталога. -->
+        <RemoveFolder Id="ProgramMenuProductDir" On="uninstall" />
+        <!-- KeyPath - признак ключевой сущности, факт установки компонента контролируется по ее наличию или отсутствию. -->
+        <!-- Так как компонент не содержит файлов, для контроля необходимо использовать запись в реестре. -->
+        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="ProgramMenuProductDir" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Ярлык для удаления программы в Пуске. -->
+    <DirectoryRef Id="ProgramMenuProductDir">
+      <Component Id="ReinstallComponent" Guid="0BC7D37C-B72B-4E12-B98F-B0A83D4B9A67">
+        <Shortcut Id="ReinstallShortcut" Name="Изменение компонентов программы" Description="Позволяет изменить, восстановить и удалить компоненты программы."
+          Target="[System64Folder]msiexec.exe" Arguments="/i [ProductCode]" />
+        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="ShortcutReinstall" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ НАЧАЛО *** -->
+    <?ifdef SERVER?>
+    <?include ComponentsServer.wxi ?>
+    <?endif?>
+    <?ifdef CLIENT?>
+    <?include ComponentsClient.wxi ?>
+    <?endif?>
+    <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ КОНЕЦ *** -->
+  </Fragment>
+</Wix>

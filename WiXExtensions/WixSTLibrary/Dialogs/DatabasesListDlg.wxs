@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+    <!-- Здесь только описание диалога, здесь не должны быть подписки на события (кроме кнопки "Отмена"). -->
+    <UI Id="UIDatabasesListDlg">
+      <!-- Диалог выбора баз данных. -->
+      <Dialog Id="DatabasesListDlg" Width="370" Height="270" Title="!(loc.DatabasesListDlg_Title)">
+        <!-- Баннер сверху и линии. -->
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.DatabasesListDlgBannerBitmap)" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+        <!-- Заголовок. -->
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.DatabasesListDlgTitle)" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.DatabasesListDlgDescription)">
+          <Condition Action="show">NOT ServerUpdateMode</Condition>
+          <Condition Action="hide">ServerUpdateMode</Condition>
+        </Control>
+        <Control Id="UpdateDescription" Type="Text" X="25" Y="23" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.DatabasesListDlgUpdateDescription)">
+          <Condition Action="show">ServerUpdateMode</Condition>
+          <Condition Action="hide">NOT ServerUpdateMode</Condition>
+        </Control>
+
+        <!-- Список баз данных. -->
+        <Control Id="DatabasesText" Type="Text" X="25" Y="65" Width="340" Height="15" Transparent="yes" NoPrefix="yes"
+          Text="!(loc.DatabasesListDlgDatabasesText)" />
+
+        <!-- Чтобы избежать предупреждения ICE17 (не заполненность ListBox) в коде XML была добавлена
+        его инициализация. Не удалось в данной версии Wix просто очистить данные в таблице, если она
+        заполенена из кода XML. Получается очистить только в том случае, если после очистки произвести 
+        сразу вставку. Если таким образом таблицу не очистить, то в дальнейшем не получится удалить 
+        эту строчку вставленную из XML. В общем результат работы в дальнейшем непредсказуем. Решено 
+        оставить пустой ListBox и предупреждение ICE17 для стабильной работы, так, например, реализована 
+        стандартная форма FilesInUse. Далее была произведена замена на ListView. -->
+        <Control Id="DatabasesListView" Type="ListView" X="25" Y="80" Width="326" Height="90" Property="SELECTEDDATABASE" Sorted="no">
+          <ListView Property="SELECTEDDATABASE" />
+        </Control>
+
+        <!-- Добавить. -->
+        <Control Id="NewDatabaseButton" Type="PushButton" X="301" Y="172" Width="16" Height="16" Icon="yes" IconSize="16" FixedSize="yes" Text="NewDatabase" ToolTip="!(loc.DatabasesListDlgNewDatabaseButton)" TabSkip="yes">
+          <!-- Если нет серверов, то выключить кнопкую. -->
+          <!-- Если свойство ServerUpdateMode установлено, то отключить кнопку в любом случае. -->
+          <Condition Action="hide">NOT SELECTEDSERVER OR ServerUpdateMode</Condition>
+          <Condition Action="show">SELECTEDSERVER AND NOT ServerUpdateMode</Condition>
+        </Control>
+        <!-- Выключенная кнопка с иконкой плохо смотрится, дублируем. -->
+        <Control Id="NewDatabaseDisButton" Type="PushButton" X="301" Y="172" Width="16" Height="16" Icon="yes" IconSize="16" FixedSize="yes" Text="NewDatabaseDis" TabSkip="yes" Disabled="yes">
+          <Condition Action="show">NOT SELECTEDSERVER OR ServerUpdateMode</Condition>
+          <Condition Action="hide">SELECTEDSERVER AND NOT ServerUpdateMode</Condition>
+        </Control>
+        
+        <!-- Добавить существующую. -->
+        <Control Id="ExistDatabaseButton" Type="PushButton" X="318" Y="172" Width="16" Height="16" Icon="yes" IconSize="16" FixedSize="yes" Text="ExistDatabase" ToolTip="!(loc.DatabasesListDlgExistDatabaseButton)" TabSkip="yes">
+          <!-- Если нет серверов или нет в списке существующих баз, то выключить кнопкую. -->
+          <Condition Action="hide">NOT SELECTEDSERVER OR NOT EXISTDATABASE</Condition>
+          <Condition Action="show">SELECTEDSERVER AND EXISTDATABASE</Condition>
+        </Control>
+        <!-- Выключенная кнопка с иконкой плохо смотрится, дублируем. -->
+        <Control Id="ExistDatabaseDisButton" Type="PushButton" X="318" Y="172" Width="16" Height="16" Icon="yes" IconSize="16" FixedSize="yes" Text="ExistDatabaseDis" TabSkip="yes" Disabled="yes">
+          <Condition Action="show">NOT SELECTEDSERVER OR NOT EXISTDATABASE</Condition>
+          <Condition Action="hide">SELECTEDSERVER AND EXISTDATABASE</Condition>
+        </Control>
+
+        <!-- Удалить. -->
+        <Control Id="DeleteDatabaseButton" Type="PushButton" X="335" Y="172" Width="16" Height="16" Icon="yes" IconSize="16" FixedSize="yes" Text="DeleteDatabase" ToolTip="!(loc.DatabasesListDlgDeleteDatabaseButton)" TabSkip="yes">
+          <Condition Action="hide">NOT SELECTEDDATABASE</Condition>
+          <Condition Action="show">SELECTEDDATABASE</Condition>
+        </Control>
+        <!-- Выключенная кнопка с иконкой плохо смотрится, дублируем. -->
+        <Control Id="DeleteDatabaseDisableButton" Type="PushButton" X="335" Y="172" Width="16" Height="16" Icon="yes" IconSize="16" FixedSize="yes" Text="DeleteDatabaseDis" TabSkip="yes" Disabled="yes">
+          <Condition Action="show">NOT SELECTEDDATABASE</Condition>
+          <Condition Action="hide">SELECTEDDATABASE</Condition>
+        </Control>
+
+        <!-- Кнопки перехода и отмены. -->
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Text="!(loc.WixUINext)" Default="yes" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+
+      <Binary Id="NewDatabase" SourceFile="Resources\NewDatabase.ico" />
+      <Binary Id="NewDatabaseDis" SourceFile="Resources\NewDatabaseDis.ico" />
+      <Binary Id="ExistDatabase" SourceFile="Resources\ExistDatabase.ico" />
+      <Binary Id="ExistDatabaseDis" SourceFile="Resources\ExistDatabaseDis.ico" />
+      <Binary Id="LockDatabase" SourceFile="Resources\LockDatabase.ico" />
+      <Binary Id="DeleteDatabase" SourceFile="Resources\DeleteDatabase.ico" />
+      <Binary Id="DeleteDatabaseDis" SourceFile="Resources\DeleteDatabaseDis.ico" />
+    </UI>
+
+    <!-- Обязательно включить таблицу в базу. -->
+    <EnsureTable Id="ListView" />
+  </Fragment>
+</Wix>

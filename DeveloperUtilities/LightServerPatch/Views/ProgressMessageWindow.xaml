@@ -1,0 +1,18 @@
+﻿<Window x:Class="LightServerPatch.Views.ProgressMessageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Сообщения построения" Height="250" Width="500"
+        WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" ResizeMode="NoResize">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <ScrollViewer x:Name="scroll" Grid.Row="0" FontFamily="Courier New" Background="Black" Foreground="Lime">
+      <StackPanel x:Name="stack" />
+    </ScrollViewer>
+    
+    <Button x:Name="btnClose" Margin="10" Grid.Row="1" Height="30" Content="Закрыть" />
+  </Grid>
+</Window>

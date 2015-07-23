@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+
+    <UIRef Id="WixUI_STInstaller"/>
+    
+    <Binary Id="CustomActionDll" SourceFile="$(var.WixSTActions.TargetDir)WixSTActions.CA.dll" />
+
+    <!-- AfterInstallInitialize. -->
+
+    <CustomAction
+      Id="AfterInstallInitializeImmediate"
+      BinaryKey="CustomActionDll"
+      DllEntry="AfterInstallInitializeImmediate"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="AfterInstallInitializeDeferred"
+      BinaryKey="CustomActionDll"
+      DllEntry="AfterInstallInitializeDeferred"
+      Execute="deferred"
+      Return="check" />
+
+    <CustomAction
+      Id="AfterInstallInitializeRollback"
+      BinaryKey="CustomActionDll"
+      DllEntry="AfterInstallInitializeRollback"
+      Execute="rollback"
+      Return="check" />
+
+    <!-- BeforeInstallFinalize. -->
+
+    <CustomAction
+      Id="BeforeInstallFinalizeImmediate"
+      BinaryKey="CustomActionDll"
+      DllEntry="BeforeInstallFinalizeImmediate"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="BeforeInstallFinalizeDeferred"
+      BinaryKey="CustomActionDll"
+      DllEntry="BeforeInstallFinalizeDeferred"
+      Execute="deferred"
+      Return="check" />
+
+    <CustomAction
+      Id="BeforeInstallFinalizeRollback"
+      BinaryKey="CustomActionDll"
+      DllEntry="BeforeInstallFinalizeRollback"
+      Execute="rollback"
+      Return="check" />
+    
+    <!-- InstallingExtendedProcedures. -->
+
+    <CustomAction
+      Id="InstallingExtendedProceduresImmediate"
+      BinaryKey="CustomActionDll"
+      DllEntry="InstallingExtendedProceduresImmediate"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="InstallingExtendedProceduresDeferred"
+      BinaryKey="CustomActionDll"
+      DllEntry="InstallingExtendedProceduresDeferred"
+      Execute="deferred"
+      Return="check" />
+
+    <CustomAction
+      Id="InstallingExtendedProceduresRollback"
+      BinaryKey="CustomActionDll"
+      DllEntry="InstallingExtendedProceduresRollback"
+      Execute="rollback"
+      Return="check" />
+
+    <!-- RestoringDataBase. -->
+
+    <CustomAction
+      Id="RestoringDataBaseImmediate"
+      BinaryKey="CustomActionDll"
+      DllEntry="RestoringDataBaseImmediate"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="RestoringDataBaseDeferred"
+      BinaryKey="CustomActionDll"
+      DllEntry="RestoringDataBaseDeferred"
+      Execute="deferred"
+      Return="check" />
+
+    <CustomAction
+      Id="RestoringDataBaseRollback"
+      BinaryKey="CustomActionDll"
+      DllEntry="RestoringDataBaseRollback"
+      Execute="rollback"
+      Return="check" />
+
+    <!-- RunSqlScript. -->
+
+    <CustomAction
+      Id="RunSqlScriptImmediate"
+      BinaryKey="CustomActionDll"
+      DllEntry="RunSqlScriptImmediate"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="RunSqlScriptDeferred"
+      BinaryKey="CustomActionDll"
+      DllEntry="RunSqlScriptDeferred"
+      Execute="deferred"
+      Return="check" />
+
+    <CustomAction
+      Id="RunSqlScriptRollback"
+      BinaryKey="CustomActionDll"
+      DllEntry="RunSqlScriptRollback"
+      Execute="rollback"
+      Return="check" />
+
+    <InstallExecuteSequence>
+      <!-- Здесь выполнение InstallInitialize. -->
+
+      <Custom Action="AfterInstallInitializeImmediate" After="InstallInitialize" />
+      <Custom Action="AfterInstallInitializeDeferred" After="AfterInstallInitializeImmediate" />
+      <Custom Action="AfterInstallInitializeRollback" Before="AfterInstallInitializeDeferred" />
+
+      <!-- Здесь выполнение InstallFiles. -->
+
+      <!-- Не важно, что будет первым, InstallingExtendedProcedures или RestoringDataBase. -->
+      <Custom Action="InstallingExtendedProceduresImmediate" After="InstallFiles" />
+      <Custom Action="InstallingExtendedProceduresDeferred" After="InstallingExtendedProceduresImmediate" />
+      <Custom Action="InstallingExtendedProceduresRollback" Before="InstallingExtendedProceduresDeferred" />
+
+      <Custom Action="RestoringDataBaseImmediate" After="InstallFiles" />
+      <Custom Action="RestoringDataBaseDeferred" After="RestoringDataBaseImmediate" />
+      <Custom Action="RestoringDataBaseRollback" Before="RestoringDataBaseDeferred" />
+
+      <Custom Action="RunSqlScriptImmediate" After="RestoringDataBaseImmediate" />
+      <Custom Action="RunSqlScriptDeferred" After="RunSqlScriptImmediate" />
+      <Custom Action="RunSqlScriptRollback" Before="RunSqlScriptDeferred" />
+
+      <Custom Action="BeforeInstallFinalizeImmediate" Before="InstallFinalize" />
+      <Custom Action="BeforeInstallFinalizeDeferred" After="BeforeInstallFinalizeImmediate" />
+      <Custom Action="BeforeInstallFinalizeRollback" Before="BeforeInstallFinalizeDeferred" />
+
+      <!-- Здесь выполнение InstallFinalize. -->
+    </InstallExecuteSequence>
+
+    <CustomAction
+      Id="InstallerInitializeUI"
+      BinaryKey="CustomActionDll"
+      DllEntry="InstallerInitializeUI"
+      Execute="immediate"
+      Return="check" />
+
+    <InstallUISequence>
+      <!-- Специально выбрано после AppSearch, так как в этот момент уже произошло считывание из реестра. -->
+      <Custom Action="InstallerInitializeUI" After="AppSearch" />
+    </InstallUISequence>
+
+    <!-- Действия для вызова из интерфейса. -->
+
+    <CustomAction
+      Id="AddDatabaseToList"
+      BinaryKey="CustomActionDll"
+      DllEntry="AddDatabaseToList"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="AddExistDatabaseToList"
+      BinaryKey="CustomActionDll"
+      DllEntry="AddExistDatabaseToList"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="DeleteDatabaseFromList"
+      BinaryKey="CustomActionDll"
+      DllEntry="DeleteDatabaseFromList"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="CheckConnectionDatabaseNotExist"
+      BinaryKey="CustomActionDll"
+      DllEntry="CheckConnectionDatabaseNotExist"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="InitializationFinishInfo"
+      BinaryKey="CustomActionDll"
+      DllEntry="InitializationFinishInfo"
+      Execute="immediate"
+      Return="check" />
+
+    <CustomAction
+      Id="ClearFinishInfo"
+      BinaryKey="CustomActionDll"
+      DllEntry="ClearFinishInfo"
+      Execute="immediate"
+      Return="check" />
+
+    <!-- Установка свойства режима работы инсталлятора SERVERSIDE. -->
+    <!-- Режим работы инсталлятора делится на два основных режима: "Client Side" - работа 
+    с пользователем и "Server Side" - работа самого инсталлятора. Не найдено решение, 
+    чтобы автоматически определять режимы Client Side и Server Side.
+    Сделано полуавтоматически, путем установкой свойства SERVERSIDE в 1 для Server Side. -->
+    <SetProperty Id="SERVERSIDE" Value="1" Before="AppSearch" Sequence="execute" />
+  </Fragment>
+</Wix>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:st="http://www.systemt.ru/STSchema">
+
+  <?include Variables.wxi ?>
+
+  <!-- Описание продукта. -->
+  <Product
+    Id="$(var.ProductId)"
+    Name="$(var.ProductName)"
+    Manufacturer="$(var.ProductManufacturer)"
+    Version="$(var.ProductVersion)"
+    Language="1049"
+    Codepage="1251"
+    UpgradeCode="$(var.ProductUpgradeCode)">
+
+    <!-- Свойства msi-пакета. -->
+    <Package
+      Id="$(var.PackageId)"
+      InstallerVersion="301"
+      Description="$(var.PackageDescription)"
+      Manufacturer="$(var.PackageManufacturer)"
+      Comments="$(var.PackageComments)"
+      Compressed="yes"
+      Languages="1049"
+      SummaryCodepage="1251"
+      InstallScope="perMachine" />
+
+    <Media
+      Id="1"
+      Cabinet="packet.cab"
+      EmbedCab="yes" />
+
+    <!-- Условия запуска. -->
+    <!-- Инсталлятор должен работать только в режиме полного интерфейса. Также активируем "тихое" удаление при вводе пароля. -->
+    <!-- Для тихого удаления запустить "msiexec.exe /x STInstaller.msi PASSWORD=pass". -->
+    <!-- Или "msiexec.exe /x "{80354159-097F-4FD8-875F-5754855CDC41}" PASSWORD=pass". -->
+    <Condition Message="Программа установки должна запускаться только с полным интерфейсом.">UILevel = 5 OR REMOVE~="ALL" AND PASSWORD = "pass" </Condition>
+    
+    <!-- Логическая взаимосвязь файлов: Product->Feature->Component->Directory. -->
+    <FeatureRef Id="RootFeature" />
+
+    <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ НАЧАЛО *** -->
+    <?ifdef SERVER?>
+    <?include ProductServer.wxi ?>
+    <?endif?>
+    <?ifdef CLIENT ?>
+    <?include ProductClient.wxi ?>
+    <?endif?>
+    <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ КОНЕЦ *** -->
+
+    <!-- Персонализация интерфейса. -->
+    <WixVariable Id="WixUIDialogBmp" Value="Resources\Dialog.bmp"/>
+    <WixVariable Id="WixUIBannerBmp" Value="Resources\Banner.bmp"/>
+    <!-- Лицензия. -->
+    <WixVariable Id="WixUILicenseRtf" Value="Resources\License.rtf"/>
+  </Product>
+</Wix>

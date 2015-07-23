@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Feature
+    Id="DataBaseFilesFeature"
+    Title="База данных"
+    Description="Развертывание базы данных"
+    Level="1"
+    ConfigurableDirectory="DBINSTALLLOCATION"
+    AllowAdvertise="no"
+    Absent="disallow"
+    InstallDefault="local">
+
+    <ComponentRef Id="SqlComponent"/>
+  </Feature>
+</Include>

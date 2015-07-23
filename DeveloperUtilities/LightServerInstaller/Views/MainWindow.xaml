@@ -1,0 +1,214 @@
+﻿<Window x:Class="LightServerInstaller.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewmodels="clr-namespace:LightServerInstaller.ViewModels"
+        xmlns:converters="clr-namespace:LightServerInstaller.ViewModels.Converters"
+        Title="LightServerInstaller" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen">
+  <Window.DataContext>
+    <viewmodels:MainViewModel />
+  </Window.DataContext> 
+  
+  <Window.Resources>
+    <converters:AppVersionToStringConverter x:Key="appVersionToStringConverter" />
+    <converters:ObservableCollectionOfStringToStringConverter x:Key="observableCollectionOfStringToStringConverter" />
+
+    <Style TargetType="{x:Type TextBlock}">
+      <Setter Property="Margin" Value="4, 3, 3, 3" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Width" Value="100" />
+    </Style>
+    <Style TargetType="{x:Type TextBox}">
+      <Setter Property="Margin" Value="3, 3, 3, 3" />
+    </Style>
+    <Style TargetType="{x:Type GroupBox}">
+      <Setter Property="Margin" Value="6, 3, 6, 3" />
+    </Style>
+    <Style x:Key="FindButton" x:Shared="false" TargetType="{x:Type Button}">
+      <Setter Property="Margin" Value="2, 2, 2, 2" />
+      <Setter Property="Content">
+        <Setter.Value>
+          <Image Source="Images\FindSmall.png" Stretch="None" />
+        </Setter.Value>
+      </Setter>
+      <Setter Property="Command" Value="{Binding FindCommand}" />
+    </Style>
+  </Window.Resources>
+  
+  <DockPanel>
+    <Ribbon DockPanel.Dock="Top" x:Name="ribbon">
+      <Ribbon.ApplicationMenu>
+        <RibbonApplicationMenu KeyTip="E">
+          <RibbonApplicationMenuItem Header="Exit" ImageSource="Images\CloseLarge.png" Command="{Binding CloseCommand}" />
+        </RibbonApplicationMenu>
+      </Ribbon.ApplicationMenu>
+      <!-- RibbonTab Main. -->
+      <RibbonTab Header="Main" KeyTip="M">
+        <!-- File group. -->
+        <RibbonGroup Header="File">
+          <RibbonButton LargeImageSource="Images\NewLarge.png" Label="New" KeyTip="N" Command="{Binding CreateCommand}" />
+          <RibbonButton LargeImageSource="Images\OpenLarge.png" Label="Open" KeyTip="O" Command="{Binding OpenCommand}" />
+          <RibbonButton LargeImageSource="Images\SaveLarge.png" Label="Save" KeyTip="S" Command="{Binding SaveCommand}" />
+        </RibbonGroup>
+        <!-- Build group. -->
+        <RibbonGroup Header="Build">
+          <RibbonButton LargeImageSource="Images\BuildLarge.png" Label="Build" KeyTip="B" Command="{Binding BuildCommand}" />
+        </RibbonGroup>
+      </RibbonTab>
+    </Ribbon>
+
+    <StatusBar DockPanel.Dock="Bottom" Background="{Binding Background, ElementName=ribbon}">
+      <StatusBarItem>
+        <TextBlock Name="txtProgress">
+          <TextBlock.Resources>
+            <Storyboard x:Key="storyProgress">
+              <StringAnimationUsingKeyFrames RepeatBehavior="Forever"
+                Storyboard.TargetName="txtProgress"
+                Storyboard.TargetProperty="Text"
+                Duration="0:0:2">
+                <DiscreteStringKeyFrame Value="Построение" KeyTime="0:0:0" />
+                <DiscreteStringKeyFrame Value="Построение." KeyTime="0:0:0.50" />
+                <DiscreteStringKeyFrame Value="Построение.." KeyTime="0:0:1.00" />
+                <DiscreteStringKeyFrame Value="Построение..." KeyTime="0:0:1.50" />
+              </StringAnimationUsingKeyFrames>
+            </Storyboard>
+          </TextBlock.Resources>
+        </TextBlock>
+      </StatusBarItem>
+    </StatusBar>
+    
+    <TabControl>
+      <TabItem Header="Описание">
+        <StackPanel>
+          <GroupBox Header="Описание продукта">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+              </Grid.RowDefinitions>
+              
+              <TextBlock Text="Идентификатор продукта:" Grid.Column="0" Grid.Row="0" Width="Auto" />
+              <TextBlock Text="Идентификатор обновления:" Grid.Column="0" Grid.Row="1" Width="Auto" />
+              <TextBlock Text="Наименование продукта:" Grid.Column="0" Grid.Row="2" Width="Auto" />
+              <TextBlock Text="Наименование производителя:" Grid.Column="0" Grid.Row="3" Width="Auto" />
+              <TextBlock Text="Версия продукта:" Grid.Column="0" Grid.Row="4" Width="Auto" />
+
+              <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Path=ProductId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" />
+              <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=ProductUpgradeCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" />
+              <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Path=ProductName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding Path=ProductManufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding Path=ProductVersion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource appVersionToStringConverter}}" />
+            </Grid>
+          </GroupBox>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="Содержание">
+        <StackPanel>
+          <GroupBox Header="Файлы базы данных">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+              </Grid.RowDefinitions>
+
+              <TextBlock Text="Mdf-файл:" Grid.Column="0" Grid.Row="0" />
+              <TextBlock Text="Ldf-файл:" Grid.Column="0" Grid.Row="1" />
+
+              <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Path=MdfFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=LdfFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+              <!-- В качестве параметра передаем тип кнопки. -->
+              <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource FindButton}" CommandParameter="MdfFile" />
+              <Button Grid.Column="2" Grid.Row="1" Style="{StaticResource FindButton}" CommandParameter="LdfFile" />
+            </Grid>
+          </GroupBox>
+
+          <GroupBox Header="Файлы хранимых процедур">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+              </Grid.RowDefinitions>
+
+              <TextBlock Text="Dll-файл:" Grid.Column="0" Grid.Row="0" />
+              <TextBlock Text="Ini-файл:" Grid.Column="0" Grid.Row="1" />
+              <TextBlock Text="Sql-файл:" Grid.Column="0" Grid.Row="2" />
+
+              <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Path=SpDllFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=SpIniFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Path=SpSqlFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+              <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource FindButton}" CommandParameter="SpDllFile" />
+              <Button Grid.Column="2" Grid.Row="1" Style="{StaticResource FindButton}" CommandParameter="SpIniFile" />
+              <Button Grid.Column="2" Grid.Row="2" Style="{StaticResource FindButton}" CommandParameter="SpSqlFile" />
+            </Grid>
+          </GroupBox>
+
+          <GroupBox Header="Файлы Sql-скриптов">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition />
+              </Grid.RowDefinitions>
+
+              <TextBlock Text="Sql-файл:" Grid.Column="0" Grid.Row="0" />
+
+              <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=SqlFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+              <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource FindButton}" CommandParameter="SqlFile" />
+            </Grid>
+          </GroupBox>
+
+          <GroupBox Header="Файлы плагинов">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition />
+              </Grid.RowDefinitions>
+
+              <TextBlock Text="Плагин:" Grid.Column="0" Grid.Row="0" />
+
+              <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=PluginDllFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+              <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource FindButton}" CommandParameter="PluginDllFile" />
+            </Grid>
+          </GroupBox>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="Вывод" Name="tabItemMessages">
+        <DockPanel>
+          <TextBox TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" 
+              Background="{Binding Background, ElementName=ribbon}" Foreground="#FF7A6925" IsReadOnly="True"
+              Text="{Binding Path=Messages, Mode=OneWay, Converter={StaticResource observableCollectionOfStringToStringConverter}}" Margin="0, 0, 0, 0" />
+        </DockPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>    
+</Window>

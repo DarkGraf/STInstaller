@@ -1,0 +1,114 @@
+﻿<Window x:Class="LightServerPatch.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewmodels="clr-namespace:LightServerPatch.ViewModels"
+        Title="LightServerPatch" Height="330" Width="600" 
+        SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+  <Window.DataContext>
+    <viewmodels:MainViewModel />
+  </Window.DataContext>
+  
+  <Window.Resources>
+    <Style TargetType="{x:Type TextBlock}">
+      <Setter Property="Margin" Value="4, 3, 3, 3" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Width" Value="80" />
+    </Style>
+    <Style TargetType="{x:Type TextBox}">
+      <Setter Property="Margin" Value="3, 3, 3, 3" />
+      <Setter Property="Width" Value="450" />
+    </Style>
+    <Style x:Key="FindButton" x:Shared="false" TargetType="{x:Type Button}">
+      <Setter Property="Margin" Value="2, 2, 2, 2" />
+      <Setter Property="Content">
+        <Setter.Value>
+          <Image Source="..\Images\FindSmall.png" Stretch="None" />
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style TargetType="{x:Type GroupBox}">
+      <Setter Property="Margin" Value="6, 3, 6, 3" />
+    </Style>
+  </Window.Resources>
+  <DockPanel>
+    <StatusBar DockPanel.Dock="Bottom">
+      <StatusBarItem>
+        <TextBlock Name="txtProgress" />
+      </StatusBarItem>
+    </StatusBar>
+    
+    <StackPanel Orientation="Vertical">
+      <GroupBox Header="Текущий продукт">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+          </Grid.RowDefinitions>
+
+          <TextBlock Text="Wixout-файл:" Grid.Column="0" Grid.Row="0" />
+          <TextBlock Text="XML-файл:" Grid.Column="0" Grid.Row="1" />
+
+          <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Path=CurrentWixout, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=CurrentXml, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+          <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource FindButton}" Command="{Binding FindCommand}" CommandParameter="CurrentWixout" />
+          <Button Grid.Column="2" Grid.Row="1" Style="{StaticResource FindButton}" Command="{Binding FindCommand}" CommandParameter="CurrentXml" />
+        </Grid>
+      </GroupBox>
+      
+      <GroupBox Header="Новый продукт">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+          </Grid.RowDefinitions>
+
+          <TextBlock Text="Wixout-файл:" Grid.Column="0" Grid.Row="0" />
+          <TextBlock Text="XML-файл:" Grid.Column="0" Grid.Row="1" />
+
+          <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Path=NewWixout, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+          <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=NewXml, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+          <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource FindButton}" Command="{Binding FindCommand}" CommandParameter="NewWixout" />
+          <Button Grid.Column="2" Grid.Row="1" Style="{StaticResource FindButton}" Command="{Binding FindCommand}" CommandParameter="NewXml" />
+        </Grid>
+      </GroupBox>
+      
+      <GroupBox Header="Вывод">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition />
+          </Grid.RowDefinitions>
+
+          <TextBlock Text="Директория:" Grid.Column="0" Grid.Row="0" />
+
+          <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Path=OutDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+          <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource FindButton}" Command="{Binding SelectDirectoryCommand}" />
+        </Grid>
+      </GroupBox>
+
+      <Button Margin="6, 3, 6, 6" Command="{Binding BuildCommand}">
+        <StackPanel Orientation="Horizontal">
+          <Image Source="..\Images\BuildLarge.png" Stretch="None" />
+          <TextBlock Text="Построить" Width="Auto" />
+        </StackPanel>
+      </Button>
+    </StackPanel>
+  </DockPanel>
+</Window>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+  <!-- Описание продукта. -->
+  <?define ProductId = "64D3028E-305E-4933-A9E4-CC25D7ECFC30"?>
+  <?define ProductName = "Клиент АСПО"?>
+  <?define ProductManufacturer = "ЗАО "НПП Системные Технологии""?>
+  <?define ProductVersion = "$(var.MajorProductVersion).$(var.MinorProductVersion)"?>
+  <?define ProductUpgradeCode = "172159B2-D079-4B5B-BF2E-095A4AE39C49"?>
+
+  <!-- Свойства msi-пакета. -->
+  <?define PackageId = "*"?>
+  <?define PackageDescription = "Установка клиента АСПО"?>
+  <?define PackageManufacturer = $(var.ProductManufacturer)?>
+  <?define PackageComments = "Пакет установки клиента АСПО"?>
+
+  <?define InstallLocationFamilyFolder = "НПП Системные Технологии"?>
+  <?define InstallLocationProductFolder = "Клиент АСПО $(var.MajorProductVersion)"?>
+  <?define ProgramMenuFamilyDirName = $(var.InstallLocationFamilyFolder)?>
+  <?define ProgramMenuFamilyDirComponentGuid = "9D874909-465A-4EA2-92BA-038F1E8AB9E3"?>
+  <?define ProgramMenuProductDirName = $(var.InstallLocationProductFolder)?>
+  <?define ProgramMenuProductDirComponentGuid = "23FD2FF5-AEEB-4F41-9A93-14B311A3A76B"?>
+</Include>

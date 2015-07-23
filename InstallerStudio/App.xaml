@@ -1,0 +1,93 @@
+﻿<Application 
+  x:Class="InstallerStudio.App"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+  xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
+  xmlns:stviews="clr-namespace:InstallerStudio.Views"
+  xmlns:stviewmodels="clr-namespace:InstallerStudio.ViewModels"
+  xmlns:stviewmodelsutils="clr-namespace:InstallerStudio.ViewModels.Utils"
+  StartupUri="Views/MainWindow.xaml">
+
+  <Application.Resources>
+    <!-- Шаблоны моделей представлений. -->
+    <DataTemplate DataType="{x:Type stviewmodels:MsiViewModel}">
+      <stviews:MsiView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type stviewmodels:MspViewModel}">
+      <stviews:MspView />
+    </DataTemplate>
+    
+    <!-- Шаблоны для Ribbon. -->
+    <DataTemplate x:Key="largeButtonTemplate">
+      <ContentControl>
+        <dxb:BarButtonItem Content="{Binding Caption}" Command="{Binding Command}" LargeGlyph="{Binding Image}" RibbonStyle="Large" />
+      </ContentControl>
+    </DataTemplate>
+    <DataTemplate x:Key="smallButtonTemplate">
+      <ContentControl>
+        <dxb:BarButtonItem Content="{Binding Caption}" Command="{Binding Command}" Glyph="{Binding Image}" RibbonStyle="SmallWithText" />
+      </ContentControl>
+    </DataTemplate>
+    <DataTemplate x:Key="splitLargeButtonTemplate">
+      <ContentControl>
+        <dxb:BarSplitButtonItem Content="{Binding Caption}" Command="{Binding Command}" LargeGlyph="{Binding Image}" RibbonStyle="Large">
+          <dxb:BarSplitButtonItem.PopupControl>
+            <dxb:PopupMenu ItemLinksSource="{Binding Buttons}" ItemTemplate="{StaticResource smallButtonTemplate}" />
+          </dxb:BarSplitButtonItem.PopupControl>
+        </dxb:BarSplitButtonItem>
+      </ContentControl>
+    </DataTemplate>
+    <DataTemplate x:Key="splitSmallButtonTemplate">
+      <ContentControl>
+        <dxb:BarSplitButtonItem Content="{Binding Caption}" Command="{Binding Command}" Glyph="{Binding Image}" RibbonStyle="SmallWithText">
+          <dxb:BarSplitButtonItem.PopupControl>
+            <dxb:PopupMenu ItemLinksSource="{Binding Buttons}" ItemTemplate="{StaticResource smallButtonTemplate}" />
+          </dxb:BarSplitButtonItem.PopupControl>
+        </dxb:BarSplitButtonItem>
+      </ContentControl>
+    </DataTemplate>
+
+    <stviewmodelsutils:RibbonButtonTemplateSelector 
+      x:Key="ribbonButtonTemplateSelector"
+      LargeButtonTemplate="{StaticResource largeButtonTemplate}"
+      SmallButtonTemplate="{StaticResource smallButtonTemplate}"
+      SplitLargeButtonTemplate="{StaticResource splitLargeButtonTemplate}"
+      SplitSmallButtonTemplate="{StaticResource splitSmallButtonTemplate}" />
+
+    <DataTemplate x:Key="groupTemplate">
+      <ContentControl>
+        <dxr:RibbonPageGroup Caption="{Binding Caption}" ItemLinksSource="{Binding Buttons}" ItemTemplateSelector="{StaticResource ribbonButtonTemplateSelector}"/>
+      </ContentControl>
+    </DataTemplate>
+    <DataTemplate x:Key="pageTemplate">
+      <ContentControl>
+        <dxr:RibbonPage Caption="{Binding Caption}" GroupsSource="{Binding Groups}" GroupTemplate="{StaticResource groupTemplate}"/>
+      </ContentControl>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="defaultCategoryTemplate">
+      <ContentControl>
+        <dxr:RibbonDefaultPageCategory 
+          Caption="{Binding Caption}" 
+          PagesSource="{Binding Pages}" 
+          PageTemplate="{StaticResource pageTemplate}"/>
+      </ContentControl>
+    </DataTemplate>
+    <DataTemplate x:Key="customCategoryTemplate">
+      <ContentControl>
+        <dxr:RibbonPageCategory 
+          Caption="{Binding Caption}" 
+          PagesSource="{Binding Pages}" 
+          PageTemplate="{StaticResource pageTemplate}" 
+          Color="CornflowerBlue" 
+          IsVisible="{Binding IsVisible, Mode=OneWay}"/>
+      </ContentControl>
+    </DataTemplate>
+
+    <stviewmodelsutils:RibbonCategoryTemplateSelector 
+      x:Key="ribbonCategoryTemplateSelector"
+      DefaultCategoryTemplate="{StaticResource defaultCategoryTemplate}"
+      CustomCategoryTemplate="{StaticResource customCategoryTemplate}" />
+  </Application.Resources>
+</Application>

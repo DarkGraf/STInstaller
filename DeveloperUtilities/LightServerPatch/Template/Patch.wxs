@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <!-- AllowRemoval - разрешим удалять патч без удаления продукта. -->
+  <!-- Classification - категория патча (Critical Update, Hotfix, Security Rollup, Security Update, Service Pack, Update, Update Rollup). -->
+  <Patch
+    AllowRemoval="no"
+    Classification="Update"
+    Comments="Patch for ASP0 1.0.1.0"
+    Description="Updates ASP0 to 1.0.2.0"
+    DisplayName="ASP0 Patch"
+    Manufacturer="ST"
+    TargetProductName="ASPO"
+    Codepage="1251">
+
+    <!-- Id должен быть больше любого в обычном установщике. -->
+    <Media Id="1000" Cabinet="aspopatch.cab">
+      <PatchBaseline Id="AspoPatch" />
+    </Media>
+
+    <!-- Version используется для связей с другими патчами. -->
+    <!-- Supersede="yes" - патч должен переписывать все патчи из этого семейства. -->
+    <PatchFamily Id="AspoPatchFamily" Version="1.0.1.0" ProductCode="c51280e3-8837-4ddd-888e-12df6168ec29" Supersede="yes">
+      <!-- Если не укажем явно компоненты, то обновятся все изменные файлы. Если укажем, то для
+      изменения версии необходимо указать PropertyRef. -->
+      <!--ComponentRef Id="SqlComponent"/>
+      <PropertyRef Id="ProductVersion"/-->
+    </PatchFamily>
+  </Patch>
+</Wix>

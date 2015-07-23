@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+  <!-- Описание продукта. -->
+  <?define ProductId = "80354159-097F-4FD8-875F-5754855CDC41"?>
+  <?define ProductName = "Сервер АСПО"?>
+  <?define ProductManufacturer = "ЗАО "НПП Системные Технологии""?>
+  <?define ProductVersion = "$(var.MajorProductVersion).$(var.MinorProductVersion)"?>
+  <?define ProductUpgradeCode = "9F19D04B-8A97-47DE-8B79-3CDA0B137C99"?>
+
+  <!-- Свойства msi-пакета. -->
+  <?define PackageId = "*"?>
+  <?define PackageDescription = "Установка сервера АСПО"?>
+  <?define PackageManufacturer = $(var.ProductManufacturer)?>
+  <?define PackageComments = "Пакет установки сервера АСПО"?>
+
+  <?define InstallLocationFamilyFolder = "НПП Системные Технологии"?>
+  <?define InstallLocationProductFolder = "Сервер АСПО $(var.MajorProductVersion)"?>
+  <?define ProgramMenuFamilyDirName = $(var.InstallLocationFamilyFolder)?>
+  <?define ProgramMenuFamilyDirComponentGuid = "B8DD5E07-4EA0-4160-8254-9C69AE643363"?>
+  <?define ProgramMenuProductDirName = $(var.InstallLocationProductFolder)?>
+  <?define ProgramMenuProductDirComponentGuid = "1AD26949-DA43-4606-9184-16C508B8339B"?>
+</Include>

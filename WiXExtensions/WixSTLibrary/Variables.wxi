@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+  <!-- Название ключей реестра для сохранения свойств UI. -->
+  <?define RegistryPath = "Software\[Manufacturer]\[UpgradeCode]\[ProductCode]"?>
+  <?define BackupPathRegistry = "BackupPath"?>
+</Include>

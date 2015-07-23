@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <!-- Интерфейс пользователя. -->
+    <!-- В целях упрощения разработки и в ущерб компактности, интерфейс разбит на взаимоисключающие фукциональности
+    определяемые переменными препроцессора WiX, что позволяет модифицировать его части в определенном режиме
+    не затрагивая функциональность другого режима. -->
+    <UI Id="WixUI_STInstaller">
+      <!-- ***************************** Общие элементы. ****************************** -->
+
+      <UIRef Id="WixUI_ErrorProgressText" />
+
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <Property Id="WixUI_Mode" Value="STMondo" />
+
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+
+      <UIRef Id="WixUI_STClient"/>
+      <UIRef Id="WixUI_STServer"/>
+      <UIRef Id="WixUI_ErrorProgressText"/>
+      <UIRef Id="WixUI_Common" />
+    </UI>
+
+    <!-- В основном проекте должно быть реализовано Feature с именем "RootFeature". 
+    В данном наборе перечислены свойства для сохранения в реестре значений UI. -->
+    <FeatureRef Id="RootFeature">
+      <!-- Для сервера. -->
+      <ComponentRef Id="UIPropertiesSavingComponent"/>
+    </FeatureRef>
+  </Fragment>
+</Wix>

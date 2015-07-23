@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<tableDefinitions xmlns="http://schemas.microsoft.com/wix/2006/tables">
+  
+  <tableDefinition
+    name="UIType"
+    createSymbols="yes">
+
+    <columnDefinition
+      name="Id"
+      type="string"
+      length="72"
+      primaryKey="yes"
+      category="identifier"
+      description="Primary key for this element" />
+
+    <columnDefinition
+      name="Type"
+      type="string"
+      length="72"
+      category="formatted"
+      nullable="no"
+      description="Type of UI"/>
+  </tableDefinition>
+
+  <tableDefinition
+    name="SqlTemplateFiles"
+    createSymbols="yes">
+
+    <columnDefinition
+      name="Id"
+      type="string"
+      length="72"
+      primaryKey="yes"
+      category="identifier"
+      description="Primary key for this element" />
+
+    <columnDefinition
+      name="Component"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Component"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Component used to determine install state"/>
+
+    <columnDefinition
+      name="MdfFileBinaryKey"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Binary"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Binary stream that contains MDF file" />
+
+    <columnDefinition
+      name="LdfFileBinaryKey"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Binary"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Binary stream that contains LDF file" />
+  </tableDefinition>
+
+  <tableDefinition
+    name="SqlScriptFile"
+    createSymbols="yes">
+
+    <columnDefinition
+      name="Script"
+      type="string"
+      length="72"
+      primaryKey="yes"
+      category="identifier"
+      description="Primary key for this element" />
+
+    <columnDefinition
+      name="Component"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Component"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Component used to determine install state "/>
+
+    <columnDefinition
+      name="ScriptBinary"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Binary"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Binary stream that contains SQL script" />
+
+    <columnDefinition
+      name="Sequence"
+      type="number"
+      length="2"
+      nullable="yes"
+      description="Order to execute SQL Queries in" />
+
+    <columnDefinition
+      name="Attributes"
+      type="number"
+      length="2"
+      set="1;2;3;4;5;6;7"
+      description="1 == execute on install, 2 == execute on reinstall, 4 == execute on uninstall"/>
+  </tableDefinition>
+
+  <tableDefinition
+    name="SqlExtendedProcedures"
+    createSymbols="yes">
+
+    <columnDefinition
+      name="Id"
+      type="string"
+      length="72"
+      primaryKey="yes"
+      category="identifier"
+      description="Primary key for this element" />
+
+    <columnDefinition
+      name="Component"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Component"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Component used to determine install state"/>
+
+    <columnDefinition
+      name="BinaryKey"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Binary"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Binary stream that contains file" />
+
+    <columnDefinition 
+      name="Name"
+      type="localized"
+      length="255"
+      description="File name used for installation, may be localized. "/>
+  </tableDefinition>
+
+  <tableDefinition
+    name="MefPlugin"
+    createSymbols="yes">
+
+    <columnDefinition
+      name="Id"
+      type="string"
+      length="72"
+      primaryKey="yes"
+      category="identifier"
+      description="Primary key for this element" />
+
+    <columnDefinition
+      name="Plugin"
+      type="string"
+      length="72"
+      modularize="column"
+      keyTable="Binary"
+      keyColumn="1"
+      category="identifier"
+      description="Foreign key, Binary stream that contains plugin" />
+
+    <columnDefinition
+      name="Sequence"
+      type="number"
+      length="2"
+      nullable="yes"
+      description="Order to execute" />
+  </tableDefinition>
+</tableDefinitions>

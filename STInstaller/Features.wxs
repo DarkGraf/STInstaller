@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  
+  <?include Variables.wxi ?>
+
+  <Fragment>
+    <!-- Наборы компонентов. -->
+    <!-- ConfigurableDirectory - пользователь может изменять директорию. -->
+    <!-- AllowAdvertise -Установка компонента по требованию (yes - вкл, no - выкл, system - применяется, только если поддерживается ОС). -->
+    <!-- Absent - предоставляет пользователю выбор в установке компонента. -->
+    <Feature
+      Id="RootFeature"
+      Title="$(var.RootFeatureTitle)"
+      Description="$(var.RootFeatureDescription)"
+      Display="expand"
+      Level="1"
+      ConfigurableDirectory="INSTALLLOCATION"
+      AllowAdvertise="no"
+      Absent="disallow"
+      InstallDefault="local">
+
+      <Feature
+        Id="CommonFeature"
+        Title="$(var.CommonFeatureTitle)"
+        Description="$(var.CommonFeatureDescription)"
+        Level="1"
+        AllowAdvertise="no"
+        Absent="disallow"
+        InstallDefault="local">
+
+        <ComponentRef Id="ProgramMenuFamilyDirComponent" />
+        <ComponentRef Id="ProgramMenuProductDirComponent" />
+        <ComponentRef Id="ReinstallComponent" />
+      </Feature>
+
+      <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ НАЧАЛО *** -->
+      <?ifdef SERVER?>
+      <?include FeaturesServer.wxi ?>
+      <?endif?>
+      <?ifdef CLIENT?>
+      <?include FeaturesClient.wxi ?>
+      <?endif?>
+      <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ КОНЕЦ *** -->
+    </Feature>
+	</Fragment>
+</Wix>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi"
+         xmlns:st="http://www.systemt.ru/STSchema">
+  <!-- Указываем режим работы интерфейса. -->
+  <st:UIType Id="MainUI" Type="Client" />
+</Include>

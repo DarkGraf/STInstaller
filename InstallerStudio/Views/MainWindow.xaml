@@ -1,0 +1,69 @@
+﻿<dxr:DXRibbonWindow 
+  x:Class="InstallerStudio.Views.MainWindow"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+  xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
+  xmlns:stviewmodels="clr-namespace:InstallerStudio.ViewModels"
+  Title="MainWindow" 
+  Height="600" 
+  Width="800" 
+  WindowState="Maximized"
+  DataContextChanged="DXRibbonWindow_DataContextChanged">
+  <!-- Тема задается в App.xaml.cs.
+  xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" 
+  dx:ThemeManager.ThemeName="Office2010Blue"
+  -->
+  
+  <Window.DataContext>
+    <stviewmodels:MainViewModel />
+  </Window.DataContext>
+
+  <dxb:BarManager>
+    <dxb:BarManager.Items>
+      <dxb:BarSplitButtonItem Name="btnNew" Content="Создать" LargeGlyph="Images\NewLarge.png" ActAsDropDown="True">
+        <dxb:BarSplitButtonItem.PopupControl>
+          <dxb:PopupMenu>
+            <dxb:BarButtonItem Name="btnNewMsi" Content="Создать MSI" LargeGlyph="Images\NewLarge.png" Command="{Binding CreateMsiCommand}" />
+            <dxb:BarButtonItem Name="btnNewMsp" Content="Создать MSP" LargeGlyph="Images\NewLarge.png" Command="{Binding CreateMspCommand}" />
+          </dxb:PopupMenu>
+        </dxb:BarSplitButtonItem.PopupControl>
+      </dxb:BarSplitButtonItem>
+      <dxb:BarButtonItem Name="btnOpen" Content="Открыть" LargeGlyph="Images\OpenLarge.png" Command="{Binding OpenCommand}" />
+      <dxb:BarButtonItem Name="btnSave" Content="Сохранить" LargeGlyph="Images\SaveLarge.png" Command="{Binding SaveCommand}" />
+      <dxb:BarButtonItem Name="btnSaveAs" Content="Сохранить как..." LargeGlyph="Images\SaveLarge.png" Command="{Binding SaveAsCommand}" />
+      <dxb:BarButtonItem Name="btnClose" Content="Выход" LargeGlyph="Images\CloseLarge.png" Command="{Binding CloseCommand}" />
+    </dxb:BarManager.Items>
+
+    <DockPanel>
+      <dxr:RibbonControl
+        DockPanel.Dock="Top"
+        CategoriesSource="{Binding Path=RibbonManager.Categories}" 
+        CategoryTemplateSelector="{StaticResource ribbonCategoryTemplateSelector}">
+        <dxr:RibbonControl.ApplicationMenu>
+          <dxr:ApplicationMenu ShowRightPane="True">
+            <dxr:ApplicationMenu.ItemLinks>
+              <dxb:BarSplitButtonItemLink BarItemName="btnNew" />
+              <dxb:BarButtonItemLink BarItemName="btnOpen" />
+              <dxb:BarButtonItemLink BarItemName="btnSave" />
+              <dxb:BarButtonItemLink BarItemName="btnSaveAs" />
+              <dxb:BarItemLinkSeparator />
+              <dxb:BarButtonItemLink BarItemName="btnClose" />
+            </dxr:ApplicationMenu.ItemLinks>
+
+            <dxr:ApplicationMenu.BottomPane>
+              <StackPanel Orientation="Horizontal">
+                <Button Content="Параметры" Command="{Binding SettingsCommand}" />
+              </StackPanel>
+            </dxr:ApplicationMenu.BottomPane>
+          </dxr:ApplicationMenu>
+        </dxr:RibbonControl.ApplicationMenu>
+      </dxr:RibbonControl>
+
+      <dxr:RibbonStatusBarControl DockPanel.Dock="Bottom" />
+
+      <!-- IsAsync позволяет пересоздать новую View того же типа. -->
+      <ContentPresenter Content="{Binding BuilderViewModel, IsAsync=True}" />
+    </DockPanel>
+  </dxb:BarManager>
+</dxr:DXRibbonWindow>

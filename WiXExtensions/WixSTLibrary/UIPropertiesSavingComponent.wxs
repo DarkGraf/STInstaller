@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <?include Variables.wxi ?>
+
+  <!-- Сохранение в реестре свойств. Восстановление происходит в формах UI. Привязка к Feature осуществляется в UI.wxs.
+  Сохраняем сразу все, для всех режимов, и для клиента, и для сервера. -->
+  <Fragment>
+    <DirectoryRef Id="INSTALLLOCATION">
+      <Component Id="UIPropertiesSavingComponent" Guid="8ACC98EE-0B81-4790-AF91-8C261F4DD9DF">
+        <RegistryValue Root="HKCU" Key="$(var.RegistryPath)" Name="$(var.BackupPathRegistry)" Type="string" Value="[BACKUPPATH]" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

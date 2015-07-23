@@ -1,0 +1,55 @@
+﻿<UserControl 
+  x:Class="InstallerStudio.Views.Controls.WixTreeListControl"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+  xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+  xmlns:stviewsconverters="clr-namespace:InstallerStudio.Views.Converters"
+  xmlns:stwixelements="clr-namespace:InstallerStudio.WixElements"
+  mc:Ignorable="d" 
+  d:DesignHeight="300" d:DesignWidth="300">
+  <dxg:TreeListControl
+    x:Name="treeListControl"
+    ItemsSource="{Binding Items, Mode=OneWay}"
+    PreviewMouseDown="TreeListControl_PreviewMouseDown">
+    
+    <dxg:TreeListControl.Resources>
+      <!-- Если привязать вместо WixElementBase к IWixElement, то
+           дочерние элементы почему-то не отображаются. -->
+      <HierarchicalDataTemplate
+        DataType="{x:Type stwixelements:WixElementBase}"
+        ItemsSource="{Binding Items, Mode=OneWay}" />
+    </dxg:TreeListControl.Resources>
+
+    <dxg:TreeListControl.Columns>
+      <dxg:TreeListColumn FieldName="Id" Header="Идентификатор" ReadOnly="True" />
+      <dxg:TreeListColumn FieldName="ShortTypeName" Header="Тип" />
+      <dxg:TreeListColumn FieldName="ImageColumn" 
+        Binding="{Binding ImageType, Converter={stviewsconverters:EnumToImageConverter}}" 
+        Visible="False" 
+        ShowInColumnChooser="False" />
+    </dxg:TreeListControl.Columns>
+
+    <dxg:TreeListControl.View>
+      <dxg:TreeListView
+        x:Name="treeListView"
+        ShowIndicator="True"
+        TreeDerivationMode="HierarchicalDataTemplate"
+        AutoExpandAllNodes="True"
+        ShowNodeImages="True"
+        ImageFieldName="ImageColumn"
+        FocusedRow="{Binding SelectedItem, Mode=TwoWay}">
+
+        <!-- Контекстное меню для удаления строк. -->
+        <dxg:TreeListView.RowCellMenuCustomizations>
+          <dxb:BarButtonItem 
+            Content="Удалить" 
+            Command="{Binding Path=(dxg:GridPopupMenu.GridMenuInfo).View.DataContext.RemoveSelectedItemCommand, RelativeSource={RelativeSource Self}}" />
+        </dxg:TreeListView.RowCellMenuCustomizations>
+
+      </dxg:TreeListView>
+    </dxg:TreeListControl.View>
+  </dxg:TreeListControl>
+</UserControl>

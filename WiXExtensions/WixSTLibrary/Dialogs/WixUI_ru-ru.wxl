@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+  <String Id="DatabasesListDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="DatabasesListDlgBannerBitmap" Overridable="yes">WixUI_Bmp_Banner</String>
+  <String Id="DatabasesListDlgTitle" Overridable="yes">{\WixUI_Font_Title}Выбор баз данных</String>
+  <String Id="DatabasesListDlgDescription" Overridable="yes">Настройка баз данных для установки</String>
+  <String Id="DatabasesListDlgUpdateDescription" Overridable="yes">Настройка баз данных для обновления</String>
+  <String Id="DatabasesListDlgDatabasesText" Overridable="yes">Базы данных:</String>
+  <String Id="DatabasesListDlgNewDatabaseButton" Overridable="yes">Создать новую базу данных.</String>
+  <String Id="DatabasesListDlgExistDatabaseButton" Overridable="yes">Добавить существующую базу данных.</String>
+  <String Id="DatabasesListDlgDeleteDatabaseButton" Overridable="yes">Удалить базу данных.</String>
+
+  <String Id="SelectServerDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="SelectServerDlgBannerBitmap" Overridable="yes">WixUI_Bmp_Banner</String>
+  <String Id="SelectServerDlgTitle" Overridable="yes">{\WixUI_Font_Title}Выбор сервера</String>
+  <String Id="SelectServerDlgDescription" Overridable="yes">Выбор экземпляра сервера баз данных</String>
+  <String Id="SelectServerDlgDatabaseText" Overridable="yes">Сервер баз данных:</String>
+
+  <String Id="NewDatabaseDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="NewDatabaseDlgBannerBitmap" Overridable="yes">WixUI_Bmp_Banner</String>
+  <String Id="NewDatabaseDlgTitle" Overridable="yes">{\WixUI_Font_Title}Создать новую БД</String>
+  <String Id="NewDatabaseDlgDescription" Overridable="yes">Создание новой базы данных</String>
+  <String Id="NewDatabaseDlgServerText" Overridable="yes">Сервер баз данных:</String>
+  <String Id="NewDatabaseDlgDatabaseText" Overridable="yes">Имя базы данных:</String>
+  <String Id="NewDatabaseDbDlgCheckConnectionButton" Overridable="yes">Проверить соединение</String>
+
+  <String Id="ExistDatabaseDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="ExistDatabaseDlgBannerBitmap" Overridable="yes">WixUI_Bmp_Banner</String>
+  <String Id="ExistDatabaseDlgTitle" Overridable="yes">{\WixUI_Font_Title}Добавить существующую БД</String>
+  <String Id="ExistDatabaseDlgDescription" Overridable="yes">Добавление существующей базы данных</String>
+  <String Id="ExistDatabaseDlgDatabaseText" Overridable="yes">Имя базы данных:</String>
+
+  <String Id="DeleteDatabaseDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="DeleteDatabaseDlgBannerBitmap" Overridable="yes">WixUI_Bmp_Banner</String>
+  <String Id="DeleteDatabaseDlgTitle" Overridable="yes">{\WixUI_Font_Title}Удалить БД</String>
+  <String Id="DeleteDatabaseDlgDescription" Overridable="yes">Удаление базы данных</String>
+  <String Id="DeleteDatabaseDlgDatabaseText" Overridable="yes">Имя базы данных:</String>
+
+  <String Id="SelectBackupDirectoryDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="SelectBackupDirectoryDlgBannerBitmap" Overridable="yes">WixUI_Bmp_Banner</String>
+  <String Id="SelectBackupDirectoryDlgTitle" Overridable="yes">{\WixUI_Font_Title}Директория для резервных копий</String>
+  <String Id="SelectBackupDirectoryDlgDescription" Overridable="yes">Выбор директории для сохранения резервных копий</String>
+
+  <String Id="FinishInfoDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="FinishInfoDlgBannerBitmap" Overridable="yes">WixUI_Bmp_Banner</String>
+  <String Id="FinishInfoDlgTitle" Overridable="yes">{\WixUI_Font_Title}Проверка параметров</String>
+  <String Id="FinishInfoDlgDescription" Overridable="yes">Проверка параметров перед установкой</String>
+
+  <String Id="UpdateWelcomeDlg_Title" Overridable="yes">Установка [ProductName]</String>
+  <String Id="UpdateWelcomeDlgBitmap" Overridable="yes">WixUI_Bmp_Dialog</String>
+  <String Id="UpdateWelcomeDlgTitle" Overridable="yes">{\WixUI_Font_Bigger}Вас приветствует мастер установки [ProductName]</String>
+  <String Id="UpdateWelcomeDlgDescription" Overridable="yes">Мастер установки обновит [ProductName] на компьютере. Нажмите кнопку "Далее", чтобы продолжить, или кнопку "Отмена", чтобы выйти из мастера установки.</String>
+</WixLocalization>

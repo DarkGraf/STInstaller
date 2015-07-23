@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi"
+         xmlns:st="http://www.systemt.ru/STSchema">
+
+  <DirectoryRef Id="ProductFolder">
+    <Directory Id="DBINSTALLLOCATION" Name="DataBases">
+      <Component Id="SqlComponent" Guid="CC71011F-EE13-4F21-B40E-014C31D81280">
+        <!-- Принудительно создаем каталог. -->
+        <CreateFolder />
+        
+        <st:SqlTemplateFiles Id="SqlTemplateFilesId"
+          MdfFileBinaryKey="MdfFile"
+          LdfFileBinaryKey="LdfFile" />
+
+        <st:SqlScriptFile Id="SqlScriptFileId" BinaryKey="SqlFile" 
+          ExecuteOnInstall="yes" ExecuteOnReinstall="yes" ExecuteOnUninstall="no" Sequence="1"/>
+
+        <st:SqlScriptFile Id="InstallXpFileId" BinaryKey="InstallXpFile"
+          ExecuteOnInstall="yes" ExecuteOnReinstall="no" ExecuteOnUninstall="no" Sequence="2"/>
+
+        <st:SqlExtendedProcedures Id="SqlExtendedProceduresDllId" Name="ASPO_XP_MSSQL.dll" BinaryKey="ExtednedProceduresDllFile" />
+        <st:SqlExtendedProcedures Id="SqlExtendedProceduresIniId" Name="ASPO_XP_MSSQL.ini" BinaryKey="ExtednedProceduresIniFile" />
+        
+        <!-- Ключевой компонент. -->
+        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="SqlComponent" Type="integer" Value="1"  KeyPath="yes" />
+      </Component>
+    </Directory>
+  </DirectoryRef>
+</Include>

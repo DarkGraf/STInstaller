@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="STSqlSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.systemt.ru/STSchema"
+  xmlns="http://www.systemt.ru/STSchema"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xse="http://schemas.microsoft.com/wix/2005/XmlSchemaExtension">
+
+  <xs:annotation>
+    <xs:documentation>
+      Схема для WixSTSqlExtension (расширение по работе с базами данных ST).
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:simpleType name="YesNoType">
+    <xs:annotation>
+      <xs:documentation>
+        Принимает значение "yes" или "no".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base='xs:NMTOKEN'>
+      <xs:enumeration value="no"/>
+      <xs:enumeration value="yes"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="LongFileNameType">
+    <xs:annotation>
+      <xs:documentation>Values of this type will look like: "Long File Name.extension".  Legal long names contain no more than 260 characters and must contain at least one non-period character.  The following characters are not allowed: \ ? | &gt; : / * " or less-than.  The name must be shorter than 260 characters.  The value could also be a localization variable with the format !(loc.VARIABLE).</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[^\\\?|&gt;&lt;:/\*&quot;]{1,259}|([!$])\(loc\.[_A-Za-z][0-9A-Za-z_.]*\)" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="UIType">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+      </xs:appinfo>
+      <xs:documentation>
+        Элемент типа пользовательского интерфейса.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Id"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Идентификатор элемента.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="Type"
+                    use="required">
+        <xs:annotation>
+          <xs:documentation>
+            Тип пользовательского интерфейса.
+          </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Client" />
+            <xs:enumeration value="Server" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SqlTemplateFiles">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation>
+        Файлы шаблонов базы данных.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Id"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Идентификатор элемента.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="MdfFileBinaryKey"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Ссылка на бинарный поток содержащий MDF-файл.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="LdfFileBinaryKey"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Ссылка на бинарный поток содержащий LDF-файл.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SqlScriptFile">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation>
+        Элемент для указания SQL-скрипта.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Id"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Идентификатор элемента.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="BinaryKey"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Скрипт для выполнения.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="Sequence"
+                    type="xs:integer">
+        <xs:annotation>
+          <xs:documentation>
+            Порядок выполнения скрипта.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="ExecuteOnInstall"
+                    type="YesNoType">
+        <xs:annotation>
+          <xs:documentation>
+            Выполнение скрипта во время установки.
+            Должен быть выставлен хотя бы один.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="ExecuteOnReinstall"
+                    type="YesNoType">
+        <xs:annotation>
+          <xs:documentation>
+            Выполнение скрипта во время переустановки.
+            Должен быть выставлен хотя бы один.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="ExecuteOnUninstall"
+                    type="YesNoType">
+        <xs:annotation>
+          <xs:documentation>
+            Выполнения скрипта во время удаления.
+            Должен быть выставлен хотя бы один.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SqlExtendedProcedures">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation>
+        Файл для копирования в директорию MS SQL-сервера.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Id"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Идентификатор элемента.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="Name" 
+                    use="required"
+                    type="LongFileNameType">        
+      </xs:attribute>
+
+      <xs:attribute name="BinaryKey"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Ссылка на бинарный поток содержащий файл.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="MefPlugin">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+      </xs:appinfo>
+      <xs:documentation>
+        Элемент сборки расширения функциональности по технологии MEF.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Id"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Идентификатор элемента.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="BinaryKey"
+                    use="required"
+                    type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            Ссылка на бинарный поток содержащий файл расширения функциональности.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <xs:attribute name="Sequence"
+                    type="xs:integer">
+        <xs:annotation>
+          <xs:documentation>
+            Порядок выполнения.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

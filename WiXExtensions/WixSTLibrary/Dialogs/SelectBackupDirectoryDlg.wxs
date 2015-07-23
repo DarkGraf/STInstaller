@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <?include ..\Variables.wxi ?>  
+  
+	<Fragment>
+    <!-- Здесь только описание диалога, здесь не должны быть подписки на события (кроме кнопки "Отмена"). -->
+    <UI Id="UISelectBackupDirectoryDlg">
+      <!-- Диалог выбора директории. Реализовано подобно BrowseDlg. -->
+      <Dialog Id="SelectBackupDirectoryDlg" Width="370" Height="270" Title="!(loc.SelectBackupDirectoryDlg_Title)">
+        <!-- Баннер сверху и линии. -->
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.SelectBackupDirectoryDlgBannerBitmap)" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+        <!-- Заголовок. -->
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.SelectBackupDirectoryDlgTitle)" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.SelectBackupDirectoryDlgDescription)" />
+
+        <Control Id="BackupDirectoryText" Type="Text" X="25" Y="58" Width="44" Height="10" TabSkip="no" Text="!(loc.BrowseDlgComboLabel)" />
+        <Control Id="BackupDirectoryCombo" Type="DirectoryCombo" X="70" Y="55" Width="220" Height="80" Property="BACKUPPATH" Fixed="yes">
+          <Subscribe Event="IgnoreChange" Attribute="IgnoreChange" />
+        </Control>
+
+        <Control Id="BackupDirectoryList" Type="DirectoryList" X="25" Y="83" Width="320" Height="98" Property="BACKUPPATH" Sunken="yes" TabSkip="no" />
+
+        <Control Id="UpPushButton" Type="PushButton" X="298" Y="55" Width="19" Height="19" ToolTip="!(loc.BrowseDlgWixUI_Bmp_UpTooltip)" Icon="yes" FixedSize="yes" IconSize="16" Text="!(loc.BrowseDlgWixUI_Bmp_Up)">
+          <Publish Event="DirectoryListUp" Value="0">1</Publish>
+        </Control>
+        <Control Id="NewFolderPushButton" Type="PushButton" X="325" Y="55" Width="19" Height="19" ToolTip="!(loc.BrowseDlgNewFolderTooltip)" Icon="yes" FixedSize="yes" IconSize="16" Text="!(loc.BrowseDlgNewFolder)">
+          <Publish Event="DirectoryListNew" Value="0">1</Publish>
+        </Control>
+
+        <Control Id="BackupPathText" Type="Text" X="25" Y="190" Width="320" Height="10" TabSkip="no" Text="!(loc.BrowseDlgPathLabel)" />
+        <Control Id="BackupPathEdit" Type="PathEdit" X="25" Y="202" Width="320" Height="18" Property="BACKUPPATH" />
+
+        <!-- Кнопки перехода и отмены. -->
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Text="!(loc.WixUINext)" Default="yes" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+
+      <Binary Id="Folder" SourceFile="Resources\Folder.ico" />
+    </UI>
+
+    <!-- Восстановление свойств из реестра при изменении, обновлении и удалении. -->
+    <!-- Путь к резервным копиям. -->
+    <!-- Инициализируем по умолчанию до действия AppSearch, потом будет чтение из реестра. -->
+    <SetProperty Id="BACKUPPATH" Value="C:\" Before="AppSearch" Sequence="first" />
+    <Property Id="BACKUPPATH">
+      <RegistrySearch Id="BackupPathRegistrySearch" Root="HKCU" Key="$(var.RegistryPath)" Name="$(var.BackupPathRegistry)" Type="raw" />
+    </Property>
+  </Fragment>
+</Wix>
