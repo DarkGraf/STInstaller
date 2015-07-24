@@ -208,5 +208,35 @@ namespace InstallerStudioTest.Utils
             File.Delete(file.ActualPath);
       }
     }
+
+    /// <summary>
+    /// Перемещения файла внутри хранилища.
+    /// </summary>
+    [TestMethod]
+    public void TempFileStoreMove()
+    {
+      IFileStore store = new TempFileStore();
+
+      string fileName = "TestPi.txt";
+
+      // Создаем и добавляем в хранилище файл.
+      File.WriteAllText(fileName, "3.1415926");
+      store.AddFile(fileName, fileName);
+
+      // Перемещаем в каталог внутри хранилища.
+      store.MoveFile("TestPi.txt", "1\\TestPi.txt");
+
+      Assert.AreEqual(FileStoreState.Changed, store.State);
+      Assert.IsFalse(File.Exists(Path.Combine(store.StoreDirectory, "TestPi.txt")));
+      Assert.IsTrue(File.Exists(Path.Combine(store.StoreDirectory, "1\\TestPi.txt")));
+      Assert.AreEqual(1, store.Files.Count);
+      Assert.AreEqual("1\\TestPi.txt", store.Files[0]);
+
+      // Перемещаем в другой каталог внутри хранилища.
+      store.MoveFile("1\\TestPi.txt", "2\\TestPi.txt");
+
+      Assert.IsFalse(Directory.Exists(Path.Combine(store.StoreDirectory, "1")));
+      Assert.IsTrue(File.Exists(Path.Combine(store.StoreDirectory, "2\\TestPi.txt")));
+    }
   }
 }

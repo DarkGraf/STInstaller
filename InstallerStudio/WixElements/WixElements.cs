@@ -24,8 +24,42 @@ namespace InstallerStudio.WixElements
    * и в нем выполнить метод инициализации. Метод инициализации виртуальный.
    */
 
+  #region Поддержка файлов.
+
+  /// <summary>
+  /// Поддержка файлов. Если некий элемент должен поддерживать работу с файлами,
+  /// он должен реализовать этот интерфейс и генерировать соответствующие события
+  /// для уведомления и воспроизводства действиями над файлами.
+  /// </summary>
+  interface IFileSupport
+  {
+    /// <summary>
+    /// Вызывается при изменение информации о путях файла.
+    /// </summary>
+    event EventHandler<FileSupportEventArgs> FileChanged;
+  }
+
+  class FileSupportEventArgs : EventArgs
+  {
+    public string OldFileName { get; private set; }
+    public string OldDirectory { get; private set; }
+    public string ActualFileName { get; private set; }
+    public string ActualDirectory { get; private set; }
+
+    public FileSupportEventArgs(string oldFileName, string oldDirectory,
+      string actualFileName, string actualDirectory)
+    {
+      OldFileName = oldFileName;
+      OldDirectory = oldDirectory;
+      ActualFileName = actualFileName;
+      ActualDirectory = actualDirectory;
+    }
+  }
+
+  #endregion
+
   [DataContract(Namespace = StringResources.Namespace)]
-  abstract class WixElementBase : ChangeableObject, IWixElement
+  abstract class WixElementBase : ChangeableObject, IWixElement, IDataErrorInfo
   {
     #region Вложенные типы.
 
@@ -157,6 +191,33 @@ namespace InstallerStudio.WixElements
     }
 
     #endregion
+
+    #region IDataErrorInfo
+
+    [Browsable(false)]
+    public string Error
+    {
+      get { return string.Empty; }
+    }
+
+    public virtual string this[string columnName]
+    {
+      get 
+      {
+        string result = string.Empty;
+        switch (columnName)
+        {
+          case "Id":
+            if (string.IsNullOrEmpty(Id))
+              result = "Идентификатор не должен быть пустым.";
+            break;
+        }
+
+        return result;
+      }
+    }
+
+    #endregion    
   }
 
   [DataContract(Namespace = StringResources.Namespace)]
@@ -341,13 +402,52 @@ namespace InstallerStudio.WixElements
   }
 
   [DataContract(Namespace = StringResources.Namespace)]
-  class WixFileElement : WixElementBase
+  class WixFileElement : WixElementBase, IFileSupport
   {
     private Type[] allowedTypesOfChildren;
+    private string fileName;
+    private string installDirectory;
+
+    private void OnFileChanged(string oldSource, string oldDestination,
+      string newSource, string newDestination)
+    {
+      if (FileChanged != null)
+        FileChanged(this, new FileSupportEventArgs(oldSource, oldDestination, newSource, newDestination));
+    }
 
     [DataMember]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
-    public string Path { get; set; }
+    public string FileName
+    {
+      get { return fileName; }
+      set 
+      { 
+        if (fileName != value)
+        {
+          string oldPath = fileName;
+          fileName = value;
+          NotifyPropertyChanged();
+          OnFileChanged(oldPath, installDirectory, fileName, installDirectory);
+        }
+      }
+    }
+
+    [DataMember]
+    [Editor(WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor, WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor)]
+    public string InstallDirectory
+    {
+      get { return installDirectory; }
+      set 
+      {
+        if (installDirectory != value)
+        {
+          string oldInstallDirectory = installDirectory;
+          installDirectory = value;
+          NotifyPropertyChanged();
+          OnFileChanged(fileName, oldInstallDirectory, fileName, installDirectory);
+        }
+      }
+    }
 
     #region WixElementBase
 
@@ -375,6 +475,12 @@ namespace InstallerStudio.WixElements
     {
       get { return "File"; }
     }
+
+    #endregion
+
+    #region IFileSupport
+
+    public event EventHandler<FileSupportEventArgs> FileChanged;
 
     #endregion
   }

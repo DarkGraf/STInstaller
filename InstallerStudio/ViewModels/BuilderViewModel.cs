@@ -123,10 +123,11 @@ namespace InstallerStudio.ViewModels
 
     #region BaseViewModel
 
-    protected override void DisposeUnmanagedResources()
+    protected override void DisposeManagedResources()
     {
       RibbonManager.RollbackTransaction(ribbonTransactionName);
-      base.DisposeUnmanagedResources();
+      Model.Dispose();
+      base.DisposeManagedResources();
     }
 
     #endregion

@@ -73,7 +73,7 @@ namespace InstallerStudio.Views.Controls
           EditorAttribute attribute = (EditorAttribute)propertyInfo.GetCustomAttributes(typeof(EditorAttribute), true).FirstOrDefault();
           if (attribute != null)
           {
-            BaseEditSettings settings = AttributesDispatcher.GetSettings(attribute.EditorTypeName);
+            BaseEditSettings settings = AttributesDispatcher.GetSettings(attribute.EditorTypeName, propertyGridControl);
             if (settings != null)
               ((PropertyDefinition)result).EditSettings = settings;
           }
@@ -92,6 +92,10 @@ namespace InstallerStudio.Views.Controls
     /// Имя редактора выбора файла.
     /// </summary>
     public const string FilePropertyEditor = "FileEdit";
+    /// <summary>
+    /// Имя редактора выбора директории из списка.
+    /// </summary>
+    public const string DirectoryComboBoxPropertyEditor = "DirectoryComboBox";
   }
 
   /// <summary>
@@ -99,12 +103,14 @@ namespace InstallerStudio.Views.Controls
   /// </summary>
   static class AttributesDispatcher
   {
-    public static BaseEditSettings GetSettings(string editorTypeName)
+    public static BaseEditSettings GetSettings(string editorTypeName, PropertyGridControl propertyGridControl)
     {
       switch (editorTypeName)
       {
         case WixPropertyEditorsNames.FilePropertyEditor:
-          return new FilePropertyEditorSettings();
+          return new FilePropertyEditorSettings(propertyGridControl);
+        case WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor:
+          return new DirectoryComboBoxPropertyEditor();
         default:
           return null;
       }
@@ -116,8 +122,11 @@ namespace InstallerStudio.Views.Controls
   /// </summary>
   class FilePropertyEditorSettings : ButtonEditSettings
   {
-    public FilePropertyEditorSettings()
+    PropertyGridControl propertyGridControl;
+
+    public FilePropertyEditorSettings(PropertyGridControl propertyGridControl)
     {
+      this.propertyGridControl = propertyGridControl;
       DefaultButtonClick += FilePropertyEditorSettings_DefaultButtonClick;
     }
 
@@ -128,11 +137,25 @@ namespace InstallerStudio.Views.Controls
       if (dialog.ShowDialog().GetValueOrDefault())
       {
         ButtonEdit edit = sender as ButtonEdit;
+        var v = ((RowData)((System.Windows.Controls.TextBox)edit.EditCore).DataContext);
         if (edit != null)
         {
-          edit.Text = dialog.FileName;
+          edit.EditValue = dialog.FileName;
+          // Не найдено решение, как сделать завершение редактирования для данного ButtonEdit,
+          // поэтому просто передадим фокус гриду и завершение сделается автоматически.
+          propertyGridControl.Focus();
         }
       }
+    }
+  }
+
+  class DirectoryComboBoxPropertyEditor : ComboBoxEditSettings
+  {
+    public DirectoryComboBoxPropertyEditor()
+    {
+      Items.Add("ProductFolder");
+      Items.Add("SystemFolder");
+      IsTextEditable = false;
     }
   }
 }

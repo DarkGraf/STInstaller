@@ -32,7 +32,7 @@ namespace InstallerStudio.Models
     }
   }
 
-  abstract class BuilderModel : NotifyObject
+  abstract class BuilderModel : NotifyObject, IDisposable
   {
     #region Константы.
     
@@ -43,21 +43,31 @@ namespace InstallerStudio.Models
 
     #endregion
 
+    #region Частные поля.
+
     /// <summary>
     /// Выделенный элемент или null, если подразумевается выделенный элемент RootItem.
     /// </summary>
     private IWixElement selectedItem;
+    /// <summary>
+    /// Хранилилще файлов.
+    /// </summary>
+    private IFileStore fileStore;
 
     /// <summary>
     /// Словарь количества экзепляров по типам для генерации уникального имени IWixElement.
     /// </summary>
     private Dictionary<Type, int> itemsCountDictionaryByType;
 
+    #endregion
+
     public BuilderModel()
     {
       selectedItem = null;
       MainItem = CreateMainEntity();
       itemsCountDictionaryByType = new Dictionary<Type, int>();
+      // Создаем хранилище файлов.
+      fileStore = FileStoreCreator.Create();
     }
 
     /// <summary>
@@ -94,6 +104,11 @@ namespace InstallerStudio.Models
 
       SelectedItem = item;
 
+      // Если добавленный элемент реализует интерфейс работы с файлом, добавим обработчик.
+      // Незабываем удалить его при удалении элемента.
+      if (item is IFileSupport)
+        (item as IFileSupport).FileChanged += BuilderModel_FileChanged;
+
       return item;
     }
 
@@ -105,10 +120,16 @@ namespace InstallerStudio.Models
     {
       if (SelectedItem != null)
       {
+        // Если добавленный элемент реализует интерфейс работы с файлом, удалим обработчик.
+        // Добавлен при создании объекта.
+        if (SelectedItem is IFileSupport)
+          (SelectedItem as IFileSupport).FileChanged -= BuilderModel_FileChanged;
+
         // Поиск родителя текущего элемента начиная с IWixMainEntity.RootElement.
         IWixElement parent = MainItem.GetParent(SelectedItem);
         if (parent != null)
           parent.Items.Remove(SelectedItem);
+
         SelectedItem = null;
       }
     }
@@ -118,18 +139,14 @@ namespace InstallerStudio.Models
     /// </summary>
     public void Save(string fileName)
     {
-      // Создаем хранилище файлов.
-      using (IFileStore store = new ZipFileStore())
-      {
-        // Сохранаяем в хранилище файл описания проекта. 
-        string descriptionFileName = Path.Combine(store.StoreDirectory, DescriptionFileName);
-        XmlSaverLoader.Save(MainItem, descriptionFileName);
-        // Добавим описание в коллекцию хранилища.
-        // Не путаем физическое и логическое имена файлов.
-        store.AddFile(descriptionFileName, DescriptionFileName);
+      // Сохранаяем в хранилище файл описания проекта. 
+      string descriptionFileName = Path.Combine(fileStore.StoreDirectory, DescriptionFileName);
+      XmlSaverLoader.Save(MainItem, descriptionFileName);
+      // Добавим описание в коллекцию хранилища.
+      // Не путаем физическое и логическое имена файлов.
+      fileStore.AddFile(descriptionFileName, DescriptionFileName);
 
-        store.Save(fileName);
-      }
+      fileStore.Save(fileName);
     }
 
     /// <summary>
@@ -137,7 +154,17 @@ namespace InstallerStudio.Models
     /// </summary>
     public void Load(string fileName)
     {
-      MainItem = XmlSaverLoader.Load<IWixMainEntity>(fileName, MainItem.GetType());
+      if (fileStore != null)
+        fileStore.Dispose();
+
+      fileStore = FileStoreCreator.Create(fileName);
+
+      string descriptionFileName = Path.Combine(fileStore.StoreDirectory, DescriptionFileName);
+      MainItem = XmlSaverLoader.Load<IWixMainEntity>(descriptionFileName, MainItem.GetType());
+
+      // Для элементов не для чтения, если они поддерживают работу с файлом, добавим обработчик события.
+      foreach (IFileSupport item in RootItem.Items.Descendants().Where(v => !v.IsReadOnly).OfType<IFileSupport>())
+        item.FileChanged += BuilderModel_FileChanged;
     }
 
     /// <summary>
@@ -185,11 +212,73 @@ namespace InstallerStudio.Models
         }
       }
     }
+
+    /// <summary>
+    /// Обработка события изменения информации о добавлении файла.
+    /// Здесь происходит работа с файлами в файловом хранилище.
+    /// </summary>
+    void BuilderModel_FileChanged(object sender, FileSupportEventArgs e)
+    {
+      FileStoreSynchronizer.Synchronize(fileStore, e);
+    }
+
+    #region IDisposable
+    
+    public void Dispose()
+    {
+      fileStore.Dispose();
+    }
+
+    #endregion
   }
 
   // Паттерн "Абстрактная фабрика".
   abstract class BuilderModelFactory
   {
     public abstract BuilderModel Create();
+  }
+
+  class FileStoreCreator
+  {
+    static bool silent = false;
+
+    public static IFileStore Create()
+    {
+      return new ZipFileStore(silent);
+    }
+
+    public static IFileStore Create(string fileName)
+    {
+      return new ZipFileStore(fileName, silent);
+    }
+  }
+
+  static class FileStoreSynchronizer
+  {
+    public static void Synchronize(IFileStore store, FileSupportEventArgs e)
+    {
+      // Если указано имя файла с полным путем, то значит этот файл не
+      // сохранен в хранилище. Если указано только имя файла, значит файл сохранен в хранилище.
+      // За один вызов может измениться либо имя файла, либо директория.
+      // Работаем только в том случае, если известно имя файла.
+
+      if (string.IsNullOrEmpty(e.ActualFileName))
+        return;
+
+      // Если файл в хранилище.
+      if (Path.GetFileName(e.ActualFileName) == e.ActualFileName)
+      {
+
+      }
+      else
+      {
+        // Если первое добавление файла, добавляем в хранилище.
+        if (string.IsNullOrEmpty(e.OldFileName) && File.Exists(e.ActualFileName))
+        {
+          string relativePath = Path.Combine(e.ActualDirectory ?? "", Path.GetFileName(e.ActualFileName));
+          store.AddFile(e.ActualFileName, relativePath);
+        }
+      }
+    }
   }
 }

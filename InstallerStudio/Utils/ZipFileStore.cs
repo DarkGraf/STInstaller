@@ -6,9 +6,9 @@ namespace InstallerStudio.Utils
 {
   class ZipFileStore : TempFileStore
   {
-    public ZipFileStore() : base() { }
+    public ZipFileStore(bool silentWork = true) : base(silentWork) { }
 
-    public ZipFileStore(string path) : base() 
+    public ZipFileStore(string path, bool silentWork = true) : base(silentWork) 
     {
       using (ZipArchive archive = ZipFile.OpenRead(path))
       {

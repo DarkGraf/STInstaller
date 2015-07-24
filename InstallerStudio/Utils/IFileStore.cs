@@ -54,6 +54,12 @@ namespace InstallerStudio.Utils
     /// <param name="path">Путь к новому файлу.</param>
     void ReplaceFile(string relativePath, string path);
     /// <summary>
+    /// Перемещение файла внутри хранилища или переименование.
+    /// </summary>
+    /// <param name="oldRelativePath"></param>
+    /// <param name="newRelativePath"></param>
+    void MoveFile(string oldRelativePath, string newRelativePath);
+    /// <summary>
     /// Состояние файлового хранилища.
     /// </summary>
     FileStoreState State { get; }

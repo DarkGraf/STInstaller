@@ -8,6 +8,7 @@ namespace InstallerStudio.WixElements
   [DataContract(Namespace = StringResources.Namespace)]
   [KnownType(typeof(WixFeatureElement))]
   [KnownType(typeof(WixComponentElement))]
+  [KnownType(typeof(WixFileElement))]
   class WixProduct : IWixMainEntity
   {
     #region Основные свойства.

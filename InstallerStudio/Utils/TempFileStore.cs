@@ -2,15 +2,23 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.VisualBasic.FileIO;
 
 namespace InstallerStudio.Utils
 {
   class TempFileStore : IFileStore
   {
     private List<string> files;
+    private IFileWorker FileWorker;
 
-    public TempFileStore()
+    /// <summary>
+    /// Создает экземпляр класса TempFileStore.
+    /// </summary>
+    /// <param name="silentWork">Признак работы без диалога.</param>
+    public TempFileStore(bool silentWork = true)
     {
+      FileWorker = silentWork ? (IFileWorker)new SilentFileWorker() : (IFileWorker)new InteractiveFileWorker();
+
       StoreDirectory = Path.Combine(Path.GetTempPath(), "ST" + Path.GetRandomFileName());
       Directory.CreateDirectory(StoreDirectory);
       files = new List<string>();
@@ -42,6 +50,19 @@ namespace InstallerStudio.Utils
       }
     }
 
+    protected void DeleteDirectoryIfEmpty(string relativeDirectory)
+    {
+      // Проверяем, если директория, где находился файл пустая, то удаляем (кроме корневой).
+      string directory = Path.Combine(StoreDirectory, relativeDirectory);
+      while (directory != StoreDirectory)
+      {
+        if (Directory.EnumerateFileSystemEntries(directory).Count() != 0)
+          break;
+        Directory.Delete(directory);
+        directory = Path.GetDirectoryName(directory);
+      }
+    }
+
     #region IFilesStore
 
     public string StoreDirectory { get; private set; }
@@ -59,7 +80,7 @@ namespace InstallerStudio.Utils
     public void AddFile(string path, string relativePath)
     {
       // Файл должен физически существовать и не быть в коллекции.
-      if (File.Exists(path) && files.FirstOrDefault(v => v == relativePath) == null)
+      if (FileWorker.Exists(path) && files.FirstOrDefault(v => v == relativePath) == null)
       {
         CheckAndCreateDirectory(relativePath);
 
@@ -68,7 +89,7 @@ namespace InstallerStudio.Utils
         // и теперь его добавляет. В этом случае добавления в коллекцию достаточно,
         // файл не копируем.
         if (path != ConvertToTempPath(relativePath))
-          File.Copy(path, ConvertToTempPath(relativePath));
+          FileWorker.Copy(path, ConvertToTempPath(relativePath));
         State = FileStoreState.Changed;
       }
     }
@@ -76,20 +97,13 @@ namespace InstallerStudio.Utils
     public void DeleteFile(string relativePath)
     {
       // Файл должен физически существовать и быть в коллекции.
-      if (File.Exists(ConvertToTempPath(relativePath)) && files.FirstOrDefault(v => v == relativePath) != null)
+      if (FileWorker.Exists(ConvertToTempPath(relativePath)) && files.FirstOrDefault(v => v == relativePath) != null)
       {
         files.Remove(relativePath);
-        File.Delete(ConvertToTempPath(relativePath));
+        FileWorker.Delete(ConvertToTempPath(relativePath));
 
-        // Проверяем, если директория, где находился файл пустая, то удаляем (кроме корневой).
-        string directory = Path.GetDirectoryName(ConvertToTempPath(relativePath));
-        while (directory != StoreDirectory)
-        {
-          if (Directory.EnumerateFileSystemEntries(directory).Count() != 0)
-            break;
-          Directory.Delete(directory);
-          directory = Path.GetDirectoryName(directory);
-        }
+        // Удаляем директорию, если она пустая.
+        DeleteDirectoryIfEmpty(Path.GetDirectoryName(relativePath));
 
         State = FileStoreState.Changed;
       }
@@ -98,14 +112,32 @@ namespace InstallerStudio.Utils
     public void ReplaceFile(string relativePath, string path)
     {
       // Файл должен физически существовать и быть в коллекции.
-      if (File.Exists(ConvertToTempPath(relativePath)) && files.FirstOrDefault(v => v == relativePath) != null)
+      if (FileWorker.Exists(path) && FileWorker.Exists(ConvertToTempPath(relativePath)) && files.FirstOrDefault(v => v == relativePath) != null)
       {
         // Не дадим заменить самого себя.
         if (path != ConvertToTempPath(relativePath))
         {
-          File.Copy(path, ConvertToTempPath(relativePath), true);
+          FileWorker.Copy(path, ConvertToTempPath(relativePath), true);
           State = FileStoreState.Changed;
         }
+      }
+    }
+
+    public void MoveFile(string oldRelativePath, string newRelativePath)
+    {
+      string oldPath = ConvertToTempPath(oldRelativePath);
+      string newPath = ConvertToTempPath(newRelativePath);
+      if (FileWorker.Exists(oldPath) && files.FirstOrDefault(v => v == oldRelativePath) != null
+        && files.FirstOrDefault(v => v == newRelativePath) == null)
+      {
+        CheckAndCreateDirectory(newRelativePath);
+        FileWorker.Move(oldPath, newPath);
+        DeleteDirectoryIfEmpty(Path.GetDirectoryName(oldRelativePath));
+
+        files.Remove(oldRelativePath);
+        files.Add(newRelativePath);
+
+        State = FileStoreState.Changed;
       }
     }
 
@@ -154,5 +186,80 @@ namespace InstallerStudio.Utils
 
 
     #endregion
+  }
+
+  interface IFileWorker
+  {
+    bool Exists(string path);
+    void Copy(string sourceFileName, string destFileName);
+    void Copy(string sourceFileName, string destFileName, bool overwrite);
+    void Move(string sourceFileName, string destFileName);
+    void Delete(string path);
+  }
+
+  /// <summary>
+  /// Работа с файлами без диалоговых окон.
+  /// </summary>
+  class SilentFileWorker : IFileWorker
+  {
+    public bool Exists(string path)
+    {
+      return File.Exists(path);
+    }
+
+    public void Copy(string sourceFileName, string destFileName)
+    {
+      File.Copy(sourceFileName, destFileName);
+    }
+
+    public void Copy(string sourceFileName, string destFileName, bool overwrite)
+    {
+      File.Copy(sourceFileName, destFileName, overwrite);
+    }
+
+    public void Move(string sourceFileName, string destFileName)
+    {
+      File.Move(sourceFileName, destFileName);
+    }
+
+    public void Delete(string path)
+    {
+      File.Delete(path);
+    }
+  }
+
+  /// <summary>
+  /// Работа с файлами с диалоговыми оконами.
+  /// Требует подключение сборки Microsoft.VisualBasic.dll.
+  /// </summary>
+  class InteractiveFileWorker : IFileWorker
+  {
+    public bool Exists(string path)
+    {
+      return FileSystem.FileExists(path);
+    }
+
+    public void Copy(string sourceFileName, string destFileName)
+    {
+      FileSystem.CopyFile(sourceFileName, destFileName, UIOption.AllDialogs);
+    }
+
+    public void Copy(string sourceFileName, string destFileName, bool overwrite)
+    {
+      // Чтобы не запрашивать пользователя о замене файла, удалим его.
+      if (FileSystem.FileExists(destFileName))
+        FileSystem.DeleteFile(destFileName);
+      FileSystem.CopyFile(sourceFileName, destFileName, UIOption.AllDialogs);
+    }
+
+    public void Move(string sourceFileName, string destFileName)
+    {
+      FileSystem.MoveFile(sourceFileName, destFileName);
+    }
+
+    public void Delete(string path)
+    {
+      FileSystem.DeleteFile(path);
+    }
   }
 }

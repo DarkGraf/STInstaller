@@ -65,4 +65,45 @@ namespace InstallerStudioTest.WixElements
       elements.Items.Add(new WixParent { Id = "Wrong" });
     }
   }
+
+  [TestClass]
+  public class WixFileElementTest
+  {
+    string oldFileName;
+    string oldDirectory;
+    string actualFileName;
+    string actualDirectory;
+
+    /// <summary>
+    /// Тестирование события интерфейса IFileSupport у WixFileElement.
+    /// </summary>
+    [TestMethod]
+    public void WixFileElementFileSupport()
+    {
+      WixFileElement element = new WixFileElement();
+      element.FileChanged += element_FileChanged;
+      
+      // Меняем Path, он является исходным путем.
+      element.FileName = "File.txt";
+      Assert.AreEqual(null, oldFileName);
+      Assert.AreEqual("File.txt", actualFileName);
+      Assert.AreEqual(null, oldDirectory);
+      Assert.AreEqual(null, actualDirectory);
+
+      // Меняем InstallDirectory, он является исходным путем.
+      element.InstallDirectory = "C:\\Temp";
+      Assert.AreEqual("File.txt", oldFileName);
+      Assert.AreEqual("File.txt", actualFileName);
+      Assert.AreEqual(null, oldDirectory);
+      Assert.AreEqual("C:\\Temp", actualDirectory);
+    }
+
+    private void element_FileChanged(object sender, FileSupportEventArgs e)
+    {
+      oldFileName = e.OldFileName;
+      oldDirectory = e.OldDirectory;
+      actualFileName = e.ActualFileName;
+      actualDirectory = e.ActualDirectory;
+    }
+  }
 }
