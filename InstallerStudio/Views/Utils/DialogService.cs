@@ -126,11 +126,29 @@ namespace InstallerStudio.Views.Utils
   {
     public SettingsDialog(Window owner) : base(owner) { }
 
+    #region ISettingsDialog
+
+    public string WixToolsetPath { get; set; }
+
+    public string CandleFileName { get; set; }
+
+    public string LightFileName { get; set; }
+
     public override bool? Show()
     {
       SettingsWindow window = new SettingsWindow();
       window.Owner = Owner;
-      return window.ShowDialog();
+      window.Settings.WixToolsetPath = WixToolsetPath;
+      window.Settings.CandleFileName = CandleFileName;
+      window.Settings.LightFileName = LightFileName;
+      bool? result = window.ShowDialog();
+      if (result.GetValueOrDefault())
+      {
+        WixToolsetPath = window.Settings.WixToolsetPath;
+      }
+      return result;
     }
+
+    #endregion
   }
 }

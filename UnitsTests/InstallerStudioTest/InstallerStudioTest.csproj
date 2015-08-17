@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -50,11 +51,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Models\MsiMspModelTest.cs" />
+    <Compile Include="Models\MsiModelTest.cs" />
     <Compile Include="Models\FileStoreSynchronizerTest.cs" />
+    <Compile Include="Models\MspModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\AppVersionTest.cs" />
     <Compile Include="Utils\TempFileStoreTest.cs" />
+    <Compile Include="Utils\SettingsManagerTest.cs" />
     <Compile Include="Utils\ZipFileStoreTest.cs" />
     <Compile Include="ViewModels\Utils\RibbonManagerTest.cs" />
     <Compile Include="WixElements\XmlSaverLoaderTest.cs" />

@@ -6,22 +6,45 @@
   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
   ShowInTaskbar="False"
   WindowStartupLocation="CenterOwner"
-  Title="Параметры" Height="170" Width="400" 
+  Title="Параметры" Height="200" Width="500" 
   ResizeMode="NoResize"
   SizeToContent="WidthAndHeight">
+
+  <Window.Resources>
+    <Style TargetType="TextBox">
+      <Style.Triggers>
+        <Trigger Property="Validation.HasError" Value="true">
+          <Setter 
+            Property="ToolTip" 
+            Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors).CurrentItem.ErrorContent}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </Window.Resources>
+
+
+  <dxc:DXWindow.DataContext>
+    <Binding RelativeSource="{RelativeSource Self}" />
+  </dxc:DXWindow.DataContext>
   
   <StackPanel Orientation="Vertical">
     <dxlc:LayoutControl Orientation="Vertical">
       <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Настройки WIX">
         <dxlc:LayoutItem Label="Путь к WIX Toolset:">
-          <TextBox Width="200" />
+          <TextBox Width="300" Text="{Binding Settings.WixToolsetPath, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+        </dxlc:LayoutItem>
+        <dxlc:LayoutItem Label="Имя компилятора:">
+          <TextBox Width="300" Text="{Binding Settings.CandleFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+        </dxlc:LayoutItem>
+        <dxlc:LayoutItem Label="Имя компоновщика:">
+          <TextBox Width="300" Text="{Binding Settings.LightFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
         </dxlc:LayoutItem>
       </dxlc:LayoutGroup>
     </dxlc:LayoutControl>
   
     <DockPanel LastChildFill="False">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-        <Button Content="Ok" Margin="10,0,5,10" Width="100" IsDefault="True" />
+        <Button Content="Ok" Margin="10,0,5,10" Width="100" IsDefault="True" Click="ButtonOk_Click" />
         <Button Content="Cancel" Margin="5,0,10,10" Width="100" IsCancel="True" />
       </StackPanel>
     </DockPanel>

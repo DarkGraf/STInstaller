@@ -2,6 +2,7 @@
 using System.Runtime.Serialization;
 
 using InstallerStudio.Utils;
+using InstallerStudio.WixElements.WixBuilders;
 
 namespace InstallerStudio.WixElements
 {
@@ -9,7 +10,7 @@ namespace InstallerStudio.WixElements
   [KnownType(typeof(WixFeatureElement))]
   [KnownType(typeof(WixComponentElement))]
   [KnownType(typeof(WixFileElement))]
-  class WixProduct : IWixMainEntity
+  class WixProduct : WixMainEntity
   {
     #region Основные свойства.
 
@@ -41,7 +42,16 @@ namespace InstallerStudio.WixElements
       RootElement = new WixFeatureElement();
     }
 
+    #region WixMainEntity
+
     [DataMember]
-    public IWixElement RootElement { get; private set; }
+    public override IWixElement RootElement { get; protected set; }
+
+    protected override WixBuilderBase CreateBuilder()
+    {
+      return new WixMsiBuilder(this);
+    }
+
+    #endregion
   }
 }

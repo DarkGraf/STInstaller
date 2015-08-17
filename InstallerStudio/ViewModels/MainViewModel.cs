@@ -1,18 +1,23 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Windows.Input;
 using System.Windows.Media;
 
 using InstallerStudio.ViewModels.Utils;
 using InstallerStudio.Views.Utils;
+using InstallerStudio.Utils;
 
 namespace InstallerStudio.ViewModels
 {
   /// <summary>
-  /// Данный интерфейс нужен только для определения функциональности модели представления.
+  /// Данный интерфейс нужен только для определения функциональности модели представления
+  /// для связи с GUI.
   /// </summary>
   interface IMainViewModel
   {
+    string ApplicationTitle { get; }
+
     BuilderViewModel BuilderViewModel { get; }
 
     ICommand CreateMsiCommand { get; }
@@ -30,9 +35,29 @@ namespace InstallerStudio.ViewModels
   class MainViewModel : BaseViewModel, IMainViewModel, IDialogServiceSetter
   {
     BuilderViewModel builderViewModel;
+    /// <summary>
+    /// Настройки программы.
+    /// Загружаем в конструкторе, сохраняем после изменения настроек.
+    /// </summary>
+    ISettingsInfo settingsInfo;
 
     public MainViewModel()
     {
+      // Получение исполняемой сборки для обращения к атрибутам.
+      Assembly assembly = Assembly.GetExecutingAssembly();
+
+      // Получение заголовка программы.
+      AssemblyTitleAttribute title = (AssemblyTitleAttribute)assembly.
+        GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0];
+      ApplicationTitle = title.Title;
+
+      // Получение директории для настроек.
+      AssemblyProductAttribute product = (AssemblyProductAttribute)assembly.
+        GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0];
+      SettingsManager.Directory = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ST", product.Product);
+      settingsInfo = new SettingsManager().Load();
+
       Predicate<object> canExecute = (obj) => { return BuilderViewModel != null; };
 
       CreateMsiCommand = new RelayCommand(param => CreateMsi());
@@ -49,6 +74,8 @@ namespace InstallerStudio.ViewModels
     }
 
     #region IMainViewModel
+
+    public string ApplicationTitle { get; private set; }
 
     public BuilderViewModel BuilderViewModel 
     {
@@ -170,7 +197,17 @@ namespace InstallerStudio.ViewModels
 
     private void ChangeSettings()
     {
-      DialogService.SettingsDialog.Show();
+      ISettingsDialog dialog = DialogService.SettingsDialog;
+      dialog.WixToolsetPath = settingsInfo.WixToolsetPath;
+      dialog.CandleFileName = settingsInfo.CandleFileName;
+      dialog.LightFileName = settingsInfo.LightFileName;
+      if (dialog.Show().GetValueOrDefault())
+      {
+        settingsInfo.WixToolsetPath = dialog.WixToolsetPath;
+        settingsInfo.CandleFileName = dialog.CandleFileName;
+        settingsInfo.LightFileName = dialog.LightFileName;
+        new SettingsManager().Save(settingsInfo);
+      }
     }
 
     private void Check()
@@ -180,7 +217,7 @@ namespace InstallerStudio.ViewModels
 
     private void Build()
     {
-
+      builderViewModel.Build();
     }
 
     #endregion

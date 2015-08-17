@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
 
-namespace InstallerStudio.WixElements
+namespace InstallerStudio.Utils
 {
   static class XmlSaverLoader
   {

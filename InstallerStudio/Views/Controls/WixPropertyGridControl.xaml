@@ -15,5 +15,6 @@
     ExpandCategoriesWhenSelectedObjectChanged="True"
     UseCollectionEditor="False" 
     ShowDescriptionIn="Panel"
-    CustomExpand="propertyGridControl_CustomExpand" />
+    CustomExpand="propertyGridControl_CustomExpand"
+    WixDataSource="{Binding WixPropertyGridControlDataSource}" />
 </UserControl>

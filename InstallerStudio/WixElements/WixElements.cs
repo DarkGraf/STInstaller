@@ -37,6 +37,17 @@ namespace InstallerStudio.WixElements
     /// Вызывается при изменение информации о путях файла.
     /// </summary>
     event EventHandler<FileSupportEventArgs> FileChanged;
+
+    /// <summary>
+    /// Уведомляет подписчиков о удалении элемента.
+    /// </summary>
+    void NotifyDeleting();
+
+    /// <summary>
+    /// Возвращает массив из установочных директорий.
+    /// Используется массив, так как элемент может поддерживать несколько файлов.
+    /// </summary>
+    string[] GetInstallDirectories();
   }
 
   class FileSupportEventArgs : EventArgs
@@ -45,14 +56,16 @@ namespace InstallerStudio.WixElements
     public string OldDirectory { get; private set; }
     public string ActualFileName { get; private set; }
     public string ActualDirectory { get; private set; }
+    public string RawFileName { get; private set; }
 
     public FileSupportEventArgs(string oldFileName, string oldDirectory,
-      string actualFileName, string actualDirectory)
+      string actualFileName, string actualDirectory, string rawFileName)
     {
       OldFileName = oldFileName;
       OldDirectory = oldDirectory;
       ActualFileName = actualFileName;
       ActualDirectory = actualDirectory;
+      RawFileName = rawFileName;
     }
   }
 
@@ -70,16 +83,13 @@ namespace InstallerStudio.WixElements
 
     internal class WixElementCollection : ObservableCollection<IWixElement>
     {
-      private readonly WixElementBase parent;
-
-      public WixElementCollection(WixElementBase parent)
-      {
-        this.parent = parent;
-      }
+      public WixElementBase Parent { get; set; }
 
       protected override void InsertItem(int index, IWixElement item)
       {
-        if (!parent.CheckChildType(item.GetType()))
+        // Родитель будет равен null во время десериализации, в данном случае
+        // ничего не будем проверять.
+        if (Parent != null && !Parent.CheckChildType(item.GetType()))
           throw new WrongChildTypeException();
 
         base.InsertItem(index, item);
@@ -90,8 +100,13 @@ namespace InstallerStudio.WixElements
 
     private string id;
 
+    [DataMember(Name = "Items")]
+    private WixElementCollection items;
+
     public WixElementBase()
     {
+      items = new WixElementCollection();
+      items.Parent = this;
       Initialize();
     }
 
@@ -101,9 +116,19 @@ namespace InstallerStudio.WixElements
       Initialize();
     }
 
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext context)
+    {
+      // Если произошла десериализация, то родитель у коллекции равен null,
+      // инициализируем его.
+      items.Parent = this;
+    }
+
     protected virtual void Initialize()
     {
-      Items = new WixElementCollection(this);
+      // При десериализации DataContractSerializer не вызывается конструктор
+      // по умолчанию, поэтому вызываем данный метод из конструктора и из
+      // метода OnDeserializing(). В нем производим всю необходимую инициализацию.
     }
 
     /// <summary>
@@ -158,8 +183,15 @@ namespace InstallerStudio.WixElements
     /// Дочерние элементы.
     /// </summary>
     [Browsable(false)]
-    [DataMember]
-    public IList<IWixElement> Items { get; private set; }
+    // Сериализуется через поле items. Если сериализовать данное
+    // поле, то из-за типа IList<IWixElement> при десериализации
+    // во внутреннем представлении будет задействован массив.
+    // Определять в интерфейсе поле с типом WixElementCollection 
+    // нехорошо, так как увеличивается связанность.
+    public IList<IWixElement> Items 
+    { 
+      get { return items; } 
+    }
 
     [Browsable(false)]
     public abstract string ShortTypeName { get; }
@@ -327,6 +359,14 @@ namespace InstallerStudio.WixElements
   {
     private Type[] allowedTypesOfChildren;
 
+    [DataMember]
+    [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    public string MdfFile { get; set; }
+
+    [DataMember]
+    [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    public string LdfFile { get; set; }
+
     #region WixElementBase
 
     protected override void Initialize()
@@ -335,7 +375,6 @@ namespace InstallerStudio.WixElements
 
       allowedTypesOfChildren = new Type[] 
       { 
-        typeof(WixDbTemplateElement), 
         typeof(WixSqlScriptElement)
       };
     }
@@ -353,32 +392,6 @@ namespace InstallerStudio.WixElements
     public override string ShortTypeName
     {
       get { return "DbComponent"; }
-    }
-
-    public override bool AvailableForRun(Type type, IWixElement rootItem)
-    {
-      // Особое бизнес правило: компонент DbTemplate должен быть один.
-      if (type == typeof(WixDbTemplateElement) && rootItem.Items.Descendants().FirstOrDefault(v => v.GetType() == type) != null)
-        return false;
-
-      return base.AvailableForRun(type, rootItem);
-    }
-
-    #endregion
-  }
-
-  class WixDbTemplateElement : WixElementBase
-  {
-    #region WixElementBase
-
-    public override ElementsImagesTypes ImageType
-    {
-      get { return ElementsImagesTypes.DbTemplate; }
-    }
-
-    public override string ShortTypeName
-    {
-      get { return "DbTemplate"; }
     }
 
     #endregion
@@ -408,11 +421,11 @@ namespace InstallerStudio.WixElements
     private string fileName;
     private string installDirectory;
 
-    private void OnFileChanged(string oldSource, string oldDestination,
-      string newSource, string newDestination)
+    private void OnFileChanged(string oldFileName, string oldDirectory,
+      string actualFileName, string actualDirectory, string rawFileName)
     {
       if (FileChanged != null)
-        FileChanged(this, new FileSupportEventArgs(oldSource, oldDestination, newSource, newDestination));
+        FileChanged(this, new FileSupportEventArgs(oldFileName, oldDirectory, actualFileName, actualDirectory, rawFileName));
     }
 
     [DataMember]
@@ -424,10 +437,16 @@ namespace InstallerStudio.WixElements
       { 
         if (fileName != value)
         {
-          string oldPath = fileName;
-          fileName = value;
+          // Значение value может содержать полный путь к файлу (при выборе пользователем
+          // файла через диалог), а может содержать только имя файла (при редактировании
+          // в PropertyGrid). В любом случае, запомним это значение в rawFileName и 
+          // передадим для дальнейшего анализа, а в FileName запомним только имя файла.
+          // Директория для инсталляции не изменилась, поэтому передаем ее в двух параметрах.
+          string rawFileName = value;
+          string oldFileName = fileName;
+          fileName = System.IO.Path.GetFileName(rawFileName);
           NotifyPropertyChanged();
-          OnFileChanged(oldPath, installDirectory, fileName, installDirectory);
+          OnFileChanged(oldFileName, installDirectory, fileName, installDirectory, rawFileName);
         }
       }
     }
@@ -441,10 +460,11 @@ namespace InstallerStudio.WixElements
       {
         if (installDirectory != value)
         {
+          // Имя файла не изменилось, в rawFileName передаем fileName.
           string oldInstallDirectory = installDirectory;
           installDirectory = value;
           NotifyPropertyChanged();
-          OnFileChanged(fileName, oldInstallDirectory, fileName, installDirectory);
+          OnFileChanged(fileName, oldInstallDirectory, fileName, installDirectory, fileName);
         }
       }
     }
@@ -481,6 +501,17 @@ namespace InstallerStudio.WixElements
     #region IFileSupport
 
     public event EventHandler<FileSupportEventArgs> FileChanged;
+
+    public void NotifyDeleting()
+    {
+      // Перед удалением элемента вызовется этот метод, передадим нулевые актуальные значения.
+      OnFileChanged(fileName, installDirectory, null, null, null);
+    }
+
+    public string[] GetInstallDirectories()
+    {
+      return new string[] { InstallDirectory ?? "" };
+    }
 
     #endregion
   }

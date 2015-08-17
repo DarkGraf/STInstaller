@@ -10,7 +10,8 @@ using InstallerStudio.WixElements;
 namespace InstallerStudio.ViewModels
 {
   /// <summary>
-  /// Данный интерфейс нужен только для определения функциональности модели представления.
+  /// Данный интерфейс нужен только для определения функциональности модели представления
+  /// для связи с GUI.
   /// </summary>
   interface IBuilderViewModel
   {
@@ -18,9 +19,6 @@ namespace InstallerStudio.ViewModels
     IWixMainEntity MainItem { get; }
     IList<IWixElement> Items { get; }
     IWixElement SelectedItem { get; set; }
-
-    void Save(string fileName);
-    void Load(string fileName);
 
     /// <summary>
     /// Удаление выделенного элемента.
@@ -161,6 +159,10 @@ namespace InstallerStudio.ViewModels
       set { Model.SelectedItem = value; }
     }
 
+    public ICommand RemoveSelectedItemCommand { get; private set; }
+
+    #endregion
+
     public void Save(string fileName)
     {
       Model.Save(fileName);
@@ -171,9 +173,10 @@ namespace InstallerStudio.ViewModels
       Model.Load(fileName);
     }
 
-    public ICommand RemoveSelectedItemCommand { get; private set; }
-
-    #endregion
+    public void Build()
+    {
+      Model.Build();
+    }
   }
 
   // Паттерн "Абстрактная фабрика".

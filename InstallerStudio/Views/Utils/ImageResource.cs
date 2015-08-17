@@ -30,8 +30,6 @@ namespace InstallerStudio.Views.Utils
     Component,
     [UriImage("Views/Images/Components/DbComponentSmall.png")]
     DbComponent,
-    [UriImage("Views/Images/Components/DbTemplateSmall.png")]
-    DbTemplate,
     [UriImage("Views/Images/Components/SqlScriptSmall.png")]
     SqlScript,
     [UriImage("Views/Images/Components/FileSmall.png")]

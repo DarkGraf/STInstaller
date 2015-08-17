@@ -2,10 +2,13 @@
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using InstallerStudio.Utils;
 using InstallerStudio.WixElements;
 
 namespace InstallerStudioTest.WixElements
 {
+  // Здесь тестируется функциональность XmlSaverLoader на базе WixFeatureElement.
+  // Подробные тесты сохранения WixFeatureElement в файле WixElementsTest.cs. 
   [TestClass]
   public class XmlSaverLoaderTest
   {

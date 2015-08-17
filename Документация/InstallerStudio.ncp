@@ -1,0 +1,309 @@
+<Project>
+  <Name>InstallerStudio</Name>
+  <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
+    <Name>Основная модель</Name>
+    <Language>CSharp</Language>
+    <Entities>
+      <Entity type="Interface">
+        <Name>IWixElement</Name>
+        <Access>Public</Access>
+        <Location left="682" top="230" />
+        <Size width="162" height="93" />
+        <Collapsed>False</Collapsed>
+      </Entity>
+      <Entity type="Class">
+        <Name>BuilderModel</Name>
+        <Access>Public</Access>
+        <Location left="682" top="424" />
+        <Size width="162" height="238" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">public IWixElement AddItem()</Member>
+        <Member type="Method">public void RemoveSelectedItem()</Member>
+        <Member type="Method">public void Save()</Member>
+        <Member type="Method">public void Load()</Member>
+        <Member type="Method">public void Build()</Member>
+        <Member type="Property">public IWixMainEntity MainItem { get; }</Member>
+        <Member type="Property">public IWixElement RootItem { get; }</Member>
+        <Member type="Property">public IList&lt;IWixElement&gt; Items { get; }</Member>
+        <Member type="Property">public IWixElement SelectedItem { get; set; }</Member>
+        <Modifier>Abstract</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>BuilderViewModel</Name>
+        <Access>Public</Access>
+        <Location left="682" top="738" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Member type="Property">protected BuilderModel Model { get; }</Member>
+        <Member type="Property">protected abstract BuilderModelFactory BuilderModelFactory { get; }</Member>
+        <Member type="Property">public IList&lt;IWixElement&gt; Items { get; }</Member>
+        <Member type="Method">public void Build()</Member>
+        <Modifier>Abstract</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>MsiModel</Name>
+        <Access>Public</Access>
+        <Location left="416" top="450" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>MspModel</Name>
+        <Access>Public</Access>
+        <Location left="961" top="465" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>MsiViewModel</Name>
+        <Access>Public</Access>
+        <Location left="416" top="738" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>MspViewModel</Name>
+        <Access>Public</Access>
+        <Location left="961" top="738" />
+        <Size width="162" height="216" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixElementBase</Name>
+        <Access>Public</Access>
+        <Location left="416" top="199" />
+        <Size width="162" height="146" />
+        <Collapsed>False</Collapsed>
+        <Member type="Property">public string Id { get; set; }</Member>
+        <Member type="Property">public abstract ElementsImagesTypes ImageType { get; }</Member>
+        <Member type="Property">public IList&lt;IWixElement&gt; Items { get; }</Member>
+        <Member type="Property">public abstract string ShortTypeName { get; }</Member>
+        <Modifier>Abstract</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixFeatureElement</Name>
+        <Access>Public</Access>
+        <Location left="103" top="149" />
+        <Size width="162" height="110" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixComponentElement</Name>
+        <Access>Public</Access>
+        <Location left="103" top="276" />
+        <Size width="162" height="114" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Interface">
+        <Name>IWixMainEntity</Name>
+        <Access>Public</Access>
+        <Location left="1055" top="241" />
+        <Size width="162" height="95" />
+        <Collapsed>False</Collapsed>
+        <Member type="Property">IWixElement RootElement { get; }</Member>
+        <Member type="Method">void Build()</Member>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixProduct</Name>
+        <Access>Public</Access>
+        <Location left="1635" top="449" />
+        <Size width="162" height="110" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixPatch</Name>
+        <Access>Public</Access>
+        <Location left="1323" top="449" />
+        <Size width="162" height="109" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>MainViewModel</Name>
+        <Access>Public</Access>
+        <Location left="682" top="1052" />
+        <Size width="162" height="130" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixBuilderBase</Name>
+        <Access>Public</Access>
+        <Location left="1502" top="899" />
+        <Size width="162" height="105" />
+        <Collapsed>False</Collapsed>
+        <Modifier>Abstract</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixMsiBuilder</Name>
+        <Access>Public</Access>
+        <Location left="1635" top="655" />
+        <Size width="162" height="114" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixMspBuilder</Name>
+        <Access>Public</Access>
+        <Location left="1323" top="655" />
+        <Size width="162" height="105" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>WixMainEntity</Name>
+        <Access>Public</Access>
+        <Location left="1469" top="214" />
+        <Size width="162" height="121" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">protected abstract WixBuilderBase CreateBuilder()</Member>
+        <Member type="Method">public void Build()</Member>
+        <Modifier>Abstract</Modifier>
+      </Entity>
+      <Entity type="Interface">
+        <Name>IMsiModelAdditional</Name>
+        <Access>Public</Access>
+        <Location left="103" top="450" />
+        <Size width="162" height="118" />
+        <Collapsed>False</Collapsed>
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Dependency" first="2" second="1">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>760</X>
+          <Y>713</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Generalization" first="3" second="1">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Generalization" first="4" second="1">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Generalization" first="5" second="2">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Generalization" first="6" second="2">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="5" second="3">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="6" second="4">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="1" second="0">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Realization" first="7" second="0">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Generalization" first="9" second="7">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="False">
+          <X>391</X>
+          <Y>288</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Generalization" first="8" second="7">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>291</X>
+          <Y>245</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Dependency" first="1" second="10">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>869</X>
+          <Y>447</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Dependency" first="10" second="0">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="13" second="2">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Generalization" first="15" second="14">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1741</X>
+          <Y>800</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Generalization" first="16" second="14">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>1410</X>
+          <Y>785</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>1477</X>
+          <Y>954</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Association" first="15" second="11">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+      </Relationship>
+      <Relationship type="Association" first="16" second="12">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+      </Relationship>
+      <Relationship type="Realization" first="17" second="10">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Generalization" first="12" second="17">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="False">
+          <X>1514</X>
+          <Y>360</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Generalization" first="11" second="17">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="False">
+          <X>1589</X>
+          <Y>360</Y>
+        </BendPoint>
+      </Relationship>
+      <Relationship type="Realization" first="3" second="18">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+    </Relationships>
+  </ProjectItem>
+</Project>

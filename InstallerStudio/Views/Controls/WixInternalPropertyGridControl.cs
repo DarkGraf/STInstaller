@@ -1,25 +1,88 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Input;
+
 using Microsoft.Win32;
 
+using DevExpress.Xpf.Editors;
+using DevExpress.Xpf.Editors.Settings;
 using DevExpress.Xpf.PropertyGrid;
 using DevExpress.Xpf.PropertyGrid.Internal;
-using DevExpress.Xpf.Editors.Settings;
-using DevExpress.Xpf.Editors;
+
+using WinControls = System.Windows.Controls;
 
 namespace InstallerStudio.Views.Controls
 {
   /// <summary>
+  /// Интерфейс для обеспечения WixInternalPropertyGridControl данными.
+  /// </summary>
+  public interface IWixPropertyGridControlDataSource
+  {
+    /// <summary>
+    /// Используется для выбора установочных директорий.
+    /// </summary>
+    ObservableCollection<string> InstallDirectories { get; }
+    /// <summary>
+    /// Проверка каталога на возможность удаления из списка.
+    /// </summary>
+    /// <param name="directory">Проверяемая директория.</param>
+    /// <returns>Истино, если можно удалить.</returns>
+    bool CheckInstallDirectoryForDeleting(string directory);
+  }
+
+  /// <summary>
+  ///  Паттерн Null-объект.
+  /// </summary>
+  class NullWixPropertyGridControlDataSource : IWixPropertyGridControlDataSource
+  {
+    public ObservableCollection<string> InstallDirectories
+    {
+      get { return new ObservableCollection<string>(); }
+    }
+
+    public bool CheckInstallDirectoryForDeleting(string directory)
+    {
+      return false;
+    }
+  }
+
+  /// <summary>
   /// Расширение PropertyGridControl с добавлением собственных редакторов.
   /// В настоящей версии PropertyGridControl от DevExpress не поддерживает
-  /// пользовательских редакторов, поэтому реализуем данным способом.
+  /// пользовательские редакторы, поэтому реализуем данным способом.
   /// https://www.devexpress.com/Support/Center/Question/Details/S172000
   /// </summary>
   public class WixInternalPropertyGridControl : PropertyGridControl
   {
+    #region Зависимое свойство WixDataSource.
+
+    public static readonly DependencyProperty WixDataSourceProperty =
+      DependencyProperty.Register("WixDataSource",
+      typeof(IWixPropertyGridControlDataSource),
+      typeof(WixInternalPropertyGridControl),
+      new PropertyMetadata(WixDataSourcePropertyChangedCallback));
+
+    public IWixPropertyGridControlDataSource WixDataSource
+    {
+      get { return (IWixPropertyGridControlDataSource)GetValue(WixDataSourceProperty); }
+      set { SetValue(WixDataSourceProperty, value); }
+    }
+
+    private static void WixDataSourcePropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      WixInternalPropertyGridControl obj = d as WixInternalPropertyGridControl;
+      if (obj != null)
+        obj.propertyBuilder.WixDataSource = e.NewValue as IWixPropertyGridControlDataSource;
+    }
+
+    #endregion
+
+    WixPropertyBuilder propertyBuilder;
+
     public WixInternalPropertyGridControl()
     {
       // Получаем свойства для чтения.
@@ -28,7 +91,7 @@ namespace InstallerStudio.Views.Controls
       PropertyInfo RowDataGeneratorInfo = typeof(PropertyGridControl).GetProperty("RowDataGenerator", BindingFlags.Instance | BindingFlags.NonPublic);
 
       // Аналогично this.PropertyBuilder = new WixPropertyBuilder(this).
-      PropertyBuilderInfo.SetValue(this, new WixPropertyBuilder(this), null);
+      PropertyBuilderInfo.SetValue(this, propertyBuilder = new WixPropertyBuilder(this), null);
 
       RowDataGenerator rowDataGenerator = new RowDataGenerator();
 
@@ -58,7 +121,12 @@ namespace InstallerStudio.Views.Controls
     public WixPropertyBuilder(PropertyGridControl propertyGridControl)
     {
       this.propertyGridControl = propertyGridControl;
+      // Если не будет ничего проинициализировано в дальнейшем, то
+      // будем безопасно использовать нулевой объект.
+      WixDataSource = new NullWixPropertyGridControlDataSource();
     }
+
+    public IWixPropertyGridControlDataSource WixDataSource { get; set; }
 
     public override PropertyDefinitionBase GetDefinition(DataController controller, 
       DataViewBase view, RowHandle handle, bool showCategories, bool getStandard = true)
@@ -73,7 +141,7 @@ namespace InstallerStudio.Views.Controls
           EditorAttribute attribute = (EditorAttribute)propertyInfo.GetCustomAttributes(typeof(EditorAttribute), true).FirstOrDefault();
           if (attribute != null)
           {
-            BaseEditSettings settings = AttributesDispatcher.GetSettings(attribute.EditorTypeName, propertyGridControl);
+            BaseEditSettings settings = AttributesDispatcher.GetSettings(attribute.EditorTypeName, propertyGridControl, WixDataSource);
             if (settings != null)
               ((PropertyDefinition)result).EditSettings = settings;
           }
@@ -103,14 +171,14 @@ namespace InstallerStudio.Views.Controls
   /// </summary>
   static class AttributesDispatcher
   {
-    public static BaseEditSettings GetSettings(string editorTypeName, PropertyGridControl propertyGridControl)
+    public static BaseEditSettings GetSettings(string editorTypeName, PropertyGridControl propertyGridControl, IWixPropertyGridControlDataSource dataSource)
     {
       switch (editorTypeName)
       {
         case WixPropertyEditorsNames.FilePropertyEditor:
           return new FilePropertyEditorSettings(propertyGridControl);
         case WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor:
-          return new DirectoryComboBoxPropertyEditor();
+          return new DirectoryComboBoxPropertyEditor(dataSource);
         default:
           return null;
       }
@@ -137,7 +205,7 @@ namespace InstallerStudio.Views.Controls
       if (dialog.ShowDialog().GetValueOrDefault())
       {
         ButtonEdit edit = sender as ButtonEdit;
-        var v = ((RowData)((System.Windows.Controls.TextBox)edit.EditCore).DataContext);
+        var v = ((RowData)((WinControls.TextBox)edit.EditCore).DataContext);
         if (edit != null)
         {
           edit.EditValue = dialog.FileName;
@@ -151,11 +219,139 @@ namespace InstallerStudio.Views.Controls
 
   class DirectoryComboBoxPropertyEditor : ComboBoxEditSettings
   {
-    public DirectoryComboBoxPropertyEditor()
+    Func<string, bool> checkForDeleting;
+
+    /// <summary>
+    /// Класс на основе выделенного значения в Popup компонента ComboBoxEdit
+    /// вычисляет, отображать кнопку удаления или нет (делает ее прозрачной).
+    /// </summary>
+    class ButtonVisibilityManager
     {
-      Items.Add("ProductFolder");
-      Items.Add("SystemFolder");
-      IsTextEditable = false;
+      ComboBoxEdit cmb;
+      Func<string, bool> checkForDeleting;
+      string item = null;
+
+      public ButtonVisibilityManager(ComboBoxEdit cmb, Func<string, bool> checkForDeleting)
+      {
+        this.cmb = cmb;
+        this.checkForDeleting = checkForDeleting;
+        cmb.PopupClosed += cmb_PopupClosed;
+        cmb.PopupContentSelectionChanged += cmb_PopupContentSelectionChanged;
+      }
+
+      public double Opacity
+      {
+        get 
+        { 
+          return item == null || !checkForDeleting(item) ? 0 : 1; 
+        }
+      }
+
+      void cmb_PopupClosed(object sender, ClosePopupEventArgs e)
+      {
+        item = null;
+      }
+
+      void cmb_PopupContentSelectionChanged(object sender, WinControls.SelectionChangedEventArgs e)
+      {
+        // При удалении будет RemovedItems содержать элементы.
+        item = e.AddedItems.Count > 0 ? e.AddedItems[0].ToString() : null;
+      }
+    }
+
+    public DirectoryComboBoxPropertyEditor(IWixPropertyGridControlDataSource dataSource)
+    {
+      ItemsSource = dataSource.InstallDirectories;
+      checkForDeleting = dataSource.CheckInstallDirectoryForDeleting;
+    }
+
+    protected override void AssignToEditCore(IBaseEdit edit)
+    {
+      ComboBoxEdit cmb;
+      if ((cmb = edit as ComboBoxEdit) != null)
+      {
+        // Чтобы содержимые элементы растягивались на все доступное пространство.
+        cmb.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+
+        // Создание ItemTemplate через FrameworkElementFactory.
+
+        FrameworkElementFactory factoryGrid = new FrameworkElementFactory(typeof(WinControls.Grid));
+        FrameworkElementFactory factoryColumnOne = new FrameworkElementFactory(typeof(WinControls.ColumnDefinition));
+        FrameworkElementFactory factoryColumnTwo = new FrameworkElementFactory(typeof(WinControls.ColumnDefinition));
+        FrameworkElementFactory factoryTextBlock = new FrameworkElementFactory(typeof(WinControls.TextBlock));
+        FrameworkElementFactory factoryButton = new FrameworkElementFactory(typeof(WinControls.Button));
+
+        // Настроим кнопку.
+        // Настройка через factoryButton.SetValue(WinControls.Button.ContentProperty, "X") не работает.
+        WinControls.ControlTemplate templateButton = new WinControls.ControlTemplate(typeof(WinControls.Button));
+        FrameworkElementFactory factoryTextBlockButton = new FrameworkElementFactory(typeof(WinControls.TextBlock));
+        factoryTextBlockButton.SetValue(WinControls.TextBlock.TextProperty, "X");
+        factoryTextBlockButton.SetValue(WinControls.TextBlock.ForegroundProperty, System.Windows.Media.Brushes.Red);
+        factoryTextBlockButton.SetValue(WinControls.TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+        templateButton.VisualTree = factoryTextBlockButton;
+
+        factoryButton.Name = "btn";
+        factoryButton.SetValue(WinControls.Button.TemplateProperty, templateButton);
+        factoryButton.SetValue(WinControls.Button.OpacityProperty, 0d); // Суффикс обязателен.
+        factoryButton.AddHandler(WinControls.Button.ClickEvent, new RoutedEventHandler(DeleteItem));
+
+        // Триггер для кнопки.
+        Trigger trig = new Trigger();
+        trig.Property = UIElement.IsMouseOverProperty;
+        trig.Value = true;
+
+        Setter set = new Setter();
+        set.Property = WinControls.Button.OpacityProperty;
+        System.Windows.Data.Binding b;
+        set.Value = b = new System.Windows.Data.Binding("Opacity");
+        b.Source = new ButtonVisibilityManager(cmb, checkForDeleting);
+
+        set.TargetName = "btn";
+        trig.Setters.Add(set);
+
+        // Создаем Grid и колонки в нем.
+        factoryColumnOne.SetValue(WinControls.ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+        factoryColumnTwo.SetValue(WinControls.ColumnDefinition.WidthProperty, new GridLength(15, GridUnitType.Pixel));
+        factoryGrid.AppendChild(factoryColumnOne);
+        factoryGrid.AppendChild(factoryColumnTwo);
+
+        // Добавляем в Grid элементы.
+        factoryTextBlock.SetValue(WinControls.Grid.ColumnProperty, 0);
+        factoryButton.SetValue(WinControls.Grid.ColumnProperty, 1);
+        factoryGrid.AppendChild(factoryTextBlock);
+        factoryGrid.AppendChild(factoryButton);
+
+        factoryTextBlock.SetBinding(WinControls.TextBlock.TextProperty, new System.Windows.Data.Binding());
+       
+        cmb.ItemTemplate = new DataTemplate();
+        cmb.ItemTemplate.VisualTree = factoryGrid;
+        cmb.ItemTemplate.Triggers.Add(trig);
+
+        // Возможность добавления нового значения.
+        cmb.ProcessNewValue += cmb_ProcessNewValue;
+        cmb.AddNewButtonPlacement = EditorPlacement.Popup;
+      }
+      base.AssignToEditCore(edit);
+    }
+
+    void cmb_ProcessNewValue(DependencyObject sender, ProcessNewValueEventArgs e)
+    {
+      // Добавление елемента в список.
+      ObservableCollection<string> itemsSource = ItemsSource as ObservableCollection<string>;
+      if (itemsSource != null && !itemsSource.Contains(e.DisplayText))
+      {
+        itemsSource.Add(e.DisplayText);
+        e.Handled = true;
+      }
+    }
+
+    void DeleteItem(object sender, RoutedEventArgs e)
+    {
+      // Удаление элемента.
+      WinControls.Button btn = e.OriginalSource as WinControls.Button;
+      // Удаляем только если кнопка видима.
+      if (btn != null && btn.Opacity > 0)
+        ((ObservableCollection<string>)(Editor as ComboBoxEdit).ItemsSource).Remove(btn.DataContext as string);
     }
   }
 }

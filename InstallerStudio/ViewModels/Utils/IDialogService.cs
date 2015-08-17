@@ -42,6 +42,10 @@ namespace InstallerStudio.ViewModels.Utils
   /// </summary>
   interface ISettingsDialog
   {
+    string WixToolsetPath { get; set; }
+    string CandleFileName { get; set; }
+    string LightFileName { get; set; }
+
     bool? Show();
   }
 }

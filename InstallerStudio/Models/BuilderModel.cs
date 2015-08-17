@@ -120,10 +120,14 @@ namespace InstallerStudio.Models
     {
       if (SelectedItem != null)
       {
-        // Если добавленный элемент реализует интерфейс работы с файлом, удалим обработчик.
+        // Если элемент реализует интерфейс работы с файлом удалим обработчик.
         // Добавлен при создании объекта.
         if (SelectedItem is IFileSupport)
+        {
+          // Уведомим подписчиков об удалении элемента.
+          (SelectedItem as IFileSupport).NotifyDeleting();
           (SelectedItem as IFileSupport).FileChanged -= BuilderModel_FileChanged;
+        }
 
         // Поиск родителя текущего элемента начиная с IWixMainEntity.RootElement.
         IWixElement parent = MainItem.GetParent(SelectedItem);
@@ -165,6 +169,11 @@ namespace InstallerStudio.Models
       // Для элементов не для чтения, если они поддерживают работу с файлом, добавим обработчик события.
       foreach (IFileSupport item in RootItem.Items.Descendants().Where(v => !v.IsReadOnly).OfType<IFileSupport>())
         item.FileChanged += BuilderModel_FileChanged;
+    }
+
+    public void Build()
+    {
+      MainItem.Build();
     }
 
     /// <summary>
@@ -257,27 +266,48 @@ namespace InstallerStudio.Models
   {
     public static void Synchronize(IFileStore store, FileSupportEventArgs e)
     {
-      // Если указано имя файла с полным путем, то значит этот файл не
-      // сохранен в хранилище. Если указано только имя файла, значит файл сохранен в хранилище.
-      // За один вызов может измениться либо имя файла, либо директория.
-      // Работаем только в том случае, если известно имя файла.
-
-      if (string.IsNullOrEmpty(e.ActualFileName))
+      // Если не известно имя файла, выходим.
+      if (string.IsNullOrEmpty(e.ActualFileName) && string.IsNullOrEmpty(e.OldFileName))
         return;
 
-      // Если файл в хранилище.
-      if (Path.GetFileName(e.ActualFileName) == e.ActualFileName)
-      {
+      // Формируем путь к файлу в хранилище с учетом устанавливаемой директории.
+      // Если имя файла не известно, оно не должно использоваться ниже.
+      string actualRelativePath = e.ActualFileName != null ? Path.Combine(e.ActualDirectory ?? "", e.ActualFileName) : null;
+      string oldRelativePath = e.OldFileName != null ? Path.Combine(e.OldDirectory ?? "", e.OldFileName) : null;
 
-      }
-      else
+      // За один вызов может измениться либо имя файла, либо директория.
+
+      // Новый файл.
+      // Если в "сырых данных" указано имя файла с полным путем и старое имя пустое, то значит это новый файл.
+      if (Path.IsPathRooted(e.RawFileName) && string.IsNullOrEmpty(e.OldFileName) && File.Exists(e.RawFileName))
       {
-        // Если первое добавление файла, добавляем в хранилище.
-        if (string.IsNullOrEmpty(e.OldFileName) && File.Exists(e.ActualFileName))
-        {
-          string relativePath = Path.Combine(e.ActualDirectory ?? "", Path.GetFileName(e.ActualFileName));
-          store.AddFile(e.ActualFileName, relativePath);
-        }
+        store.AddFile(e.RawFileName, actualRelativePath);
+      }
+      // Удаление файла.
+      // Если актуальное имя пустое, а старое есть в хранилище, удалим файл.
+      else if (string.IsNullOrEmpty(e.ActualFileName) && store.Files.Contains(oldRelativePath))
+      {
+        store.DeleteFile(oldRelativePath);
+      }
+      // Переименование файла.
+      else if (!string.IsNullOrEmpty(e.ActualFileName) && !string.IsNullOrEmpty(e.OldFileName) 
+        && e.ActualFileName != e.OldFileName && e.ActualFileName == e.RawFileName)
+      {
+        store.MoveFile(oldRelativePath, actualRelativePath);
+      }
+      // Перемещение файла в другой каталог.
+      else if (e.ActualFileName == e.OldFileName && e.ActualDirectory != e.OldDirectory && e.ActualFileName == e.RawFileName)
+      {
+        store.MoveFile(oldRelativePath, actualRelativePath);
+      }
+      // Замена на файл с тем же именем.
+      else if (Path.IsPathRooted(e.RawFileName) && !string.IsNullOrEmpty(e.OldFileName) && !string.IsNullOrEmpty(e.ActualFileName) 
+        && e.ActualDirectory == e.OldDirectory && File.Exists(e.RawFileName))
+      {
+        // Заменяем файл, имя остается тем же.
+        store.ReplaceFile(oldRelativePath, e.RawFileName);
+        // Меняем имя файла.
+        store.MoveFile(oldRelativePath, actualRelativePath);
       }
     }
   }

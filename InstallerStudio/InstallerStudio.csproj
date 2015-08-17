@@ -76,6 +76,8 @@
     <Compile Include="Models\BuilderModel.cs" />
     <Compile Include="Models\MsiModel.cs" />
     <Compile Include="Models\MspModel.cs" />
+    <Compile Include="Utils\SettingsManager.cs" />
+    <Compile Include="Utils\TempFileStoreBase.cs" />
     <Compile Include="Utils\ZipFileStore.cs" />
     <Compile Include="Views\Controls\WixInternalPropertyGridControl.cs" />
     <Compile Include="WixElements\AppVersion.cs" />
@@ -108,11 +110,14 @@
     <Compile Include="Views\Utils\DialogService.cs" />
     <Compile Include="Views\Utils\ImageResource.cs" />
     <Compile Include="WixElements\IWixElement.cs" />
-    <Compile Include="WixElements\IWixMainEntity.cs" />
+    <Compile Include="WixElements\WixMainEntity.cs" />
     <Compile Include="WixElements\StringResources.cs" />
+    <Compile Include="WixElements\WixBuilders\WixBuilderBase.cs" />
+    <Compile Include="WixElements\WixBuilders\WixMsiBuilder.cs" />
+    <Compile Include="WixElements\WixBuilders\WixMspBuilder.cs" />
     <Compile Include="WixElements\WixElementsExtension.cs" />
     <Compile Include="WixElements\WixElements.cs" />
-    <Compile Include="WixElements\XmlSaverLoader.cs" />
+    <Compile Include="Utils\XmlSaverLoader.cs" />
     <Compile Include="WixElements\WixPatch.cs" />
     <Compile Include="WixElements\WixProduct.cs" />
     <Page Include="Views\Controls\WixPropertyGridControl.xaml">
@@ -196,7 +201,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Views\Images\Components\DbComponentSmall.png" />
-    <Resource Include="Views\Images\Components\DbTemplateSmall.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Views\Images\BuildLarge.png" />
@@ -214,6 +218,28 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Views\Images\Components\StartMenuShortcutSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="WixElements\WixBuilders\MspTemplate\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="..\STInstaller\Components.wxs">
+      <Link>WixElements\WixBuilders\MsiTemplate\Components.wxs</Link>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="..\STInstaller\Directories.wxs">
+      <Link>WixElements\WixBuilders\MsiTemplate\Directories.wxs</Link>
+    </Resource>
+    <Resource Include="..\STInstaller\Features.wxs">
+      <Link>WixElements\WixBuilders\MsiTemplate\Features.wxs</Link>
+    </Resource>
+    <Resource Include="..\STInstaller\Product.wxs">
+      <Link>WixElements\WixBuilders\MsiTemplate\Product.wxs</Link>
+    </Resource>
+    <Resource Include="..\STInstaller\Variables.wxi">
+      <Link>WixElements\WixBuilders\MsiTemplate\Variables.wxi</Link>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

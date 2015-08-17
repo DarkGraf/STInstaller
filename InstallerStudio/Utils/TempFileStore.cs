@@ -6,7 +6,7 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace InstallerStudio.Utils
 {
-  class TempFileStore : IFileStore
+  class TempFileStore : TempFileStoreBase, IFileStore
   {
     private List<string> files;
     private IFileWorker FileWorker;
@@ -15,12 +15,10 @@ namespace InstallerStudio.Utils
     /// Создает экземпляр класса TempFileStore.
     /// </summary>
     /// <param name="silentWork">Признак работы без диалога.</param>
-    public TempFileStore(bool silentWork = true)
+    public TempFileStore(bool silentWork = true) : base()
     {
       FileWorker = silentWork ? (IFileWorker)new SilentFileWorker() : (IFileWorker)new InteractiveFileWorker();
 
-      StoreDirectory = Path.Combine(Path.GetTempPath(), "ST" + Path.GetRandomFileName());
-      Directory.CreateDirectory(StoreDirectory);
       files = new List<string>();
       State = FileStoreState.Changed;
     }
@@ -64,8 +62,6 @@ namespace InstallerStudio.Utils
     }
 
     #region IFilesStore
-
-    public string StoreDirectory { get; private set; }
 
     public IReadOnlyList<string> Files
     {
@@ -142,48 +138,6 @@ namespace InstallerStudio.Utils
     }
 
     public FileStoreState State { get; private set; }
-
-    #endregion
-
-    #region IDisposable
-    
-    public void Dispose()
-    {
-      Dispose(true);
-      GC.SuppressFinalize(this);
-    }
-
-    #endregion
-
-    #region Очистка объекта.
-
-    bool disposed = false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="disposing">Если true, то освободить управляемые ресурсы.</param>
-    private void Dispose(bool disposing)
-    {
-      if (!disposed)
-      {
-        if (disposing)
-        {
-          // Освободить управляемые ресурсы.
-        }
-
-        // Освободить неуправляемые ресурсы.
-        if (Directory.Exists(StoreDirectory))
-          Directory.Delete(StoreDirectory, true);
-      }
-      disposed = true;
-    }
-
-    ~TempFileStore()
-    {
-      Dispose(false);
-    }
-
 
     #endregion
   }

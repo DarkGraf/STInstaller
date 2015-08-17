@@ -7,7 +7,7 @@ using InstallerStudio.WixElements;
 namespace InstallerStudioTest.Models
 {
   [TestClass]
-  public class MsiMspModelTest
+  public class MsiModelTest
   {
     /// <summary>
     /// Проверка корневого элемента.
@@ -17,16 +17,6 @@ namespace InstallerStudioTest.Models
     {
       BuilderModel model = new MsiModel();
       Assert.IsInstanceOfType(model.RootItem, typeof(WixFeatureElement));
-    }
-
-    /// <summary>
-    /// Проверка корневого элемента.
-    /// </summary>
-    [TestMethod]
-    public void MspModelRootElement()
-    {
-      BuilderModel model = new MspModel();
-      Assert.IsInstanceOfType(model.RootItem, typeof(WixPatchFamilyElement));
     }
 
     /// <summary>
@@ -125,6 +115,9 @@ namespace InstallerStudioTest.Models
       Assert.AreEqual(componetThird, model.SelectedItem);
     }
 
+    /// <summary>
+    /// Тест удаления элемента.
+    /// </summary>
     [TestMethod]
     public void MsiModelDeleteItem()
     {
@@ -147,6 +140,31 @@ namespace InstallerStudioTest.Models
       model.RemoveSelectedItem();
       Assert.AreEqual(--count, model.RootItem.Items.Count);
       Assert.IsNull(model.SelectedItem);
+    }
+
+    /// <summary>
+    /// Тест проверки удаления установочных директорий.
+    /// </summary>
+    [TestMethod]
+    public void MsiModelCheckInstallDirectoryForDeleting()
+    {
+      MsiModel model = new MsiModel();
+
+      // Проверим на удаление предопределенный элемент.
+      Assert.IsFalse(model.CheckInstallDirectoryForDeleting(MsiModel.PredefinedInstallDirectories[0]));
+
+      // Добавим директорию и проверим на удаление ее.
+      model.InstallDirectories.Add("QQQ");
+      Assert.IsTrue(model.CheckInstallDirectoryForDeleting("QQQ"));
+
+      // Добавим в модель компонент.      
+      IWixElement component = model.AddItem(typeof(WixComponentElement));
+      // Добавим в компонент файл.
+      WixFileElement file = model.AddItem(typeof(WixFileElement)) as WixFileElement;
+
+      // У первого файла выставим директорию QQQ и попробуем удалить ее.
+      file.InstallDirectory = "QQQ";
+      Assert.IsFalse(model.CheckInstallDirectoryForDeleting("QQQ"));
     }
   }
 }

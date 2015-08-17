@@ -1,13 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 using InstallerStudio.WixElements;
 using InstallerStudio.ViewModels;
-using InstallerStudio.Views.Utils;
 
 namespace InstallerStudio.Models
 {
-  class MsiModel : BuilderModel
+  class MsiModel : BuilderModel, IMsiModelAdditional
   {
+    /// <summary>
+    /// Предопределенные установочные директории.
+    /// </summary>
+    internal static IList<string> PredefinedInstallDirectories = new List<string>
+    {
+      "[ProductFolder]",
+      "[SystemFolder]"
+    };
+
+    public MsiModel()
+    {
+      // Создаем установочные директории для сессии и добавляем 
+      // туда предопределенные установочные директории.
+      InstallDirectories = new ObservableCollection<string>(PredefinedInstallDirectories);
+    }
+
     #region BuilderModel
 
     protected override IWixMainEntity CreateMainEntity()
@@ -56,9 +74,30 @@ namespace InstallerStudio.Models
         new CommandMetadata("Файлы", typeof(WixStartMenuShortcutElement)),
 
         new CommandMetadata("База данных", typeof(WixDbComponentElement)),
-        new CommandMetadata("База данных", typeof(WixDbTemplateElement)),
         new CommandMetadata("База данных", typeof(WixSqlScriptElement))
       };
+    }
+
+    #endregion
+
+    #region IMsiModelAdditional
+
+    /// <summary>
+    /// Содержит установочные директории для выбора пользователем.
+    /// </summary>
+    public ObservableCollection<string> InstallDirectories { get; private set; }
+
+    public bool CheckInstallDirectoryForDeleting(string directory)
+    {
+      // Возвращаем истину, если удаление возможно.
+      // Если директория не является предопределенной и если ни один 
+      // элемент не использует данную директорию, то разрешаем удаление.
+
+      // Возможно в будущем нужно будет разрешать удалять в том случае, если
+      // директория есть у одного элемента и этот элемент редактируется
+      // в текущий момент, то можно воспользоваться свойством SelectedItem.
+      return !PredefinedInstallDirectories.Contains(directory)
+        && !RootItem.Items.Descendants().OfType<IFileSupport>().SelectMany(v => v.GetInstallDirectories()).Contains(directory);
     }
 
     #endregion
