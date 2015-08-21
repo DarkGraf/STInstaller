@@ -39,6 +39,9 @@
         <dxlc:LayoutItem Label="Имя компоновщика:">
           <TextBox Width="300" Text="{Binding Settings.LightFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
         </dxlc:LayoutItem>
+        <dxlc:LayoutItem Label="Имя UI-расширения:">
+          <TextBox Width="300" Text="{Binding Settings.UIExtensionFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+        </dxlc:LayoutItem>
       </dxlc:LayoutGroup>
     </dxlc:LayoutControl>
   

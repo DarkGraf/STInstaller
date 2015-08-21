@@ -11,7 +11,9 @@
   mc:Ignorable="d" 
   d:DesignHeight="500" d:DesignWidth="700"
   SelectedDocumentIndex="{Binding ComponentsCategoryIsVisible, Mode=TwoWay,
-    Converter={stviewsconverters:BooleanToSpecificIntConverter}, ConverterParameter=0}">
+    Converter={stviewsconverters:BooleanToSpecificIntConverter}, ConverterParameter=0}"
+  BuildMessages="{Binding BuildMessages, Mode=OneWay,
+    Converter={stviewsconverters:ListOfStringToStringConverter}}">
   <!-- В App.xaml привязка видимости дополнительной категории осуществляется 
   по свойству IsVisible связанного объекта (IRibbonCustomCategory). Здесь 
   связываемся со свойством модели, которая возвращает и устанавливает 
@@ -24,9 +26,10 @@
     <dxdo:DocumentPanel Caption="Содержание">
       <stviewscontrols:WixTreeListControl />
     </dxdo:DocumentPanel>
-    <dxdo:DocumentPanel Caption="Описание пакета установки">
+    <dxdo:DocumentPanel Caption="Свойства пакета установки">
       <dxlc:LayoutControl Orientation="Vertical">
-        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Основные свойства пакета">
+        
+        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Cвойства продукта">
           <dxlc:LayoutItem Label="Идентификатор продукта:">
             <TextBox IsReadOnly="True" Text="{Binding Path=MainItem.Id}" />
           </dxlc:LayoutItem>
@@ -40,9 +43,28 @@
             <TextBox Text="{Binding Path=MainItem.Manufacturer}" />
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Версия:">
-            <TextBox Text="{Binding Path=MainItem.Version}" />
+            <TextBox Text="{Binding Path=MainItem.Version, Converter={stviewsconverters:AppVersionToStringConverter}}" />
           </dxlc:LayoutItem>
         </dxlc:LayoutGroup>
+        
+        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Свойства msi-пакета">
+          <dxlc:LayoutItem Label="Описание:">
+            <TextBox Text="{Binding Path=MainItem.PackageDescription}" />
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Комментарий:">
+            <TextBox Text="{Binding Path=MainItem.PackageComments}" />
+          </dxlc:LayoutItem>
+        </dxlc:LayoutGroup>
+
+        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Установочные директории">
+          <dxlc:LayoutItem Label="Директория семейства продуктов:">
+            <TextBox Text="{Binding Path=MainItem.InstallLocationFamilyFolder}" />
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Директория продукта:" ToolTip="Будет добавлено окончание в виде основной версии.">
+            <TextBox Text="{Binding Path=MainItem.InstallLocationProductFolder}" />
+          </dxlc:LayoutItem>
+        </dxlc:LayoutGroup>
+
       </dxlc:LayoutControl>
     </dxdo:DocumentPanel>
   </stviewscontrols:ChildViewBase.Documents>

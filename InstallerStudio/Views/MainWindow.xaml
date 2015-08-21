@@ -2,6 +2,7 @@
   x:Class="InstallerStudio.Views.MainWindow"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
   xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
   xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
   xmlns:stviewmodels="clr-namespace:InstallerStudio.ViewModels"
@@ -62,8 +63,12 @@
 
       <dxr:RibbonStatusBarControl DockPanel.Dock="Bottom" />
 
-      <!-- IsAsync позволяет пересоздать новую View того же типа. -->
-      <ContentPresenter Content="{Binding BuilderViewModel, IsAsync=True}" />
+      <!-- Grid нужен чтобы WaitIndicator расположился поверх ContentPresenter. -->
+      <Grid>
+        <!-- IsAsync позволяет пересоздать новую View того же типа. -->
+        <ContentPresenter Content="{Binding BuilderViewModel, IsAsync=True}" />
+        <dx:WaitIndicator DeferedVisibility="{Binding IsBuilding}" Content="Построение..." />
+      </Grid>
     </DockPanel>
   </dxb:BarManager>
 </dxr:DXRibbonWindow>

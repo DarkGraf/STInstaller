@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
@@ -32,7 +33,57 @@ namespace InstallerStudio.Models
     }
   }
 
-  abstract class BuilderModel : NotifyObject, IDisposable
+  /// <summary>
+  /// Реализация контекста для построения.
+  /// Класс-обёртка.
+  /// </summary>
+  public class BuildContextWrapper : IBuildContext
+  {
+    IList<string> buildMessages;
+    ISettingsInfo applicationSettings;
+    string projectFileName;
+    Action buildIsFinished;
+
+    public BuildContextWrapper(IList<string> buildMessages, ISettingsInfo applicationSettings, string projectFileName,
+      Action buildIsFinished)
+    {
+      this.buildMessages = buildMessages;
+      this.applicationSettings = applicationSettings;
+      this.projectFileName = projectFileName;
+      this.buildIsFinished = buildIsFinished;
+    }
+
+    #region IBuildContext
+    
+    public void BuildMessageWriteLine(string message)
+    {
+      buildMessages.Add(message);
+    }
+
+    public void ClearBuildMessage()
+    {
+      buildMessages.Clear();
+    }
+
+    public ISettingsInfo ApplicationSettings
+    {
+      get { return applicationSettings; }
+    }
+
+    public string ProjectFileName
+    {
+      get { return projectFileName; }
+    }
+
+    public Action BuildIsFinished
+    {
+      get { return buildIsFinished; }
+    }
+
+    #endregion
+  }
+
+  abstract class BuilderModel : ChangeableObject, IDisposable
   {
     #region Константы.
     
@@ -46,6 +97,10 @@ namespace InstallerStudio.Models
     #region Частные поля.
 
     /// <summary>
+    /// Имя файла для сохранения/загрузки.
+    /// </summary>
+    private string loadedFileName;
+    /// <summary>
     /// Выделенный элемент или null, если подразумевается выделенный элемент RootItem.
     /// </summary>
     private IWixElement selectedItem;
@@ -53,6 +108,8 @@ namespace InstallerStudio.Models
     /// Хранилилще файлов.
     /// </summary>
     private IFileStore fileStore;
+
+    private bool isBuilding;
 
     /// <summary>
     /// Словарь количества экзепляров по типам для генерации уникального имени IWixElement.
@@ -68,6 +125,11 @@ namespace InstallerStudio.Models
       itemsCountDictionaryByType = new Dictionary<Type, int>();
       // Создаем хранилище файлов.
       fileStore = FileStoreCreator.Create();
+      // Создадим сообщения о построении и привяжем
+      // делегат уведомления об изменении свойства BuildMessages.
+      BuildMessages = new ObservableCollection<string>();
+      ((ObservableCollection<string>)BuildMessages).CollectionChanged += delegate { NotifyPropertyChanged("BuildMessages"); };
+      IsBuilding = false;
     }
 
     /// <summary>
@@ -161,6 +223,8 @@ namespace InstallerStudio.Models
       if (fileStore != null)
         fileStore.Dispose();
 
+      loadedFileName = fileName;
+
       fileStore = FileStoreCreator.Create(fileName);
 
       string descriptionFileName = Path.Combine(fileStore.StoreDirectory, DescriptionFileName);
@@ -171,9 +235,13 @@ namespace InstallerStudio.Models
         item.FileChanged += BuilderModel_FileChanged;
     }
 
-    public void Build()
+    public void Build(ISettingsInfo settingsInfo)
     {
-      MainItem.Build();
+      IsBuilding = true;
+      // Внимание!!! Делегат вызовется не из UI потока.
+      BuildContextWrapper context = new BuildContextWrapper(BuildMessages, settingsInfo, loadedFileName,
+        delegate { IsBuilding = false; });
+      MainItem.Build(context);
     }
 
     /// <summary>
@@ -222,6 +290,14 @@ namespace InstallerStudio.Models
       }
     }
 
+    public IList<string> BuildMessages { get; private set; }
+
+    public bool IsBuilding 
+    {
+      get { return isBuilding; }
+      private set { SetValue(ref isBuilding, value); } 
+    }
+
     /// <summary>
     /// Обработка события изменения информации о добавлении файла.
     /// Здесь происходит работа с файлами в файловом хранилище.
@@ -259,56 +335,6 @@ namespace InstallerStudio.Models
     public static IFileStore Create(string fileName)
     {
       return new ZipFileStore(fileName, silent);
-    }
-  }
-
-  static class FileStoreSynchronizer
-  {
-    public static void Synchronize(IFileStore store, FileSupportEventArgs e)
-    {
-      // Если не известно имя файла, выходим.
-      if (string.IsNullOrEmpty(e.ActualFileName) && string.IsNullOrEmpty(e.OldFileName))
-        return;
-
-      // Формируем путь к файлу в хранилище с учетом устанавливаемой директории.
-      // Если имя файла не известно, оно не должно использоваться ниже.
-      string actualRelativePath = e.ActualFileName != null ? Path.Combine(e.ActualDirectory ?? "", e.ActualFileName) : null;
-      string oldRelativePath = e.OldFileName != null ? Path.Combine(e.OldDirectory ?? "", e.OldFileName) : null;
-
-      // За один вызов может измениться либо имя файла, либо директория.
-
-      // Новый файл.
-      // Если в "сырых данных" указано имя файла с полным путем и старое имя пустое, то значит это новый файл.
-      if (Path.IsPathRooted(e.RawFileName) && string.IsNullOrEmpty(e.OldFileName) && File.Exists(e.RawFileName))
-      {
-        store.AddFile(e.RawFileName, actualRelativePath);
-      }
-      // Удаление файла.
-      // Если актуальное имя пустое, а старое есть в хранилище, удалим файл.
-      else if (string.IsNullOrEmpty(e.ActualFileName) && store.Files.Contains(oldRelativePath))
-      {
-        store.DeleteFile(oldRelativePath);
-      }
-      // Переименование файла.
-      else if (!string.IsNullOrEmpty(e.ActualFileName) && !string.IsNullOrEmpty(e.OldFileName) 
-        && e.ActualFileName != e.OldFileName && e.ActualFileName == e.RawFileName)
-      {
-        store.MoveFile(oldRelativePath, actualRelativePath);
-      }
-      // Перемещение файла в другой каталог.
-      else if (e.ActualFileName == e.OldFileName && e.ActualDirectory != e.OldDirectory && e.ActualFileName == e.RawFileName)
-      {
-        store.MoveFile(oldRelativePath, actualRelativePath);
-      }
-      // Замена на файл с тем же именем.
-      else if (Path.IsPathRooted(e.RawFileName) && !string.IsNullOrEmpty(e.OldFileName) && !string.IsNullOrEmpty(e.ActualFileName) 
-        && e.ActualDirectory == e.OldDirectory && File.Exists(e.RawFileName))
-      {
-        // Заменяем файл, имя остается тем же.
-        store.ReplaceFile(oldRelativePath, e.RawFileName);
-        // Меняем имя файла.
-        store.MoveFile(oldRelativePath, actualRelativePath);
-      }
     }
   }
 }

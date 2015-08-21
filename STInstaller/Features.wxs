@@ -33,6 +33,7 @@
         <ComponentRef Id="ReinstallComponent" />
       </Feature>
 
+      <!--DEVELOPMENT_INFO_BEGIN-->
       <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ НАЧАЛО *** -->
       <?ifdef SERVER?>
       <?include FeaturesServer.wxi ?>
@@ -41,6 +42,7 @@
       <?include FeaturesClient.wxi ?>
       <?endif?>
       <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ КОНЕЦ *** -->
+      <!--DEVELOPMENT_INFO_END-->
     </Feature>
 	</Fragment>
 </Wix>

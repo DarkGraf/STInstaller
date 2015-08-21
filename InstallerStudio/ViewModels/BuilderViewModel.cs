@@ -6,6 +6,7 @@ using System.Windows.Input;
 using InstallerStudio.Models;
 using InstallerStudio.ViewModels.Utils;
 using InstallerStudio.WixElements;
+using InstallerStudio.Utils;
 
 namespace InstallerStudio.ViewModels
 {
@@ -19,12 +20,15 @@ namespace InstallerStudio.ViewModels
     IWixMainEntity MainItem { get; }
     IList<IWixElement> Items { get; }
     IWixElement SelectedItem { get; set; }
+    bool IsBuilding { get; }
 
     /// <summary>
     /// Удаление выделенного элемента.
     /// Используется в TreeListControl в контекстном меню.
     /// </summary>
     ICommand RemoveSelectedItemCommand { get; }
+
+    IList<string> BuildMessages { get; }
   }
 
   struct FileDescription
@@ -159,7 +163,17 @@ namespace InstallerStudio.ViewModels
       set { Model.SelectedItem = value; }
     }
 
+    public bool IsBuilding
+    {
+      get { return Model.IsBuilding; }
+    }
+
     public ICommand RemoveSelectedItemCommand { get; private set; }
+
+    public IList<string> BuildMessages 
+    {
+      get { return Model.BuildMessages; }
+    }
 
     #endregion
 
@@ -173,9 +187,9 @@ namespace InstallerStudio.ViewModels
       Model.Load(fileName);
     }
 
-    public void Build()
+    public void Build(ISettingsInfo settingsInfo)
     {
-      Model.Build();
+      Model.Build(settingsInfo);
     }
   }
 

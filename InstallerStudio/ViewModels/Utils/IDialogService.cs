@@ -45,6 +45,7 @@ namespace InstallerStudio.ViewModels.Utils
     string WixToolsetPath { get; set; }
     string CandleFileName { get; set; }
     string LightFileName { get; set; }
+    string UIExtensionFileName { get; set; }
 
     bool? Show();
   }

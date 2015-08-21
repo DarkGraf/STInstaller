@@ -10,6 +10,7 @@ namespace InstallerStudio.WixElements
   [KnownType(typeof(WixFeatureElement))]
   [KnownType(typeof(WixComponentElement))]
   [KnownType(typeof(WixFileElement))]
+  [KnownType(typeof(WixDbComponentElement))]
   class WixProduct : WixMainEntity
   {
     #region Основные свойства.
@@ -29,6 +30,27 @@ namespace InstallerStudio.WixElements
     [DataMember]
     public AppVersion Version { get; set; }
 
+    [DataMember]
+    public string PackageDescription { get; set; }
+
+    [DataMember]
+    public string PackageComments { get; set; }
+
+    [DataMember]
+    public string InstallLocationFamilyFolder { get; set; }
+
+    [DataMember]
+    public string InstallLocationProductFolder { get; set; }
+
+    [DataMember]
+    public Guid ProgramMenuFamilyDirComponentGuid { get; set; }
+
+    [DataMember]
+    public Guid ProgramMenuProductDirComponentGuid { get; set; }
+
+    [DataMember]
+    public Guid ProgramMenuReinstallComponentGuid { get; set; }
+
     #endregion
 
     public WixProduct()
@@ -38,6 +60,18 @@ namespace InstallerStudio.WixElements
       Name = string.Empty;
       Manufacturer = string.Empty;
       Version = new AppVersion();
+      PackageDescription = string.Empty;
+      PackageComments = string.Empty;
+      InstallLocationFamilyFolder = string.Empty;
+      InstallLocationProductFolder = string.Empty;
+
+      // Уникальные идентификаторы для компонент деинсталляции директорий
+      // семейства продукта, самого продукта и ярлыка переустановки из меню пуск.
+      // Должны быть одинаковые в пределах продукта основной версии.
+      // В GUI не показываем, для пользователя не нужны.
+      ProgramMenuFamilyDirComponentGuid = Guid.NewGuid();
+      ProgramMenuProductDirComponentGuid = Guid.NewGuid();
+      ProgramMenuReinstallComponentGuid = Guid.NewGuid();
 
       RootElement = new WixFeatureElement();
     }

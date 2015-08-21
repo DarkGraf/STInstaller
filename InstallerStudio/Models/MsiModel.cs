@@ -32,11 +32,15 @@ namespace InstallerStudio.Models
     {
       WixProduct product = new WixProduct();
 
+      // Создаем предопределенные элементы. Это общие элементы для 
+      // всех инсталляторов (для серверной и клиентской частей).
+      // Несут информационную нагрузку, в формированиии результирующего
+      // файла *.wxs в данный момент не участвуют.
+
+      // Корневой элемент с типом WixFeatureElement создаст сам WixProduct.
       // Заполняем свойствами корневую Feature.
       product.RootElement.Id = "RootFeature";
 
-      // Создаем предопределенные элементы. Это общие элементы для 
-      // всех инсталляторов (для серверной и клиентской частей).
       WixFeatureElement commonFeature = new WixFeatureElement();
       commonFeature.Id = "CommonFeature";
       commonFeature.Predefinition();

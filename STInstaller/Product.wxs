@@ -40,6 +40,7 @@
     <!-- Логическая взаимосвязь файлов: Product->Feature->Component->Directory. -->
     <FeatureRef Id="RootFeature" />
 
+    <!--DEVELOPMENT_INFO_BEGIN-->
     <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ НАЧАЛО *** -->
     <?ifdef SERVER?>
     <?include ProductServer.wxi ?>
@@ -48,6 +49,7 @@
     <?include ProductClient.wxi ?>
     <?endif?>
     <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ КОНЕЦ *** -->
+    <!--DEVELOPMENT_INFO_END-->
 
     <!-- Персонализация интерфейса. -->
     <WixVariable Id="WixUIDialogBmp" Value="Resources\Dialog.bmp"/>

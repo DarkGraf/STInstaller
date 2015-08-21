@@ -19,6 +19,7 @@ namespace InstallerStudio.ViewModels
     string ApplicationTitle { get; }
 
     BuilderViewModel BuilderViewModel { get; }
+    bool IsBuilding { get; }
 
     ICommand CreateMsiCommand { get; }
     ICommand CreateMspCommand { get; }
@@ -30,6 +31,12 @@ namespace InstallerStudio.ViewModels
     ICommand CheckCommand { get; }
     ICommand BuildCommand { get; }
     IRibbonManager RibbonManager { get; }
+  }
+
+  enum CreatedBuilderType
+  {
+    Msi,
+    Msp
   }
 
   class MainViewModel : BaseViewModel, IMainViewModel, IDialogServiceSetter
@@ -60,8 +67,8 @@ namespace InstallerStudio.ViewModels
 
       Predicate<object> canExecute = (obj) => { return BuilderViewModel != null; };
 
-      CreateMsiCommand = new RelayCommand(param => CreateMsi());
-      CreateMspCommand = new RelayCommand(param => CreateMsp());
+      CreateMsiCommand = new RelayCommand(param => CreateBuilder(CreatedBuilderType.Msi));
+      CreateMspCommand = new RelayCommand(param => CreateBuilder(CreatedBuilderType.Msp));
       OpenCommand = new RelayCommand(param => Open());
       SaveCommand = new RelayCommand(param => Save(true), canExecute);
       SaveAsCommand = new RelayCommand(param => Save(false));
@@ -81,6 +88,11 @@ namespace InstallerStudio.ViewModels
     {
       get { return builderViewModel; }
       private set { SetValue(ref builderViewModel, value); }
+    }
+
+    public bool IsBuilding
+    {
+      get { return builderViewModel == null ? false : builderViewModel.IsBuilding; }
     }
 
     public ICommand CreateMsiCommand { get; private set; }
@@ -141,16 +153,31 @@ namespace InstallerStudio.ViewModels
 
     #region Методы для команд.
 
-    private void CreateMsi()
+    private void CreateBuilder(CreatedBuilderType type)
     {
       DisposeBuilderViewModel();
-      BuilderViewModel = new MsiViewModelFactory().Create(RibbonManager);
-    }
+      switch (type)
+      { 
+        case CreatedBuilderType.Msi:
+          BuilderViewModel = new MsiViewModelFactory().Create(RibbonManager);
+          break;
+        case CreatedBuilderType.Msp:
+          BuilderViewModel = new MsiViewModelFactory().Create(RibbonManager);
+          break;
+        default:
+          BuilderViewModel = null;
+          break;
+      }
 
-    private void CreateMsp()
-    {
-      DisposeBuilderViewModel();
-      BuilderViewModel = new MspViewModelFactory().Create(RibbonManager);
+      if (BuilderViewModel != null)
+      {
+        // Подписываемся на уведомление о построении.
+        BuilderViewModel.PropertyChanged += (s, e) =>
+        {
+          if (e.PropertyName == "IsBuilding")
+            NotifyPropertyChanged("IsBuilding");
+        };
+      }
     }
 
     private void Open()
@@ -166,11 +193,11 @@ namespace InstallerStudio.ViewModels
         switch (Path.GetExtension(dialog.FileName))
         {
           case ".msizip":
-            CreateMsi();
+            CreateBuilder(CreatedBuilderType.Msi);
             BuilderViewModel.Load(dialog.FileName);
             break;
           case ".mspzip":
-            CreateMsp();
+            CreateBuilder(CreatedBuilderType.Msp);
             BuilderViewModel.Load(dialog.FileName);
             break;
         }
@@ -201,11 +228,13 @@ namespace InstallerStudio.ViewModels
       dialog.WixToolsetPath = settingsInfo.WixToolsetPath;
       dialog.CandleFileName = settingsInfo.CandleFileName;
       dialog.LightFileName = settingsInfo.LightFileName;
+      dialog.UIExtensionFileName = settingsInfo.UIExtensionFileName;
       if (dialog.Show().GetValueOrDefault())
       {
         settingsInfo.WixToolsetPath = dialog.WixToolsetPath;
         settingsInfo.CandleFileName = dialog.CandleFileName;
         settingsInfo.LightFileName = dialog.LightFileName;
+        settingsInfo.UIExtensionFileName = dialog.UIExtensionFileName;
         new SettingsManager().Save(settingsInfo);
       }
     }
@@ -217,7 +246,7 @@ namespace InstallerStudio.ViewModels
 
     private void Build()
     {
-      builderViewModel.Build();
+      builderViewModel.Build(settingsInfo);
     }
 
     #endregion

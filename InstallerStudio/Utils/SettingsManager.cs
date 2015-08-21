@@ -9,6 +9,7 @@ namespace InstallerStudio.Utils
     string WixToolsetPath { get; set; }
     string CandleFileName { get; set; }
     string LightFileName { get; set; }
+    string UIExtensionFileName { get; set; }
   }
 
   class SettingsManager
@@ -22,6 +23,8 @@ namespace InstallerStudio.Utils
       public string CandleFileName { get; set; }
       [DataMember]
       public string LightFileName { get; set; }
+      [DataMember]
+      public string UIExtensionFileName { get; set; }
 
       public static SettingsInfo CreateDefault()
       {
@@ -29,6 +32,7 @@ namespace InstallerStudio.Utils
         info.WixToolsetPath = "C:\\Program Files\\WiX Toolset\\bin";
         info.CandleFileName = "candle.exe";
         info.LightFileName = "light.exe";
+        info.UIExtensionFileName = "wixUIExtension.dll";
         return info;
       }
 
@@ -38,7 +42,8 @@ namespace InstallerStudio.Utils
         {
           WixToolsetPath = info.WixToolsetPath,
           CandleFileName = info.CandleFileName,
-          LightFileName = info.LightFileName
+          LightFileName = info.LightFileName,
+          UIExtensionFileName = info.UIExtensionFileName
         };
       }
     }

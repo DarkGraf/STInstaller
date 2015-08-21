@@ -17,11 +17,13 @@ namespace InstallerStudio.Views.Controls
    *      |      +---LayoutPanel (есть свойство PropertyPanel)
    *      +---AutoHideGroups
    *             +---LayoutPanel
+   *                    +---TextBox
    */
   public class ChildViewBase : DockLayoutManager
   {
     DocumentGroup documentGroup;
     LayoutPanel propLayoutPanel;
+    TextBox txtMessages;
 
     #region Зависимое свойство Documents.
 
@@ -96,6 +98,29 @@ namespace InstallerStudio.Views.Controls
 
     #endregion
 
+    #region Зависимое свойство BuildMessages.
+
+    public static readonly DependencyProperty BuildMessagesProperty =
+      DependencyProperty.Register("BuildMessages",
+      typeof(string),
+      typeof(ChildViewBase),
+      new FrameworkPropertyMetadata(BuildMessagesPropertyChangedCallback));
+
+    public string BuildMessages
+    {
+      get { return (string)GetValue(BuildMessagesProperty); }
+      set { SetValue(BuildMessagesProperty, value); }
+    }
+
+    private static void BuildMessagesPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      ChildViewBase obj = d as ChildViewBase;
+      if (obj != null)
+        obj.txtMessages.Text = (e.NewValue ?? "").ToString();
+    }
+
+    #endregion
+
     public ChildViewBase()
     {
       SetValue(DocumentsPropertyKey, new FreezableCollection<BaseLayoutItem>());
@@ -132,6 +157,20 @@ namespace InstallerStudio.Views.Controls
       outLayoutPanel.AllowDrag = false;
       outLayoutPanel.AllowClose = false;
       autoHideGroup.Add(outLayoutPanel);
+
+      // Элемент для вывода информации о построении.
+      txtMessages = new TextBox();
+      txtMessages.TextWrapping = TextWrapping.Wrap;
+      txtMessages.AcceptsReturn = true;
+      txtMessages.IsReadOnly = true;
+      txtMessages.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+      // При изменении содержимого активируем панель и будем прокручивать текст вниз.
+      txtMessages.TextChanged += (s, e) => 
+      {
+        Activate(outLayoutPanel);
+        (s as TextBox).ScrollToEnd();
+      };
+      outLayoutPanel.Content = txtMessages;
     }
   }
 }

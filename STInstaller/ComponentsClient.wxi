@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Include>
-	<!-- TODO: Put your code here. -->
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <DirectoryRef Id="ProductFolder">
+    <Component Id="STExeComponent" Guid="0A4CB1AE-9C4B-4C0E-8C38-841C04ADC888">
+      <File Id="STExeFile" Name="ST.exe" Source="$(var.PathToFiles)" KeyPath="yes" />
+    </Component>
+  </DirectoryRef>
 </Include>

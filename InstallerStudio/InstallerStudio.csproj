@@ -76,10 +76,15 @@
     <Compile Include="Models\BuilderModel.cs" />
     <Compile Include="Models\MsiModel.cs" />
     <Compile Include="Models\MspModel.cs" />
+    <Compile Include="Utils\FileStoreSynchronizer.cs" />
+    <Compile Include="Utils\ProcessRunner.cs" />
     <Compile Include="Utils\SettingsManager.cs" />
+    <Compile Include="Utils\StringExtension.cs" />
     <Compile Include="Utils\TempFileStoreBase.cs" />
     <Compile Include="Utils\ZipFileStore.cs" />
     <Compile Include="Views\Controls\WixInternalPropertyGridControl.cs" />
+    <Compile Include="Views\Converters\AppVersionToStringConverter.cs" />
+    <Compile Include="Views\Converters\ListOfStringToStringConverter.cs" />
     <Compile Include="WixElements\AppVersion.cs" />
     <Compile Include="Utils\IFileStore.cs" />
     <Compile Include="Utils\TempFileStore.cs" />
@@ -120,6 +125,7 @@
     <Compile Include="Utils\XmlSaverLoader.cs" />
     <Compile Include="WixElements\WixPatch.cs" />
     <Compile Include="WixElements\WixProduct.cs" />
+    <Compile Include="WixElements\XmlLinqExtension.cs" />
     <Page Include="Views\Controls\WixPropertyGridControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -175,6 +181,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="..\STInstaller\Resources\License.rtf">
+      <Link>WixElements\WixBuilders\MsiTemplate\Resources\License.rtf</Link>
+    </Resource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -241,7 +250,22 @@
       <Link>WixElements\WixBuilders\MsiTemplate\Variables.wxi</Link>
     </Resource>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="..\STInstaller\Resources\Banner.bmp">
+      <Link>WixElements\WixBuilders\MsiTemplate\Resources\Banner.bmp</Link>
+    </Resource>
+    <Resource Include="..\STInstaller\Resources\Dialog.bmp">
+      <Link>WixElements\WixBuilders\MsiTemplate\Resources\Dialog.bmp</Link>
+    </Resource>
+    <Resource Include="..\STInstaller\Resources\Help.ico">
+      <Link>WixElements\WixBuilders\MsiTemplate\Resources\Help.ico</Link>
+    </Resource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>@echo *** КОПИРОВАНИЕ СБОРКИ WixUIExtension.dll ***
+copy ..\..\..\WiXExtensions\WixSTExtension\bin\Debug\WixSTExtension.dll WixSTExtension.dll</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

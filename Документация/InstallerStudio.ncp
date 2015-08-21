@@ -174,9 +174,29 @@
         <Size width="162" height="118" />
         <Collapsed>False</Collapsed>
       </Entity>
+      <Entity type="Interface">
+        <Name>IProcessRunner</Name>
+        <Access>Public</Access>
+        <Location left="1469" top="1066" />
+        <Size width="227" height="112" />
+        <Collapsed>False</Collapsed>
+        <Member type="Method">void Start()</Member>
+        <Member type="Property">bool HasError { get; }</Member>
+        <Member type="Event">event EventHandler&lt;ProcessRunnerEventArgs&gt; OutputMessageReceived</Member>
+      </Entity>
+      <Entity type="Class">
+        <Name>ProcessRunner</Name>
+        <Access>Public</Access>
+        <Location left="1214" top="1066" />
+        <Size width="162" height="116" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
     </Entities>
     <Relationships>
       <Relationship type="Dependency" first="2" second="1">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -201,14 +221,20 @@
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="5" second="3">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="6" second="4">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="1" second="0">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
@@ -233,6 +259,8 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Dependency" first="1" second="10">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="True">
@@ -241,10 +269,14 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Dependency" first="10" second="0">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="13" second="2">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
@@ -269,12 +301,16 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Association" first="15" second="11">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
         <AssociationType>Composition</AssociationType>
       </Relationship>
       <Relationship type="Association" first="16" second="12">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
@@ -301,6 +337,16 @@
         </BendPoint>
       </Relationship>
       <Relationship type="Realization" first="3" second="18">
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
+      </Relationship>
+      <Relationship type="Dependency" first="14" second="19">
+        <Label>
+        </Label>
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+      <Relationship type="Realization" first="20" second="19">
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>

@@ -134,6 +134,8 @@ namespace InstallerStudio.Views.Utils
 
     public string LightFileName { get; set; }
 
+    public string UIExtensionFileName { get; set; }
+
     public override bool? Show()
     {
       SettingsWindow window = new SettingsWindow();
@@ -141,10 +143,14 @@ namespace InstallerStudio.Views.Utils
       window.Settings.WixToolsetPath = WixToolsetPath;
       window.Settings.CandleFileName = CandleFileName;
       window.Settings.LightFileName = LightFileName;
+      window.Settings.UIExtensionFileName = UIExtensionFileName;
       bool? result = window.ShowDialog();
       if (result.GetValueOrDefault())
       {
         WixToolsetPath = window.Settings.WixToolsetPath;
+        CandleFileName = window.Settings.CandleFileName;
+        LightFileName = window.Settings.LightFileName;
+        UIExtensionFileName = window.Settings.UIExtensionFileName;
       }
       return result;
     }

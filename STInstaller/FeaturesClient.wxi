@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Include>
-	<!-- TODO: Put your code here. -->
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Feature
+    Id="MainFilesFeature"
+    Title="Основные компоненты"
+    Description="Основные компоненты"
+    Level="1"
+    ConfigurableDirectory="INSTALLLOCATION"
+    AllowAdvertise="no"
+    Absent="disallow"
+    InstallDefault="local">
+
+    <ComponentRef Id="STExeComponent"/>
+  </Feature>
 </Include>

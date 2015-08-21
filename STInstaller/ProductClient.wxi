@@ -3,4 +3,8 @@
          xmlns:st="http://www.systemt.ru/STSchema">
   <!-- Указываем режим работы интерфейса. -->
   <st:UIType Id="MainUI" Type="Client" />
+
+  <!-- Demo-плагин. -->
+  <Binary Id="PluginDemoFile" SourceFile="$(var.PathToFiles)Plugins\ProgressMessageDemo.dll" />
+  <st:MefPlugin Id="PluginDemoId" BinaryKey="PluginDemoFile" />
 </Include>

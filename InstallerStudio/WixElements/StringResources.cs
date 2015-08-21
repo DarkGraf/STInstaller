@@ -12,5 +12,6 @@ namespace InstallerStudio.WixElements
 
     public const string CategoryMain = "Основное";
     public const string CategoryAuxiliary = "Служебное";
+    public const string CategoryFiles = "Файлы и директории";
   }
 }

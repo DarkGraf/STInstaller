@@ -19,4 +19,5 @@
   <?define ProgramMenuFamilyDirComponentGuid = "9D874909-465A-4EA2-92BA-038F1E8AB9E3"?>
   <?define ProgramMenuProductDirName = $(var.InstallLocationProductFolder)?>
   <?define ProgramMenuProductDirComponentGuid = "23FD2FF5-AEEB-4F41-9A93-14B311A3A76B"?>
+  <?define ProgramMenuReinstallComponentGuid = "EB63A0E9-153D-461A-B455-BC02F61BA396"?>
 </Include>

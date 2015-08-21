@@ -27,15 +27,16 @@
       </Component>
     </DirectoryRef>
 
-    <!-- Ярлык для удаления программы в Пуске. -->
+    <!-- Ярлык для переустановки программы в Пуске. -->
     <DirectoryRef Id="ProgramMenuProductDir">
-      <Component Id="ReinstallComponent" Guid="0BC7D37C-B72B-4E12-B98F-B0A83D4B9A67">
+      <Component Id="ReinstallComponent" Guid="$(var.ProgramMenuReinstallComponentGuid)">
         <Shortcut Id="ReinstallShortcut" Name="Изменение компонентов программы" Description="Позволяет изменить, восстановить и удалить компоненты программы."
           Target="[System64Folder]msiexec.exe" Arguments="/i [ProductCode]" />
         <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="ShortcutReinstall" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </DirectoryRef>
 
+    <!--DEVELOPMENT_INFO_BEGIN-->
     <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ НАЧАЛО *** -->
     <?ifdef SERVER?>
     <?include ComponentsServer.wxi ?>
@@ -44,5 +45,6 @@
     <?include ComponentsClient.wxi ?>
     <?endif?>
     <!-- *** РЕЖИМНЫЕ НАСТРОЙКИ КОНЕЦ *** -->
+    <!--DEVELOPMENT_INFO_END-->
   </Fragment>
 </Wix>
