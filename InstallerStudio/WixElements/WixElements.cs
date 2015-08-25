@@ -204,6 +204,16 @@ namespace InstallerStudio.WixElements
       set { SetValue(ref id, value); }
     }
 
+    /// <summary>
+    /// Краткая сводка про компонент.
+    /// </summary>
+    [Browsable(false)]
+    public virtual string Summary
+    {
+      // Не будем переопределять метод ToString(), пусть останется для разработки.
+      get { return "";  }
+    }
+
     [Browsable(false)]
     public abstract ElementsImagesTypes ImageType { get; }
 
@@ -284,12 +294,20 @@ namespace InstallerStudio.WixElements
   class WixFeatureElement : WixElementBase
   {
     [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixFeatureElementTitleDescription)]
     [DataMember]
     public string Title { get; set; }
 
     [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixFeatureElementDescriptionDescription)]
     [DataMember]
     public string Description { get; set; }
+
+    [Category(StringResources.CategoryMiscellaneous)]
+    [Description(StringResources.WixFeatureElementDisplayDescription)]
+    [Editor(WixPropertyEditorsNames.FeatureDisplayComboBoxPropertyEditor, WixPropertyEditorsNames.FeatureDisplayComboBoxPropertyEditor)]
+    [DataMember]
+    public string Display { get; set; }
 
     private Type[] allowedTypesOfChildren;
 
@@ -378,6 +396,16 @@ namespace InstallerStudio.WixElements
       };
     }
 
+    public override bool AvailableForRun(Type type, IWixElement rootItem)
+    {
+      // Особое бизнес правило: элемент File должен быть один для одного компонента.
+      // Это необходимо чтобы формировать обновления для каждого файла (см. ТЗ).
+      if (type == typeof(WixFileElement) && Items.Descendants().FirstOrDefault(v => v.GetType() == type) != null)
+        return false;
+
+      return base.AvailableForRun(type, rootItem);
+    }
+
     protected override IEnumerable<Type> AllowedTypesOfChildren
     {
       get { return allowedTypesOfChildren; }
@@ -397,14 +425,12 @@ namespace InstallerStudio.WixElements
   }
 
   [DataContract(Namespace = StringResources.Namespace)]
-  class WixDbComponentElement : WixElementBase, IFileSupport
+  class WixDbComponentElement : WixComponentElement, IFileSupport
   {
-#warning Нужно наследовать от WixComponentElement.
     private Type[] allowedTypesOfChildren;
     private string mdfFile;
-    private string mdfDirectory;
     private string ldfFile;
-    private string ldfDirectory;
+    private string directory;
 
     private void OnFileChanged(FileSupportEventArgs e)
     {
@@ -414,44 +440,29 @@ namespace InstallerStudio.WixElements
 
     [DataMember]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    [EditorInfo("*.mdf|*.mdf|*.*|*.*")]
     [Category(StringResources.CategoryFiles)]
     public string MdfFile 
     {
       get { return mdfFile; }
       set 
       {
-        FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref mdfFile, mdfDirectory);
+        FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref mdfFile, directory);
         NotifyPropertyChanged();
         OnFileChanged(e);
       }
     }
 
     [DataMember]
-    [Editor(WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor, WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor)]
-    [Category(StringResources.CategoryFiles)]
-    public string MdfDirectory
-    {
-      get { return mdfDirectory; }
-      set
-      {
-        if (mdfDirectory != value)
-        {
-          FileSupportEventArgs e = FileSupportHelper.DirectoryChanged(value, ref mdfDirectory, mdfFile);
-          NotifyPropertyChanged();
-          OnFileChanged(e);
-        }
-      }
-    }
-
-    [DataMember]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    [EditorInfo("*.ldf|*.ldf|*.*|*.*")]
     [Category(StringResources.CategoryFiles)]
     public string LdfFile 
     {
       get { return ldfFile; }
       set 
       {
-        FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref ldfFile, ldfDirectory);
+        FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref ldfFile, directory);
         NotifyPropertyChanged();
         OnFileChanged(e);
       }
@@ -460,15 +471,21 @@ namespace InstallerStudio.WixElements
     [DataMember]
     [Editor(WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor, WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor)]
     [Category(StringResources.CategoryFiles)]
-    public string LdfDirectory
+    public string Directory
     {
-      get { return ldfDirectory; }
+      get { return directory; }
       set
       {
-        if (ldfDirectory != value)
+        if (directory != value)
         {
-          FileSupportEventArgs e = FileSupportHelper.DirectoryChanged(value, ref ldfDirectory, ldfFile);
+          // Тут два файла и одна директория, значит надо уведомить об изменении два раза.
+          // Сохраним старое значение директории (где сейчас находятся файлы).
+          string oldDirectory = directory;
+          FileSupportEventArgs e = FileSupportHelper.DirectoryChanged(value, ref directory, mdfFile);
           NotifyPropertyChanged();
+          OnFileChanged(e);
+          // Также надо переместить ldf-файл, передаем в oldDirectory где он сейчас находится.
+          e = FileSupportHelper.DirectoryChanged(value, ref oldDirectory, ldfFile);
           OnFileChanged(e);
         }
       }
@@ -516,8 +533,7 @@ namespace InstallerStudio.WixElements
     {
       return new string[] 
       { 
-        MdfDirectory ?? "",
-        LdfDirectory ?? ""
+        Directory ?? ""
       };
     }
 
@@ -556,6 +572,7 @@ namespace InstallerStudio.WixElements
 
     [DataMember]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    [EditorInfo("*.*|*.*|*.exe|*.exe|*.dll|*.dll")]
     [Category(StringResources.CategoryFiles)]
     public string FileName
     {
@@ -595,8 +612,7 @@ namespace InstallerStudio.WixElements
       base.Initialize();
       allowedTypesOfChildren = new Type[] 
       { 
-        typeof(WixDesktopShortcutElement), 
-        typeof(WixStartMenuShortcutElement)
+        typeof(WixShortcutElement)
       };
     }
 
@@ -613,6 +629,11 @@ namespace InstallerStudio.WixElements
     public override string ShortTypeName
     {
       get { return "File"; }
+    }
+
+    public override string Summary
+    {
+      get { return FileName; }
     }
 
     #endregion
@@ -635,35 +656,117 @@ namespace InstallerStudio.WixElements
     #endregion
   }
 
-  class WixDesktopShortcutElement : WixElementBase
+  [DataContract(Namespace = StringResources.Namespace)]
+  class WixShortcutElement : WixElementBase, IFileSupport
   {
+    private string icon;
+
+    [DataMember]
+    [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixShortcutElementNameDescription)]
+    public string Name { get; set; }
+
+    [DataMember]
+    [Category(StringResources.CategoryMiscellaneous)]
+    [Description(StringResources.WixShortcutElementDescriptionDescription)]
+    public string Description { get; set; }
+
+    [DataMember]
+    [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixShortcutElementDirectoryDescription)]
+    [Editor(WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor, WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor)]
+    public string Directory { get; set; }
+
+    [DataMember]
+    [Category(StringResources.CategoryMiscellaneous)]
+    [Description(StringResources.WixShortcutElementIconDescription)]
+    [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    [EditorInfo("*.ico|*.ico")]
+    public string Icon 
+    {
+      get { return icon; }
+      set 
+      {
+        if (icon != value)
+        {
+          FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref icon, null);
+          NotifyPropertyChanged();
+          OnFileChanged(e);
+        }
+      }
+    }
+
+    [DataMember]
+    [Category(StringResources.CategoryMiscellaneous)]
+    [Description(StringResources.WixShortcutElementArgumentsDescription)]
+    public string Arguments { get; set; }
+
+    private void OnFileChanged(FileSupportEventArgs e)
+    {
+      if (FileChanged != null)
+        FileChanged(this, e);
+    }
+
     #region WixElementBase
 
     public override ElementsImagesTypes ImageType
     {
-      get { return ElementsImagesTypes.DesktopShortcut; }
+      get { return ElementsImagesTypes.Shortcut; }
     }
 
     public override string ShortTypeName
     {
-      get { return "DesktopShortcut"; }
+      get { return "Shortcut"; }
+    }
+
+    #endregion
+
+    #region IFileSupport
+
+    public event EventHandler<FileSupportEventArgs> FileChanged;
+
+    public void NotifyDeleting()
+    {
+      throw new NotImplementedException();
+    }
+
+    public string[] GetInstallDirectories()
+    {
+      throw new NotImplementedException();
     }
 
     #endregion
   }
 
-  class WixStartMenuShortcutElement : WixElementBase
+  class WixSqlExtentedProceduresElement : WixElementBase
   {
     #region WixElementBase
 
     public override ElementsImagesTypes ImageType
     {
-      get { return ElementsImagesTypes.StartMenuShortcut; }
+      get { return ElementsImagesTypes.SqlExtentedProcedures; }
     }
 
     public override string ShortTypeName
     {
-      get { return "StartMenuShortcut"; }
+      get { return "SqlExtentedProcedures"; }
+    }
+
+    #endregion
+  }
+
+  class WixMefPluginElement : WixElementBase
+  {
+    #region WixElementBase
+
+    public override ElementsImagesTypes ImageType
+    {
+      get { return ElementsImagesTypes.MefPlugin; }
+    }
+
+    public override string ShortTypeName
+    {
+      get { return "MefPlugin"; }
     }
 
     #endregion

@@ -10,6 +10,6 @@
     Absent="disallow"
     InstallDefault="local">
 
-    <ComponentRef Id="STExeComponent"/>
+    <ComponentRef Id="STExeComponent" />
   </Feature>
 </Include>

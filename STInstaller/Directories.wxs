@@ -26,6 +26,11 @@
 
       <!-- Рабочий стол. -->
       <Directory Id="DesktopFolder" />
+      
+      <!-- Другие системные директории. -->
+      <Directory Id="StartMenuFolder" />
+      <Directory Id="StartupFolder" />
+      <Directory Id="WindowsFolder" />
     </Directory>
   </Fragment>
 </Wix>

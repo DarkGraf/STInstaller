@@ -22,5 +22,19 @@ namespace InstallerStudio.WixElements
                 && instruction.Data.StartsWith(data)
               select node).FirstOrDefault();
     }
+
+    /// <summary>
+    /// Получает первый узел XElement с именем localName в узле.
+    /// Если не найден, будет null.
+    /// </summary>
+    /// <returns></returns>
+    public static XElement GetXElement(this XContainer container, string localName, XAttribute attribute = null)
+    {
+      return (from node in container.Descendants()
+              where node.Name.LocalName == localName
+                && (attribute == null || node.Attribute(attribute.Name).Value == attribute.Value)
+              select node).FirstOrDefault();
+    }
+
   }
 }

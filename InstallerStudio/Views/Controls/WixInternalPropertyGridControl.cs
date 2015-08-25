@@ -51,6 +51,20 @@ namespace InstallerStudio.Views.Controls
   }
 
   /// <summary>
+  /// Вспомогательный атрибут для атрибута EditorAttribute,
+  /// обеспечивающий передачу дополнительной информации.
+  /// </summary>
+  class EditorInfoAttribute : Attribute
+  {
+    public string Info { get; private set; }
+
+    public EditorInfoAttribute(string info)
+    {
+      Info = info;
+    }
+  }
+
+  /// <summary>
   /// Расширение PropertyGridControl с добавлением собственных редакторов.
   /// В настоящей версии PropertyGridControl от DevExpress не поддерживает
   /// пользовательские редакторы, поэтому реализуем данным способом.
@@ -139,9 +153,12 @@ namespace InstallerStudio.Views.Controls
         if (propertyInfo != null)
         {
           EditorAttribute attribute = (EditorAttribute)propertyInfo.GetCustomAttributes(typeof(EditorAttribute), true).FirstOrDefault();
+          // Также ищем вспомогательный атрибут с дополнительной информацией.
+          EditorInfoAttribute attributeInfo = (EditorInfoAttribute)propertyInfo.GetCustomAttributes(typeof(EditorInfoAttribute), true).FirstOrDefault();
           if (attribute != null)
           {
-            BaseEditSettings settings = AttributesDispatcher.GetSettings(attribute.EditorTypeName, propertyGridControl, WixDataSource);
+            string info = attributeInfo != null ? attributeInfo.Info : null;
+            BaseEditSettings settings = AttributesDispatcher.GetSettings(attribute.EditorTypeName, info, propertyGridControl, WixDataSource);
             if (settings != null)
               ((PropertyDefinition)result).EditSettings = settings;
           }
@@ -164,6 +181,10 @@ namespace InstallerStudio.Views.Controls
     /// Имя редактора выбора директории из списка.
     /// </summary>
     public const string DirectoryComboBoxPropertyEditor = "DirectoryComboBox";
+    /// <summary>
+    /// Содержит список collapse (по умолчанию), expand или hidden.
+    /// </summary>
+    public const string FeatureDisplayComboBoxPropertyEditor = "FeatureDisplayComboBox";
   }
 
   /// <summary>
@@ -171,14 +192,16 @@ namespace InstallerStudio.Views.Controls
   /// </summary>
   static class AttributesDispatcher
   {
-    public static BaseEditSettings GetSettings(string editorTypeName, PropertyGridControl propertyGridControl, IWixPropertyGridControlDataSource dataSource)
+    public static BaseEditSettings GetSettings(string editorTypeName, string info, PropertyGridControl propertyGridControl, IWixPropertyGridControlDataSource dataSource)
     {
       switch (editorTypeName)
       {
         case WixPropertyEditorsNames.FilePropertyEditor:
-          return new FilePropertyEditorSettings(propertyGridControl);
+          return new FilePropertyEditorSettings(propertyGridControl, info);
         case WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor:
           return new DirectoryComboBoxPropertyEditor(dataSource);
+        case WixPropertyEditorsNames.FeatureDisplayComboBoxPropertyEditor:
+          return new FeatureDisplayComboBoxPropertyEditor();
         default:
           return null;
       }
@@ -191,17 +214,21 @@ namespace InstallerStudio.Views.Controls
   class FilePropertyEditorSettings : ButtonEditSettings
   {
     PropertyGridControl propertyGridControl;
+    string filterExtensions;
 
-    public FilePropertyEditorSettings(PropertyGridControl propertyGridControl)
+    public FilePropertyEditorSettings(PropertyGridControl propertyGridControl, string filterExtensions)
     {
       this.propertyGridControl = propertyGridControl;
+      // В info должен быть фильтр расширений для диалога. Если передан null,
+      // будем показывать все файлы.
+      this.filterExtensions = filterExtensions ?? "*.*|*.*";
       DefaultButtonClick += FilePropertyEditorSettings_DefaultButtonClick;
     }
 
     void FilePropertyEditorSettings_DefaultButtonClick(object sender, RoutedEventArgs e)
     {
       OpenFileDialog dialog = new OpenFileDialog();
-      dialog.Filter = "*.*|*.*|*.exe|*.exe|*.dll|*.dll";
+      dialog.Filter = filterExtensions;
       if (dialog.ShowDialog().GetValueOrDefault())
       {
         ButtonEdit edit = sender as ButtonEdit;
@@ -352,6 +379,23 @@ namespace InstallerStudio.Views.Controls
       // Удаляем только если кнопка видима.
       if (btn != null && btn.Opacity > 0)
         ((ObservableCollection<string>)(Editor as ComboBoxEdit).ItemsSource).Remove(btn.DataContext as string);
+    }
+  }
+
+  class FeatureDisplayComboBoxPropertyEditor : ComboBoxEditSettings
+  {
+    public FeatureDisplayComboBoxPropertyEditor()
+    {
+      Items.Add("Collapse");
+      Items.Add("Expand");
+      Items.Add("Hidden");
+      IsTextEditable = false;
+    }
+
+    protected override void AssignToEditCore(IBaseEdit edit)
+    {
+      ((ComboBoxEdit)edit).NullValueButtonPlacement = EditorPlacement.Popup;
+      base.AssignToEditCore(edit);      
     }
   }
 }

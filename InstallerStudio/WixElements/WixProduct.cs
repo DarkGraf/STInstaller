@@ -11,6 +11,7 @@ namespace InstallerStudio.WixElements
   [KnownType(typeof(WixComponentElement))]
   [KnownType(typeof(WixFileElement))]
   [KnownType(typeof(WixDbComponentElement))]
+  [KnownType(typeof(WixShortcutElement))]
   class WixProduct : WixMainEntity
   {
     #region Основные свойства.

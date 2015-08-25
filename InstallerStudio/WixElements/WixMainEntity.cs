@@ -50,6 +50,10 @@ namespace InstallerStudio.WixElements
     /// Внимание. Вызывается с не UI потока.
     /// </summary>
     Action BuildIsFinished { get; }
+    /// <summary>
+    /// Временная директория исходных файлов (msizip, mspzip).
+    /// </summary>
+    string SourceStoreDirectory { get; }
   }
 
   [DataContract(Namespace = StringResources.Namespace)]

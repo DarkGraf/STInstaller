@@ -40,17 +40,15 @@ namespace InstallerStudio.Models
   public class BuildContextWrapper : IBuildContext
   {
     IList<string> buildMessages;
-    ISettingsInfo applicationSettings;
-    string projectFileName;
-    Action buildIsFinished;
 
     public BuildContextWrapper(IList<string> buildMessages, ISettingsInfo applicationSettings, string projectFileName,
-      Action buildIsFinished)
+      Action buildIsFinished, string sourceStoreDirectory)
     {
       this.buildMessages = buildMessages;
-      this.applicationSettings = applicationSettings;
-      this.projectFileName = projectFileName;
-      this.buildIsFinished = buildIsFinished;
+      this.ApplicationSettings = applicationSettings;
+      this.ProjectFileName = projectFileName;
+      this.BuildIsFinished = buildIsFinished;
+      this.SourceStoreDirectory = sourceStoreDirectory;
     }
 
     #region IBuildContext
@@ -65,20 +63,13 @@ namespace InstallerStudio.Models
       buildMessages.Clear();
     }
 
-    public ISettingsInfo ApplicationSettings
-    {
-      get { return applicationSettings; }
-    }
+    public ISettingsInfo ApplicationSettings { get; private set; }
 
-    public string ProjectFileName
-    {
-      get { return projectFileName; }
-    }
+    public string ProjectFileName { get; private set; }
 
-    public Action BuildIsFinished
-    {
-      get { return buildIsFinished; }
-    }
+    public Action BuildIsFinished { get; private set; }
+
+    public string SourceStoreDirectory { get; private set; }
 
     #endregion
   }
@@ -240,7 +231,7 @@ namespace InstallerStudio.Models
       IsBuilding = true;
       // Внимание!!! Делегат вызовется не из UI потока.
       BuildContextWrapper context = new BuildContextWrapper(BuildMessages, settingsInfo, loadedFileName,
-        delegate { IsBuilding = false; });
+        delegate { IsBuilding = false; }, fileStore.StoreDirectory);
       MainItem.Build(context);
     }
 

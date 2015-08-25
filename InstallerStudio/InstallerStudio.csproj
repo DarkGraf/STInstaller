@@ -49,6 +49,7 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Printing" />
@@ -77,6 +78,7 @@
     <Compile Include="Models\MsiModel.cs" />
     <Compile Include="Models\MspModel.cs" />
     <Compile Include="Utils\FileStoreSynchronizer.cs" />
+    <Compile Include="Utils\IconHelper.cs" />
     <Compile Include="Utils\ProcessRunner.cs" />
     <Compile Include="Utils\SettingsManager.cs" />
     <Compile Include="Utils\StringExtension.cs" />
@@ -220,13 +222,10 @@
     <Resource Include="Views\Images\SaveLarge.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Views\Images\Components\DesktopShortcutSmall.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Views\Images\Components\FileSmall.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Views\Images\Components\StartMenuShortcutSmall.png" />
+    <Resource Include="Views\Images\Components\ShortcutSmall.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="WixElements\WixBuilders\MspTemplate\" />
@@ -260,6 +259,10 @@
     <Resource Include="..\STInstaller\Resources\Help.ico">
       <Link>WixElements\WixBuilders\MsiTemplate\Resources\Help.ico</Link>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Views\Images\Components\MefPluginSmall.png" />
+    <Resource Include="Views\Images\Components\SqlExtentedProceduresSmall.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

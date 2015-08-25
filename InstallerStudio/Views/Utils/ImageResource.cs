@@ -34,10 +34,12 @@ namespace InstallerStudio.Views.Utils
     SqlScript,
     [UriImage("Views/Images/Components/FileSmall.png")]
     File,
-    [UriImage("Views/Images/Components/DesktopShortcutSmall.png")]
-    DesktopShortcut,
-    [UriImage("Views/Images/Components/StartMenuShortcutSmall.png")]
-    StartMenuShortcut
+    [UriImage("Views/Images/Components/ShortcutSmall.png")]
+    Shortcut,
+    [UriImage("Views/Images/Components/SqlExtentedProceduresSmall.png")]
+    SqlExtentedProcedures,
+    [UriImage("Views/Images/Components/MefPluginSmall.png")]
+    MefPlugin
   }
 
   /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Xml.Linq;
 
 using InstallerStudio.Utils;
 using InstallerStudio.WixElements;
+using InstallerStudio.Models;
 
 namespace InstallerStudio.WixElements.WixBuilders
 {
@@ -54,6 +56,90 @@ namespace InstallerStudio.WixElements.WixBuilders
     {
       string path = Path.Combine(StoreDirectory, templates[MsiTemplateTypes.Component]);
       DeleteDevelopmentInfo(path);
+
+      XElement xmlWix = XElement.Load(path);
+
+      // Получаем секцию Fragment, в ней вложенные секции DirectoryRef для каждого компонента.
+      XElement xmlFragment = xmlWix.GetXElement("Fragment");
+
+      // Получаем не предопределенные компоненты.
+      foreach (WixComponentElement component in product.RootElement.Items.Descendants().
+        OfType<WixComponentElement>().Where(v => !v.IsPredefined))
+      {
+        // Добавляем файлы. В WIX в одном компоненте может быть несколько файлов, но
+        // мы будем использовать для каждого файла отдельный компонент. Так не будет
+        // проблем с директориями, потому-что пользователь может указать для
+        // каждого файла разные директории установки. И что более важно, согласно ТЗ,
+        // будем в дальнейшем формировать обновления для каждого файла.
+        foreach (WixFileElement file in component.Items.OfType<WixFileElement>())
+        {
+          XElement xmlFile;
+          // Словарь для иконок.
+          Dictionary<string, string> icons = new Dictionary<string, string>();
+          string installDirectory = MsiModel.FormatInstallDirectory(file.InstallDirectory);
+          string pathToFile = Path.Combine(context.SourceStoreDirectory, file.InstallDirectory, file.FileName);
+
+          XElement xml = new XElement(XmlNameSpaceWIX + "DirectoryRef",
+            new XAttribute("Id", installDirectory),
+            new XElement(XmlNameSpaceWIX + "Component",
+              new XAttribute("Id", component.Id),
+              new XAttribute("Guid", component.Guid),
+              xmlFile = new XElement(XmlNameSpaceWIX + "File",
+                new XAttribute("Id", file.Id),
+                new XAttribute("Name", file.FileName),
+                new XAttribute("Source", pathToFile),
+                new XAttribute("KeyPath", "yes"))));
+
+          // Если у файла указаны ярлыки, добавим.
+          foreach (WixShortcutElement shortcut in file.Items.OfType<WixShortcutElement>())
+          {
+            // Обязательные атрибуты.
+            XElement xmlShortcut = new XElement(XmlNameSpaceWIX + "Shortcut",
+              new XAttribute("Id", shortcut.Id),
+              new XAttribute("Name", shortcut.Name),
+              new XAttribute("WorkingDirectory", installDirectory),
+              new XAttribute("Directory", MsiModel.FormatInstallDirectory(shortcut.Directory)),
+              new XAttribute("Advertise", "yes"));
+
+            // Не обязательные атрибуты.
+            if (!string.IsNullOrWhiteSpace(shortcut.Arguments))
+              xmlShortcut.Add(new XAttribute("Arguments", shortcut.Arguments));
+            if (!string.IsNullOrWhiteSpace(shortcut.Description))
+              xmlShortcut.Add(new XAttribute("Description", shortcut.Description));
+
+            // Для иконки смотрим, если строка пустая и целевой файл содержит иконку,
+            // то указываем сам файл.
+            // Если строка не пустая, то указываем содержащийся в ней файл.
+            if (string.IsNullOrWhiteSpace(shortcut.Icon))
+            {
+              if (IconHelper.ExtractIcon(pathToFile, 0, false) != null)
+              {
+                xmlShortcut.Add(new XAttribute("Icon", file.FileName));
+                icons[file.FileName] = pathToFile;
+              }
+            }
+            else
+            {
+              xmlShortcut.Add(new XAttribute("Icon", shortcut.Icon));
+              icons[shortcut.Icon] = Path.Combine(context.SourceStoreDirectory, shortcut.Icon);
+            }
+            
+
+            xmlFile.Add(xmlShortcut);
+          }
+
+          xmlFragment.Add(xml);
+          // Теперь сформируем теги для иконок.
+          foreach (var icon in icons)
+          {
+            xmlFragment.Add(new XElement(XmlNameSpaceWIX + "Icon",
+              new XAttribute("Id", icon.Key),
+              new XAttribute("SourceFile", icon.Value)));
+          }
+        }
+      }
+      
+      xmlWix.Save(path);
     }
 
     private void ProcessingTemplateDirectory(IBuildContext context, CancellationTokenSource cts)
@@ -65,6 +151,68 @@ namespace InstallerStudio.WixElements.WixBuilders
     {
       string path = Path.Combine(StoreDirectory, templates[MsiTemplateTypes.Feature]);
       DeleteDevelopmentInfo(path);
+
+      XElement xmlWix = XElement.Load(path);
+
+      // Получаем секцию Fragment, в нем должна быть только секции Feature с Id = "RootFeature".
+      XElement xmlFragment = xmlWix.GetXElement("Fragment");
+      XElement xmlFeature = xmlFragment.GetXElement("Feature", new XAttribute("Id", "RootFeature"));
+      
+      // Стек для обхода дерева элементов Feature.
+      Stack<KeyValuePair<WixFeatureElement, XElement>> stack = new Stack<KeyValuePair<WixFeatureElement, XElement>>();
+
+      // Проверим информацию для построения.
+      if (!(product.RootElement is WixFeatureElement))
+        throw new Exception("WixProduct.RootElement не является WixFeatureElement");
+
+      // Заполняем стек первым уровнем.
+      stack.Push(new KeyValuePair<WixFeatureElement, XElement>(product.RootElement as WixFeatureElement, xmlFeature));
+
+      // Обходим дерево.
+      // Первая Feature должна быть обязательно как в продукте, так и в xml.
+      // Далее может быть Feature или Component.
+      while (stack.Count > 0)
+      {
+        var pair = stack.Pop();
+        WixFeatureElement parent = pair.Key;
+        XElement xmlParent = pair.Value;
+        // Добавляем детей. Если нет соответствуюшего элемента в xml, то создадим.
+        foreach (var child in parent.Items.Where(v => v is WixFeatureElement || v is WixComponentElement))
+        {
+          XElement xmlChild = null;
+
+          if (child is WixFeatureElement)
+          {
+            WixFeatureElement childFeature = child as WixFeatureElement;
+            xmlChild = xmlParent.GetXElement("Feature", new XAttribute("Id", child.Id));
+            // Нет в xml.
+            if (xmlChild == null)
+            {
+              xmlChild = new XElement(XmlNameSpaceWIX + "Feature",
+                new XAttribute("Id", childFeature.Id),
+                new XAttribute("Title", childFeature.Title),
+                new XAttribute("Description", childFeature.Description));
+              xmlParent.Add(xmlChild);
+            }
+
+            stack.Push(new KeyValuePair<WixFeatureElement, XElement>(childFeature, xmlChild));
+          }
+
+          if (child is WixComponentElement)
+          {
+            xmlChild = xmlParent.GetXElement("ComponentRef", new XAttribute("Id", child.Id));
+            // Нет в xml.
+            if (xmlChild == null)
+            {
+              xmlChild = new XElement(XmlNameSpaceWIX + "ComponentRef",
+                new XAttribute("Id", child.Id));
+              xmlParent.Add(xmlChild);
+            }
+          }
+        }
+      }
+
+      xmlWix.Save(path);
     }
 
     void ProcessingTemplateProduct(IBuildContext context, CancellationTokenSource cts)
@@ -75,7 +223,7 @@ namespace InstallerStudio.WixElements.WixBuilders
       XElement xmlWix = XElement.Load(path);
 
       // Получаем секцию Product.
-      XElement xmlProduct = xmlWix.Elements().First(v => v.Name.LocalName == "Product");
+      XElement xmlProduct = xmlWix.GetXElement("Product");
 
       // Указываем режим работы интерфейса.
       // Произведем поиск по всем WixElements и если есть элемент

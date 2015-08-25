@@ -162,7 +162,7 @@ namespace InstallerStudio.ViewModels
           BuilderViewModel = new MsiViewModelFactory().Create(RibbonManager);
           break;
         case CreatedBuilderType.Msp:
-          BuilderViewModel = new MsiViewModelFactory().Create(RibbonManager);
+          BuilderViewModel = new MspViewModelFactory().Create(RibbonManager);
           break;
         default:
           BuilderViewModel = null;

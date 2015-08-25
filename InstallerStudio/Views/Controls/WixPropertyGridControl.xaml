@@ -16,5 +16,6 @@
     UseCollectionEditor="False" 
     ShowDescriptionIn="Panel"
     CustomExpand="propertyGridControl_CustomExpand"
+    SortMode="Ascending"
     WixDataSource="{Binding WixPropertyGridControlDataSource}" />
 </UserControl>

@@ -2,7 +2,13 @@
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <DirectoryRef Id="ProductFolder">
     <Component Id="STExeComponent" Guid="0A4CB1AE-9C4B-4C0E-8C38-841C04ADC888">
-      <File Id="STExeFile" Name="ST.exe" Source="$(var.PathToFiles)" KeyPath="yes" />
+      <File Id="STExeFile" Name="ST.exe" Source="$(var.PathToFiles)" KeyPath="yes">
+        <Shortcut Id="STExeDesktopShortCut" Name="ST" Description="Запуск ST"
+          WorkingDirectory="ProductFolder" Directory="DesktopFolder" Advertise="yes" Icon="ST.exe" Arguments="111" />
+        <Shortcut Id="STExeStartMenuShortCut" Name="ST" Description="Запуск ST"
+          WorkingDirectory="ProductFolder" Directory="ProgramMenuProductDir" Advertise="yes" />
+      </File>
     </Component>
   </DirectoryRef>
+  <Icon Id="ST.exe" SourceFile="$(var.PathToFiles)ST.exe" />
 </Include>

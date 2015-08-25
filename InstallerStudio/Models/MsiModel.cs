@@ -10,14 +10,39 @@ namespace InstallerStudio.Models
 {
   class MsiModel : BuilderModel, IMsiModelAdditional
   {
+    #region Статические члены.
+
     /// <summary>
     /// Предопределенные установочные директории.
     /// </summary>
     internal static IList<string> PredefinedInstallDirectories = new List<string>
     {
-      "[ProductFolder]",
-      "[SystemFolder]"
+      "[ProductFolder]", // Каталог для конкретного продукта.
+      "[ProgramFilesFolder]", // Program Files.
+      "[INSTALLLOCATION]", // Общий каталог для семейства продуктов.
+      "[ProgramMenuFolder]", // Пуск.
+      "[ProgramMenuFamilyDir]", // Меню общее для семейства продуктов.
+      "[ProgramMenuProductDir]", // Меню для конкретного продукта.
+      "[DesktopFolder]", // Рабочий стол.
+      "[StartMenuFolder]",
+      "[StartupFolder]",
+      "[WindowsFolder]"
     };
+
+    /// <summary>
+    /// Приводит предопределенную директорию к формату для использования в
+    /// файлах формирования msi. При передачи не предопределенной директории,
+    /// просто возвращает ее.
+    /// </summary>
+    internal static string FormatInstallDirectory(string directory)
+    {
+      if (PredefinedInstallDirectories.Contains(directory))
+        return directory.Substring(1, directory.Length - 2);
+      else
+        return directory;
+    }
+
+    #endregion
 
     public MsiModel()
     {
@@ -34,8 +59,8 @@ namespace InstallerStudio.Models
 
       // Создаем предопределенные элементы. Это общие элементы для 
       // всех инсталляторов (для серверной и клиентской частей).
-      // Несут информационную нагрузку, в формированиии результирующего
-      // файла *.wxs в данный момент не участвуют.
+      // При построении msi данные секции уже должны быть в файлах wxs с
+      // заполненными атрибутами.
 
       // Корневой элемент с типом WixFeatureElement создаст сам WixProduct.
       // Заполняем свойствами корневую Feature.
@@ -72,13 +97,14 @@ namespace InstallerStudio.Models
       {
         new CommandMetadata("Общие", typeof(WixFeatureElement)),
         new CommandMetadata("Общие", typeof(WixComponentElement)),
+        new CommandMetadata("Общие", typeof(WixMefPluginElement)),
 
         new CommandMetadata("Файлы", typeof(WixFileElement)),
-        new CommandMetadata("Файлы", typeof(WixDesktopShortcutElement)),
-        new CommandMetadata("Файлы", typeof(WixStartMenuShortcutElement)),
+        new CommandMetadata("Файлы", typeof(WixShortcutElement)),
 
         new CommandMetadata("База данных", typeof(WixDbComponentElement)),
-        new CommandMetadata("База данных", typeof(WixSqlScriptElement))
+        new CommandMetadata("База данных", typeof(WixSqlScriptElement)),
+        new CommandMetadata("База данных", typeof(WixSqlExtentedProceduresElement))
       };
     }
 
