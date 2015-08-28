@@ -135,14 +135,18 @@ namespace LightServerInstaller.Models
       // Меняем информацию в ProductServer.wxi.
       fileName = Path.Combine(tempDirectory.TempDirectory, "ProductServer.wxi");
       XElement xmlProductServer = XElement.Load(fileName);
-      xmlProductServer.GetNode("Binary", new XAttribute("Id", "MdfFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.MdfFile);
-      xmlProductServer.GetNode("Binary", new XAttribute("Id", "LdfFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.LdfFile);
-      xmlProductServer.GetNode("Binary", new XAttribute("Id", "SqlFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SqlFile);
-      xmlProductServer.GetNode("Binary", new XAttribute("Id", "InstallXpFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SpSqlFile);
-      xmlProductServer.GetNode("Binary", new XAttribute("Id", "ExtednedProceduresDllFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SpDllFile);
-      xmlProductServer.GetNode("Binary", new XAttribute("Id", "ExtednedProceduresIniFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SpIniFile);
       xmlProductServer.GetNode("Binary", new XAttribute("Id", "PluginDemoFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.PluginDllFile);
       xmlProductServer.Save(fileName);
+
+      fileName = Path.Combine(tempDirectory.TempDirectory, "ComponentsServer.wxi");
+      XElement xmlComponentServer = XElement.Load(fileName);
+      xmlComponentServer.GetNode("Binary", new XAttribute("Id", "MdfFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.MdfFile);
+      xmlComponentServer.GetNode("Binary", new XAttribute("Id", "LdfFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.LdfFile);
+      xmlComponentServer.GetNode("Binary", new XAttribute("Id", "SqlFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SqlFile);
+      xmlComponentServer.GetNode("Binary", new XAttribute("Id", "InstallXpFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SpSqlFile);
+      xmlComponentServer.GetNode("Binary", new XAttribute("Id", "ExtednedProceduresDllFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SpDllFile);
+      xmlComponentServer.GetNode("Binary", new XAttribute("Id", "ExtednedProceduresIniFile")).Attribute("SourceFile").Value = Path.GetFullPath(product.SpIniFile);
+      xmlComponentServer.Save(fileName);
 
       // Меняем информацию в Variables.wxi.
       fileName = Path.Combine(tempDirectory.TempDirectory, "Variables.wxi");

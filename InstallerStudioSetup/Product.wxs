@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product 
+    Id="*"
+    Name="Installer Studio"
+    Manufacturer="ЗАО &quot;НПП Системные Технологии&quot;"
+    Version="0.0.0.1" 
+    Language="1049"
+    Codepage="1251"
+    UpgradeCode="FCFD20DC-4CE8-4BFA-B0B1-AA7ECF049A94">
+		
+    <Package
+      Id="*"
+      InstallerVersion="301" 
+      Description="Установка Installer Studio"
+      Manufacturer="ЗАО &quot;НПП Системные Технологии&quot;"
+      Comments="Пакет установки Installer Studio"
+      Compressed="yes"
+      Languages="1049"
+      SummaryCodepage="1251"
+      InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
+		<MediaTemplate EmbedCab="yes" />
+
+		<Feature 
+      Id="ProductFeature" 
+      Title="Основные компоненты"
+      Description="Установка основных комонент"
+      Display="expand"
+      Level="1"
+      ConfigurableDirectory="INSTALLFOLDER"
+      AllowAdvertise="no"
+      Absent="disallow"
+      InstallDefault="local">
+    
+			<ComponentGroupRef Id="MainExecutableGroup" />
+      <ComponentGroupRef Id="UninstallGroup" />
+		</Feature>
+  
+    <Icon Id="InstallerStudio.exe" SourceFile="$(var.InstallerStudio.TargetPath)" />
+
+    <UI Id="MyWixUI_Mondo">
+      <UIRef Id="WixUI_Mondo" />
+      <UIRef Id="WixUI_ErrorProgressText" />
+    </UI>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="Installer Studio" />
+			</Directory>
+    
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgramMenuDir" Name="Installer Studio" />
+      </Directory>
+
+      <Directory Id="DesktopFolder" />
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="MainExecutableGroup" Directory="INSTALLFOLDER">
+			<Component Id="MainExeComponent" Guid="603345AB-05EC-48FE-8874-081E3750AC25">
+        <File Id="MainExeFile" Name="$(var.InstallerStudio.TargetFileName)" Source="$(var.InstallerStudio.TargetPath)" DiskId="1" KeyPath="yes">
+          <Shortcut Id="MainExeDesktopShortcut" Name="Installer Studio" Description="Запуск Installer Studio" 
+                    WorkingDirectory="INSTALLFOLDER" Directory="DesktopFolder" Advertise="yes" Icon="InstallerStudio.exe" />
+          <Shortcut Id="MainExeProgramMenuShortcut" Name="Installer Studio" Description="Запуск Installer Studio" 
+                    WorkingDirectory="INSTALLFOLDER" Directory="ProgramMenuDir" Advertise="yes" Icon="InstallerStudio.exe" />
+        </File>
+      </Component>
+		</ComponentGroup>
+  
+    <!-- Каталог в меню "Пуск". Удаление при деинсталляции -->
+    <ComponentGroup Id="UninstallGroup" Directory="ProgramMenuDir">
+      <Component Id="ProgramMenuDirComponent" Guid="79621250-FD71-42E3-B615-0118B3B22CCB">
+        <RemoveFolder Id="ProgramMenuDir" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="ProgramMenuDir" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+	</Fragment>
+</Wix>

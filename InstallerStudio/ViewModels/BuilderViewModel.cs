@@ -191,6 +191,10 @@ namespace InstallerStudio.ViewModels
     {
       Model.Build(settingsInfo);
     }
+
+    public string LoadedFileName { get { return Model.LoadedFileName; } }
+
+    public ModelState State { get { return Model.State; } }
   }
 
   // Паттерн "Абстрактная фабрика".

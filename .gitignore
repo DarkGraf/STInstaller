@@ -7,6 +7,8 @@ DeveloperUtilities/LightServerPatch/bin
 DeveloperUtilities/LightServerPatch/obj
 InstallerStudio/bin
 InstallerStudio/obj
+InstallerStudioSetup/bin
+InstallerStudioSetup/obj
 Samples/Plugins/ProgressMessageDemo/bin
 Samples/Plugins/ProgressMessageDemo/obj
 STInstaller/bin

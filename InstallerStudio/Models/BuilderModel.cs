@@ -74,6 +74,13 @@ namespace InstallerStudio.Models
     #endregion
   }
 
+  public enum ModelState
+  {
+    New,
+    Changed,
+    Saved
+  }
+
   abstract class BuilderModel : ChangeableObject, IDisposable
   {
     #region Константы.
@@ -88,9 +95,10 @@ namespace InstallerStudio.Models
     #region Частные поля.
 
     /// <summary>
-    /// Имя файла для сохранения/загрузки.
+    /// Доступ должен быть только через свойство.
     /// </summary>
-    private string loadedFileName;
+    IWixMainEntity mainItem;
+
     /// <summary>
     /// Выделенный элемент или null, если подразумевается выделенный элемент RootItem.
     /// </summary>
@@ -121,6 +129,7 @@ namespace InstallerStudio.Models
       BuildMessages = new ObservableCollection<string>();
       ((ObservableCollection<string>)BuildMessages).CollectionChanged += delegate { NotifyPropertyChanged("BuildMessages"); };
       IsBuilding = false;
+      State = ModelState.New;
     }
 
     /// <summary>
@@ -204,6 +213,9 @@ namespace InstallerStudio.Models
       fileStore.AddFile(descriptionFileName, DescriptionFileName);
 
       fileStore.Save(fileName);
+      // Делаем последним, если произойдёт исключение, это не выполнится.
+      State = ModelState.Saved;
+      LoadedFileName = fileName;
     }
 
     /// <summary>
@@ -214,7 +226,7 @@ namespace InstallerStudio.Models
       if (fileStore != null)
         fileStore.Dispose();
 
-      loadedFileName = fileName;
+      LoadedFileName = fileName;
 
       fileStore = FileStoreCreator.Create(fileName);
 
@@ -224,13 +236,15 @@ namespace InstallerStudio.Models
       // Для элементов не для чтения, если они поддерживают работу с файлом, добавим обработчик события.
       foreach (IFileSupport item in RootItem.Items.Descendants().Where(v => !v.IsReadOnly).OfType<IFileSupport>())
         item.FileChanged += BuilderModel_FileChanged;
+
+      State = ModelState.Saved;
     }
 
     public void Build(ISettingsInfo settingsInfo)
     {
       IsBuilding = true;
       // Внимание!!! Делегат вызовется не из UI потока.
-      BuildContextWrapper context = new BuildContextWrapper(BuildMessages, settingsInfo, loadedFileName,
+      BuildContextWrapper context = new BuildContextWrapper(BuildMessages, settingsInfo, LoadedFileName,
         delegate { IsBuilding = false; }, fileStore.StoreDirectory);
       MainItem.Build(context);
     }
@@ -238,7 +252,22 @@ namespace InstallerStudio.Models
     /// <summary>
     /// Самая главная сущность Wix.
     /// </summary>
-    public IWixMainEntity MainItem { get; private set; }
+    public IWixMainEntity MainItem 
+    { 
+      get { return mainItem; }
+      private set
+      {
+        mainItem = value;
+        // При изменении любых свойств, будем изменять State.
+        // Поля вложенных сущностей должны сами уведомлять главную сущность об изменении.
+        mainItem.PropertyChanged += (s, e) => 
+        { 
+          // Меняем если только сохранено, новую оставляем.
+          if (State == ModelState.Saved)
+            State = ModelState.Changed; 
+        };
+      }
+    }
 
     /// <summary>
     /// Корневой элемент.
@@ -288,6 +317,17 @@ namespace InstallerStudio.Models
       get { return isBuilding; }
       private set { SetValue(ref isBuilding, value); } 
     }
+
+    /// <summary>
+    /// Состояние модели: новая, измененная или сохраненная.
+    /// </summary>
+    public ModelState State { get; private set; }
+
+    /// <summary>
+    /// Имя файла для сохранения/загрузки.
+    /// </summary>
+    public string LoadedFileName { get; private set; }
+
 
     /// <summary>
     /// Обработка события изменения информации о добавлении файла.

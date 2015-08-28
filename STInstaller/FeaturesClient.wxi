@@ -5,7 +5,6 @@
     Title="Основные компоненты"
     Description="Основные компоненты"
     Level="1"
-    ConfigurableDirectory="INSTALLLOCATION"
     AllowAdvertise="no"
     Absent="disallow"
     InstallDefault="local">

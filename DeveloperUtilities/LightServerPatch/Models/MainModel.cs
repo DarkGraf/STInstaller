@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -130,18 +131,20 @@ namespace LightServerPatch.Models
       ProcessRunner processRunner = new ProcessRunner(new Process());
       string parameters;
 
+      string pathToWix = ConfigurationManager.AppSettings["wixPath"].IncludeTrailingPathDelimiter(); ;
+
       // torch -p -xi "Сервер АСПО 1.0.1\Сервер АСПО.wixout" "Сервер АСПО 1.0.2\Сервер АСПО.wixout" -out Patch\Differences.wixmst
       string wixmstFileName = Path.ChangeExtension(wxsFileName, ".wixmst");
       parameters = string.Format(@"-p -xi ""{0}"" ""{1}"" -out ""{2}""", 
         PatchInfo.CurrentWixout, PatchInfo.NewWixout, wixmstFileName);
-      processRunner.Start("torch", parameters);
+      processRunner.Start(Path.Combine(pathToWix, "torch"), parameters);
       FormatAndSendProcessMessage(processRunner.Output, "Torch", processRunner.HasError);
       if (processRunner.HasError)
         return;
 
       // candle Patch\Patch.wxs -out Patch\
       parameters = string.Format(@"""{0}"" -out ""{1}\""", wxsFileName, directoryName.IncludeTrailingPathDelimiter());
-      processRunner.Start("candle", parameters);
+      processRunner.Start(Path.Combine(pathToWix, "candle"), parameters);
       FormatAndSendProcessMessage(processRunner.Output, "Candle", processRunner.HasError);
       if (processRunner.HasError)
         return;
@@ -150,7 +153,7 @@ namespace LightServerPatch.Models
       string wixobjFileName = Path.ChangeExtension(wxsFileName, ".wixobj");
       string wixmspFileName = Path.ChangeExtension(wxsFileName, ".wixmsp");
       parameters = string.Format(@"""{0}"" -out ""{1}""", wixobjFileName, wixmspFileName);
-      processRunner.Start("light", parameters);
+      processRunner.Start(Path.Combine(pathToWix, "light"), parameters);
       FormatAndSendProcessMessage(processRunner.Output, "Light", processRunner.HasError);
       if (processRunner.HasError)
         return;
@@ -158,7 +161,7 @@ namespace LightServerPatch.Models
       // pyro Patch\Patch.wixmsp -t MyPatch Patch\Differences.wixmst -out Patch\Patch.msp
       string mspFileName = Path.ChangeExtension(wxsFileName, ".msp");
       parameters = string.Format(@"""{0}"" -t AspoPatch ""{1}"" -out ""{2}""", wixmspFileName, wixmstFileName, mspFileName);
-      processRunner.Start("pyro", parameters);
+      processRunner.Start(Path.Combine(pathToWix, "pyro"), parameters);
       FormatAndSendProcessMessage(processRunner.Output, "Pyro", processRunner.HasError);
       if (processRunner.HasError)
         return;

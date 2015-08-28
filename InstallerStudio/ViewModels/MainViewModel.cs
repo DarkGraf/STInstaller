@@ -206,15 +206,20 @@ namespace InstallerStudio.ViewModels
 
     private void Save(bool withoutQuery)
     {
-      IOpenSaveFileDialog dialog = DialogService.SaveFileDialog;
-      FileDescription fileDescription = BuilderViewModel.FileDescription;
-      dialog.Filter = string.Format("{0} (*.{1})|*.{1}", fileDescription.Description, fileDescription.FileExtension);
-      dialog.FilterIndex = 1;
-      dialog.Title = "Сохранение";
-      dialog.FileName = "Default";
-      if (dialog.Show().GetValueOrDefault())
+      if (withoutQuery && BuilderViewModel.LoadedFileName != null)
+        BuilderViewModel.Save(BuilderViewModel.LoadedFileName);
+      else
       {
-        BuilderViewModel.Save(dialog.FileName);
+        IOpenSaveFileDialog dialog = DialogService.SaveFileDialog;
+        FileDescription fileDescription = BuilderViewModel.FileDescription;
+        dialog.Filter = string.Format("{0} (*.{1})|*.{1}", fileDescription.Description, fileDescription.FileExtension);
+        dialog.FilterIndex = 1;
+        dialog.Title = "Сохранение";
+        dialog.FileName = "Default";
+        if (dialog.Show().GetValueOrDefault())
+        {
+          BuilderViewModel.Save(dialog.FileName);
+        }
       }
     }
 

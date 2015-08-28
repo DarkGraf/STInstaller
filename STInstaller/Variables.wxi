@@ -2,7 +2,7 @@
 <Include>
   <!--DEVELOPMENT_INFO_BEGIN-->
   <!-- Режим сборки сервера (SERVER) или клиента (CLIENT) при разработке (должен быть активным только один). -->
-  <?define CLIENT?>
+  <?define SERVER?>
   <!--DEVELOPMENT_INFO_END-->
 
   <!-- Основная версия ПО. -->

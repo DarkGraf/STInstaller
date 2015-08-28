@@ -15,18 +15,23 @@ namespace InstallerStudio.Models
     /// <summary>
     /// Предопределенные установочные директории.
     /// </summary>
-    internal static IList<string> PredefinedInstallDirectories = new List<string>
+    internal static IList<string> PredefinedInstallDirectories 
+    { 
+      get { return predefinedInstallDirectories.Select(v => v.Key).ToList(); } 
+    }
+
+    internal static IDictionary<string, string> predefinedInstallDirectories = new Dictionary<string, string>
     {
-      "[ProductFolder]", // Каталог для конкретного продукта.
-      "[ProgramFilesFolder]", // Program Files.
-      "[INSTALLLOCATION]", // Общий каталог для семейства продуктов.
-      "[ProgramMenuFolder]", // Пуск.
-      "[ProgramMenuFamilyDir]", // Меню общее для семейства продуктов.
-      "[ProgramMenuProductDir]", // Меню для конкретного продукта.
-      "[DesktopFolder]", // Рабочий стол.
-      "[StartMenuFolder]",
-      "[StartupFolder]",
-      "[WindowsFolder]"
+      { "[ProgramFilesFolder]", "ProgramFilesFolder" }, // Program Files.
+      { "[ProgramFilesFamilyFolder]", "INSTALLLOCATION" }, // Общий каталог для семейства продуктов.
+      { "[ProgramFilesProductFolder]", "ProductFolder" }, // Каталог для конкретного продукта.      
+      { "[ProgramMenuFolder]", "ProgramMenuFolder" }, // Пуск.
+      { "[ProgramMenuFamilyDir]", "ProgramMenuFamilyDir" }, // Меню общее для семейства продуктов.
+      { "[ProgramMenuProductDir]", "ProgramMenuProductDir" }, // Меню для конкретного продукта.
+      { "[DesktopFolder]", "DesktopFolder" }, // Рабочий стол.
+      { "[StartMenuFolder]", "StartMenuFolder" },
+      { "[StartupFolder]", "StartupFolder" },
+      { "[WindowsFolder]", "WindowsFolder" }
     };
 
     /// <summary>
@@ -36,8 +41,8 @@ namespace InstallerStudio.Models
     /// </summary>
     internal static string FormatInstallDirectory(string directory)
     {
-      if (PredefinedInstallDirectories.Contains(directory))
-        return directory.Substring(1, directory.Length - 2);
+      if (predefinedInstallDirectories.Keys.Contains(directory))
+        return predefinedInstallDirectories[directory];
       else
         return directory;
     }

@@ -48,9 +48,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\WiXExtensions\WixSTActions\WixSTActions.csproj">
       <Project>{d4ed1370-b649-442f-b648-91640070fd54}</Project>
       <Name>WixSTActions</Name>

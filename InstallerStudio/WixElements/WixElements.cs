@@ -309,6 +309,12 @@ namespace InstallerStudio.WixElements
     [DataMember]
     public string Display { get; set; }
 
+    [Category(StringResources.CategoryMiscellaneous)]
+    [Description(StringResources.WixFeatureElementAbsentDescription)]
+    [Editor(WixPropertyEditorsNames.FeatureAbsentComboBoxPropertyEditor, WixPropertyEditorsNames.FeatureAbsentComboBoxPropertyEditor)]
+    [DataMember]
+    public string Absent { get; set; }
+
     private Type[] allowedTypesOfChildren;
 
     #region WixElementBase
@@ -321,7 +327,10 @@ namespace InstallerStudio.WixElements
       { 
         typeof(WixFeatureElement), 
         typeof(WixComponentElement),
-        typeof(WixDbComponentElement)
+        typeof(WixDbComponentElement),
+        // Разрешим добавлять WixMefPluginElement только в корневую Feature.
+        // На самом деле он будет добавлен в Product.wxs.
+        typeof(WixMefPluginElement)
       };
     }
 
@@ -346,24 +355,12 @@ namespace InstallerStudio.WixElements
       if (type == typeof(WixDbComponentElement) && rootItem.Items.Descendants().FirstOrDefault(v => v.GetType() == type) != null)
         return false;
 
+      // Разрешим добавлять WixMefPluginElement только в корневую Feature.
+      // На самом деле он будет добавлен в Product.wxs.
+      if (type == typeof(WixMefPluginElement) && rootItem != this)
+        return false;
+
       return base.AvailableForRun(type, rootItem);
-    }
-
-    #endregion
-  }
-
-  class WixPatchFamilyElement : WixElementBase
-  {
-    #region WixElementBase
-
-    public override ElementsImagesTypes ImageType
-    {
-      get { return ElementsImagesTypes.SqlScript; }
-    }
-
-    public override string ShortTypeName 
-    { 
-      get { return "PatchFamily"; }
     }
 
     #endregion
@@ -430,7 +427,6 @@ namespace InstallerStudio.WixElements
     private Type[] allowedTypesOfChildren;
     private string mdfFile;
     private string ldfFile;
-    private string directory;
 
     private void OnFileChanged(FileSupportEventArgs e)
     {
@@ -441,51 +437,36 @@ namespace InstallerStudio.WixElements
     [DataMember]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
     [EditorInfo("*.mdf|*.mdf|*.*|*.*")]
-    [Category(StringResources.CategoryFiles)]
+    [Category(StringResources.CategoryDBFiles)]
+    [Description(StringResources.WixDbComponentElementMdfFileDescription)]
     public string MdfFile 
     {
       get { return mdfFile; }
       set 
       {
-        FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref mdfFile, directory);
-        NotifyPropertyChanged();
-        OnFileChanged(e);
+        if (mdfFile != value)
+        {
+          FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref mdfFile, null);
+          NotifyPropertyChanged();
+          OnFileChanged(e);
+        }
       }
     }
 
     [DataMember]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
     [EditorInfo("*.ldf|*.ldf|*.*|*.*")]
-    [Category(StringResources.CategoryFiles)]
+    [Category(StringResources.CategoryDBFiles)]
+    [Description(StringResources.WixDbComponentElementLdfFileDescription)]
     public string LdfFile 
     {
       get { return ldfFile; }
       set 
       {
-        FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref ldfFile, directory);
-        NotifyPropertyChanged();
-        OnFileChanged(e);
-      }
-    }
-
-    [DataMember]
-    [Editor(WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor, WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor)]
-    [Category(StringResources.CategoryFiles)]
-    public string Directory
-    {
-      get { return directory; }
-      set
-      {
-        if (directory != value)
+        if (ldfFile != value)
         {
-          // Тут два файла и одна директория, значит надо уведомить об изменении два раза.
-          // Сохраним старое значение директории (где сейчас находятся файлы).
-          string oldDirectory = directory;
-          FileSupportEventArgs e = FileSupportHelper.DirectoryChanged(value, ref directory, mdfFile);
+          FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref ldfFile, null);
           NotifyPropertyChanged();
-          OnFileChanged(e);
-          // Также надо переместить ldf-файл, передаем в oldDirectory где он сейчас находится.
-          e = FileSupportHelper.DirectoryChanged(value, ref oldDirectory, ldfFile);
           OnFileChanged(e);
         }
       }
@@ -499,7 +480,8 @@ namespace InstallerStudio.WixElements
 
       allowedTypesOfChildren = new Type[] 
       { 
-        typeof(WixSqlScriptElement)
+        typeof(WixSqlScriptElement),
+        typeof(WixSqlExtentedProceduresElement)
       };
     }
 
@@ -526,22 +508,76 @@ namespace InstallerStudio.WixElements
 
     public void NotifyDeleting()
     {
-      throw new NotImplementedException();
+      // Перед удалением элемента вызовется этот метод, передадим нулевые актуальные значения.
+      OnFileChanged(new FileSupportEventArgs(mdfFile, null, null, null, null));
+      OnFileChanged(new FileSupportEventArgs(ldfFile, null, null, null, null));
     }
 
     public string[] GetInstallDirectories()
     {
-      return new string[] 
-      { 
-        Directory ?? ""
-      };
+      return new string[] { "" };
     }
 
     #endregion
   }
 
-  class WixSqlScriptElement : WixElementBase
+  [DataContract(Namespace = StringResources.Namespace)]
+  class WixSqlScriptElement : WixElementBase, IFileSupport
   {
+    private string script;
+
+    public WixSqlScriptElement()
+    {
+      // Инициализируем только при создании (не при десериализации).
+      Sequence = 1;
+    }
+
+    [DataMember]
+    [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    [EditorInfo("*.sql|*.sql|*.*|*.*")]
+    [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixSqlScriptElementScriptDescription)]
+    public string Script 
+    {
+      get { return script; }
+      set
+      {
+        if (script != value)
+        {
+          FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref script, null);
+          NotifyPropertyChanged();
+          OnFileChanged(e);
+        }
+      }
+    }
+
+    [DataMember]
+    [Category(StringResources.CategoryRunModes)]
+    [Description(StringResources.WixSqlScriptElementExecuteOnInstallDescription)]
+    public bool ExecuteOnInstall { get; set; }
+
+    [DataMember]
+    [Category(StringResources.CategoryRunModes)]
+    [Description(StringResources.WixSqlScriptElementExecuteOnReinstallDescription)]
+    public bool ExecuteOnReinstall { get; set; }
+
+    [DataMember]
+    [Category(StringResources.CategoryRunModes)]
+    [Description(StringResources.WixSqlScriptElementExecuteOnUninstallDescription)]
+    public bool ExecuteOnUninstall { get; set; }
+
+    [DataMember]
+    [Editor(WixPropertyEditorsNames.SqlScriptSequenceSpinEditPropertyEditor, WixPropertyEditorsNames.SqlScriptSequenceSpinEditPropertyEditor)]
+    [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixSqlScriptElementSequenceDescription)]
+    public int Sequence { get; set; }
+
+    private void OnFileChanged(FileSupportEventArgs e)
+    {
+      if (FileChanged != null)
+        FileChanged(this, e);
+    }
+
     #region WixElementBase
 
     public override ElementsImagesTypes ImageType
@@ -552,6 +588,23 @@ namespace InstallerStudio.WixElements
     public override string ShortTypeName
     {
       get { return "SQLScript"; }
+    }
+
+    #endregion
+
+    #region IFileSupport
+    
+    public event EventHandler<FileSupportEventArgs> FileChanged;
+
+    public void NotifyDeleting()
+    {
+      // Перед удалением элемента вызовется этот метод, передадим нулевые актуальные значения.
+      OnFileChanged(new FileSupportEventArgs(script, null, null, null, null));
+    }
+
+    public string[] GetInstallDirectories()
+    {
+      return new string[] { "" };
     }
 
     #endregion
@@ -727,19 +780,48 @@ namespace InstallerStudio.WixElements
 
     public void NotifyDeleting()
     {
-      throw new NotImplementedException();
+      // Перед удалением элемента вызовется этот метод, передадим нулевые актуальные значения.
+      OnFileChanged(new FileSupportEventArgs(icon, null, null, null, null));
     }
 
     public string[] GetInstallDirectories()
     {
-      throw new NotImplementedException();
+      return new string[] { "" };
     }
 
     #endregion
   }
 
-  class WixSqlExtentedProceduresElement : WixElementBase
+  [DataContract(Namespace = StringResources.Namespace)]
+  class WixSqlExtentedProceduresElement : WixElementBase, IFileSupport
   {
+    private string fileName;
+
+    [DataMember]
+    [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixSqlExtentedProceduresElementFileNameDescription)]
+    [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    [EditorInfo("*.dll|*.dll|*.*|*.*")]
+    public string FileName 
+    {
+      get { return fileName; }
+      set
+      {
+        if (fileName != value)
+        {
+          FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref fileName, null);
+          NotifyPropertyChanged();
+          OnFileChanged(e);
+        }
+      }
+    }
+
+    private void OnFileChanged(FileSupportEventArgs e)
+    {
+      if (FileChanged != null)
+        FileChanged(this, e);
+    }
+
     #region WixElementBase
 
     public override ElementsImagesTypes ImageType
@@ -753,10 +835,55 @@ namespace InstallerStudio.WixElements
     }
 
     #endregion
+
+    #region IFileSupport
+
+    public event EventHandler<FileSupportEventArgs> FileChanged;
+
+    public void NotifyDeleting()
+    {
+      // Перед удалением элемента вызовется этот метод, передадим нулевые актуальные значения.
+      OnFileChanged(new FileSupportEventArgs(fileName, null, null, null, null));
+    }
+
+    public string[] GetInstallDirectories()
+    {
+      return new string[] { "" };
+    }
+
+    #endregion
   }
 
-  class WixMefPluginElement : WixElementBase
+  [DataContract(Namespace = StringResources.Namespace)]
+  class WixMefPluginElement : WixElementBase, IFileSupport
   {
+    private string fileName;
+
+    [DataMember]
+    [Category(StringResources.CategoryMain)]
+    [Description(StringResources.WixMefPluginElementFileNameDescription)]
+    [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
+    [EditorInfo("*.dll|*.dll")]
+    public string FileName
+    {
+      get { return fileName; }
+      set
+      {
+        if (fileName != value)
+        {
+          FileSupportEventArgs e = FileSupportHelper.FileNameChanged(value, ref fileName, null);
+          NotifyPropertyChanged();
+          OnFileChanged(e);
+        }
+      }
+    }
+
+    private void OnFileChanged(FileSupportEventArgs e)
+    {
+      if (FileChanged != null)
+        FileChanged(this, e);
+    }
+
     #region WixElementBase
 
     public override ElementsImagesTypes ImageType
@@ -767,6 +894,40 @@ namespace InstallerStudio.WixElements
     public override string ShortTypeName
     {
       get { return "MefPlugin"; }
+    }
+
+    #endregion
+
+    #region IFileSupport
+
+    public event EventHandler<FileSupportEventArgs> FileChanged;
+
+    public void NotifyDeleting()
+    {
+      // Перед удалением элемента вызовется этот метод, передадим нулевые актуальные значения.
+      OnFileChanged(new FileSupportEventArgs(fileName, null, null, null, null));
+    }
+
+    public string[] GetInstallDirectories()
+    {
+      return new string[] { "" };
+    }
+
+    #endregion
+  }
+
+  class WixPatchFamilyElement : WixElementBase
+  {
+    #region WixElementBase
+
+    public override ElementsImagesTypes ImageType
+    {
+      get { return ElementsImagesTypes.SqlScript; }
+    }
+
+    public override string ShortTypeName
+    {
+      get { return "PatchFamily"; }
     }
 
     #endregion

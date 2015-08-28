@@ -4,14 +4,6 @@
   <!-- Указываем режим работы интерфейса. -->
   <st:UIType Id="MainUI" Type="Server" />
 
-  <!-- Шаблон базы данных. -->
-  <Binary Id="MdfFile" SourceFile="$(var.PathToFiles)Database\ESRR_868_2008.mdf" />
-  <Binary Id="LdfFile" SourceFile="$(var.PathToFiles)Database\ESRR_868_2008.ldf" />
-  <Binary Id="SqlFile" SourceFile="$(var.PathToFiles)Скрипт для MSSQL\1.0_to_1.1.sql" />
-  <Binary Id="InstallXpFile" SourceFile="$(var.PathToFiles)ASPO_XP_MSSQL\InstallASPO_XP.sql" />
-  <Binary Id="ExtednedProceduresDllFile" SourceFile="$(var.PathToFiles)ASPO_XP_MSSQL\ASPO_XP_MSSQL.dll" />
-  <Binary Id="ExtednedProceduresIniFile" SourceFile="$(var.PathToFiles)ASPO_XP_MSSQL\ASPO_XP_MSSQL.ini" />
-  
   <!-- Demo-плагин. -->
   <Binary Id="PluginDemoFile" SourceFile="$(var.PathToFiles)Plugins\ProgressMessageDemo.dll" />
   <st:MefPlugin Id="PluginDemoId" BinaryKey="PluginDemoFile" />

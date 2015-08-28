@@ -1,6 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
+using InstallerStudio.Common;
 using InstallerStudio.Models;
 using InstallerStudio.WixElements.WixBuilders;
 using InstallerStudio.Utils;
@@ -10,7 +12,7 @@ namespace InstallerStudio.WixElements
   /// <summary>
   /// Описывает интерфейс самой главной сущности Wix.
   /// </summary>
-  interface IWixMainEntity
+  interface IWixMainEntity : INotifyPropertyChanged
   {
     /// <summary>
     /// Корневой элемент сущности Wix.
@@ -57,7 +59,7 @@ namespace InstallerStudio.WixElements
   }
 
   [DataContract(Namespace = StringResources.Namespace)]
-  abstract class WixMainEntity : IWixMainEntity
+  abstract class WixMainEntity : ChangeableObject, IWixMainEntity
   {
     protected abstract WixBuilderBase CreateBuilder();
 

@@ -10,7 +10,8 @@
   Height="600" 
   Width="800" 
   WindowState="Maximized"
-  DataContextChanged="DXRibbonWindow_DataContextChanged">
+  DataContextChanged="DXRibbonWindow_DataContextChanged"
+  Icon="../ApplicationIcon.ico">
   <!-- Тема задается в App.xaml.cs.
   xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" 
   dx:ThemeManager.ThemeName="Office2010Blue"

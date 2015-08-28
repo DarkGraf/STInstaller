@@ -12,10 +12,13 @@ namespace InstallerStudio.WixElements
   [KnownType(typeof(WixFileElement))]
   [KnownType(typeof(WixDbComponentElement))]
   [KnownType(typeof(WixShortcutElement))]
+  [KnownType(typeof(WixSqlScriptElement))]
+  [KnownType(typeof(WixSqlExtentedProceduresElement))]
+  [KnownType(typeof(WixMefPluginElement))]
   class WixProduct : WixMainEntity
   {
     #region Основные свойства.
-
+#warning При изменении каждого свойства нужно сделать уведомление.
     [DataMember]
     public Guid Id { get; set; }
 

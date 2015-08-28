@@ -182,9 +182,17 @@ namespace InstallerStudio.Views.Controls
     /// </summary>
     public const string DirectoryComboBoxPropertyEditor = "DirectoryComboBox";
     /// <summary>
-    /// Содержит список collapse (по умолчанию), expand или hidden.
+    /// Имя редактора со списком collapse, expand или hidden.
     /// </summary>
     public const string FeatureDisplayComboBoxPropertyEditor = "FeatureDisplayComboBox";
+    /// <summary>
+    /// Имя редактора со списком allow и disallow.
+    /// </summary>
+    public const string FeatureAbsentComboBoxPropertyEditor = "FeatureAbsentComboBox";
+    /// <summary>
+    /// Имя редактора для установки целочисленной последовательности.
+    /// </summary>
+    public const string SqlScriptSequenceSpinEditPropertyEditor = "SqlScriptSequenceSpinEdit";
   }
 
   /// <summary>
@@ -202,6 +210,10 @@ namespace InstallerStudio.Views.Controls
           return new DirectoryComboBoxPropertyEditor(dataSource);
         case WixPropertyEditorsNames.FeatureDisplayComboBoxPropertyEditor:
           return new FeatureDisplayComboBoxPropertyEditor();
+        case WixPropertyEditorsNames.FeatureAbsentComboBoxPropertyEditor:
+          return new FeatureAbsentComboBoxPropertyEditor();
+        case WixPropertyEditorsNames.SqlScriptSequenceSpinEditPropertyEditor:
+          return new SqlScriptSequenceSpinEditPropertyEditor();
         default:
           return null;
       }
@@ -382,13 +394,11 @@ namespace InstallerStudio.Views.Controls
     }
   }
 
-  class FeatureDisplayComboBoxPropertyEditor : ComboBoxEditSettings
+  abstract class SimpleComboBoxPropertyEditor : ComboBoxEditSettings
   {
-    public FeatureDisplayComboBoxPropertyEditor()
+    public SimpleComboBoxPropertyEditor()
     {
-      Items.Add("Collapse");
-      Items.Add("Expand");
-      Items.Add("Hidden");
+      Items.AddRange(GetItems());
       IsTextEditable = false;
     }
 
@@ -396,6 +406,35 @@ namespace InstallerStudio.Views.Controls
     {
       ((ComboBoxEdit)edit).NullValueButtonPlacement = EditorPlacement.Popup;
       base.AssignToEditCore(edit);      
+    }
+
+    protected abstract object[] GetItems();
+  }
+
+  class FeatureDisplayComboBoxPropertyEditor : SimpleComboBoxPropertyEditor
+  {
+    protected override object[] GetItems()
+    {
+      return new string[] { "Collapse", "Expand", "Hidden" };
+    }
+  }
+
+  class FeatureAbsentComboBoxPropertyEditor : SimpleComboBoxPropertyEditor
+  {
+    protected override object[] GetItems()
+    {
+      return new string[] { "Allow", "Disallow" };
+    }
+  }
+
+  class SqlScriptSequenceSpinEditPropertyEditor : SpinEditSettings
+  {
+    protected override void AssignToEditCore(IBaseEdit edit)
+    {
+      ((SpinEdit)edit).IsFloatValue = false;
+      ((SpinEdit)edit).MinValue = 1;
+      ((SpinEdit)edit).MaxValue = 100;
+      base.AssignToEditCore(edit);
     }
   }
 }
