@@ -8,7 +8,6 @@ using System.Threading;
 using System.Xml.Linq;
 
 using InstallerStudio.Utils;
-using InstallerStudio.WixElements;
 using InstallerStudio.Models;
 
 namespace InstallerStudio.WixElements.WixBuilders
@@ -52,11 +51,11 @@ namespace InstallerStudio.WixElements.WixBuilders
 
     #region Обработка шаблонов.
 
-    private void ProcessingTemplateSimpleComponent(IBuildContext context, CancellationTokenSource cts, XElement xmlFragment, WixComponentElement component)
+    private void ProcessingTemplateSimpleComponent(IBuildContext context, CancellationTokenSource cts, XElement xmlWix, WixComponentElement component)
     {
       // Добавляем файлы. В WIX в одном компоненте может быть несколько файлов, но
       // мы будем использовать для каждого файла отдельный компонент. Так не будет
-      // проблем с директориями, потому-что пользователь может указать для
+      // проблем с директориями, потому что пользователь может указать для
       // каждого файла разные директории установки. И что более важно, согласно ТЗ,
       // будем в дальнейшем формировать обновления для каждого файла.
       foreach (WixFileElement file in component.Items.OfType<WixFileElement>())
@@ -115,6 +114,8 @@ namespace InstallerStudio.WixElements.WixBuilders
           xmlFile.Add(xmlShortcut);
         }
 
+        XElement xmlFragment = new XElement(XmlNameSpaceWIX + "Fragment");
+        xmlWix.Add(xmlFragment);
         xmlFragment.Add(xmlDirectory);
         // Теперь сформируем теги для иконок.
         foreach (var icon in icons)
@@ -126,7 +127,7 @@ namespace InstallerStudio.WixElements.WixBuilders
       }
     }
 
-    private void ProcessingTemplateDbComponent(IBuildContext context, CancellationTokenSource cts, XElement xmlFragment, WixDbComponentElement component)
+    private void ProcessingTemplateDbComponent(IBuildContext context, CancellationTokenSource cts, XElement xmlWix, WixDbComponentElement component)
     {
       Dictionary<string, string> binaries = new Dictionary<string, string>();
 
@@ -163,6 +164,8 @@ namespace InstallerStudio.WixElements.WixBuilders
       binaries[formatedMdfFile] = Path.Combine(context.SourceStoreDirectory, component.MdfFile);
       binaries[formatedLdfFile] = Path.Combine(context.SourceStoreDirectory, component.LdfFile);
 
+      XElement xmlFragment = new XElement(XmlNameSpaceWIX + "Fragment");
+      xmlWix.Add(xmlFragment);
       xmlFragment.Add(xmlDirectory);
 
       // Если есть скрипты, добавляем.
@@ -205,17 +208,18 @@ namespace InstallerStudio.WixElements.WixBuilders
       DeleteDevelopmentInfo(path);
 
       XElement xmlWix = XElement.Load(path);
-      // Получаем секцию Fragment, в ней вложенные секции DirectoryRef для каждого компонента.
-      XElement xmlFragment = xmlWix.GetXElement("Fragment");
+      // Важно для обновления. Чтобы обновлять в будущем компоненты по отдельности
+      // используя msp, каждый компонент должен быть помещен в отдельный фрагмент.
+      // Части находящиеся в одном фрагменте будут обновлены вместе.
 
       // Получаем не предопределенные компоненты.
       foreach (WixComponentElement component in product.RootElement.Items.Descendants().
         OfType<WixComponentElement>().Where(v => !v.IsPredefined))
       {
         if (typeof(WixComponentElement) == component.GetType())
-          ProcessingTemplateSimpleComponent(context, cts, xmlFragment, component);
+          ProcessingTemplateSimpleComponent(context, cts, xmlWix, component);
         else if (typeof(WixDbComponentElement) == component.GetType())
-          ProcessingTemplateDbComponent(context, cts, xmlFragment, component as WixDbComponentElement);
+          ProcessingTemplateDbComponent(context, cts, xmlWix, component as WixDbComponentElement);
       }
       
       xmlWix.Save(path);
@@ -400,7 +404,7 @@ namespace InstallerStudio.WixElements.WixBuilders
 
     private void RunningCandle(IBuildContext context, CancellationTokenSource cts)
     {
-      context.BuildMessageWriteLine("Запуск компилятора Candle.exe (получение объектных модулей по исходным XML-документам).");
+      context.BuildMessageWriteLine(CandleDescription, BuildMessageTypes.Notification);
 
       // Путь к candle.
       string candleFileName = Path.Combine(context.ApplicationSettings.WixToolsetPath, context.ApplicationSettings.CandleFileName);
@@ -420,21 +424,12 @@ namespace InstallerStudio.WixElements.WixBuilders
         command.Append(string.Format(" \"{0}\"", Path.Combine(StoreDirectory, name.Value)));
       }
 
-      string strCommand = command.ToString();
-      context.BuildMessageWriteLine(candleFileName + " " + strCommand);
-      IProcessRunner runner = CreateProcessRunner();
-      runner.OutputMessageReceived += (s, e) =>
-        {
-          context.BuildMessageWriteLine(e.Message);
-        };
-      runner.Start(candleFileName, strCommand);
-      if (runner.HasError)
-        throw new Exception("Запуск Candle.exe завершился с ошибкой.");
+      RunCommand(context, candleFileName, command.ToString());
     }
 
     private void RunningLight(IBuildContext context, CancellationTokenSource cts)
     {
-      context.BuildMessageWriteLine("Запуск компоновщика Light.exe (сборка инсталляционного пакета из объектных модулей и других ресурсов).");
+      context.BuildMessageWriteLine(LightDescription, BuildMessageTypes.Notification);
 
       // Путь к light.
       string lightFileName = Path.Combine(context.ApplicationSettings.WixToolsetPath, context.ApplicationSettings.LightFileName);
@@ -447,32 +442,45 @@ namespace InstallerStudio.WixElements.WixBuilders
       string outDirectory = string.Format("{0} v{1}", product.Name, product.Version);
       outFileName = Path.Combine(Path.GetDirectoryName(context.ProjectFileName), outDirectory, outFileName);
 
-      // Команда для выполнения.
-      StringBuilder command = new StringBuilder();
-      command.Append(string.Format("-out \"{0}.{1}\"", outFileName, "msi"));
-      command.Append(string.Format(" -pdbout \"{0}.{1}\"", outFileName, "wixpdb"));
-      command.Append(" -cultures:null");
-      command.Append(string.Format(" -ext \"{0}\"", Path.Combine(context.ApplicationSettings.WixToolsetPath, context.ApplicationSettings.UIExtensionFileName)));
-      command.Append(string.Format(" -ext \"{0}\"", Path.Combine(Environment.CurrentDirectory, "WixSTExtension.dll")));
-      command.Append(" -cultures:ru-RU;en-US");
-      // Берем файлы с расширением .wxs и меняем на .wixobj.
-      foreach (var name in templates.Where(v => v.Value.EndsWith(".wxs")).Select(v => Path.ChangeExtension(v.Value, ".wixobj")))
+      // Выполняем два раза. 
+      // Первый раз строим wixout, второй msi и wixpdb.
+      for (int mode = 0; mode < 2; mode++)
       {
-        command.Append(@" " + Path.Combine(StoreDirectory, name));
-      }
+        // Команда для выполнения.
+        StringBuilder command = new StringBuilder();
+        string targetFileName;
+        if (mode == 0)
+        {
+          targetFileName = string.Format("{0}.{1}", outFileName, "wixout");
+          command.Append(string.Format("-bf -xo -out \"{0}\"", targetFileName));
+        }
+        else
+        {
+          targetFileName = string.Format("{0}.{1}", outFileName, "msi");
+          command.Append(string.Format("-out \"{0}\"", targetFileName));
+          command.Append(string.Format(" -pdbout \"{0}.{1}\"", outFileName, "wixpdb"));
+        }
+        command.Append(" -cultures:null");
+        command.Append(string.Format(" -ext \"{0}\"", Path.Combine(context.ApplicationSettings.WixToolsetPath, context.ApplicationSettings.UIExtensionFileName)));
+        command.Append(string.Format(" -ext \"{0}\"", Path.Combine(Environment.CurrentDirectory, "WixSTExtension.dll")));
+        command.Append(" -cultures:ru-RU;en-US");
+        // Берем файлы с расширением .wxs и меняем на .wixobj.
+        foreach (var name in templates.Where(v => v.Value.EndsWith(".wxs")).Select(v => Path.ChangeExtension(v.Value, ".wixobj")))
+        {
+          command.Append(@" " + Path.Combine(StoreDirectory, name));
+        }
 
-      string strCommand = command.ToString();
-      context.BuildMessageWriteLine(lightFileName + " " + strCommand);
-      IProcessRunner runner = CreateProcessRunner();
-      runner.OutputMessageReceived += (s, e) =>
-      {
-        context.BuildMessageWriteLine(e.Message);
-      };
-      runner.Start(lightFileName, strCommand);
-      if (runner.HasError)
-        throw new Exception("Запуск Light.exe завершился с ошибкой.");
-      else
-        context.BuildMessageWriteLine(string.Format("Создан файл: {0}.{1}", outFileName, "msi"));
+        RunCommand(context, lightFileName, command.ToString());
+
+        context.BuildMessageWriteLine(string.Format("Создан файл: {0}", targetFileName), BuildMessageTypes.Information);
+
+        // Если создаем wixout, то зархивируем его вместе с дополнительной информацией.
+        if (mode == 0)
+        {
+          WixProductUpdateInfo updateInfo = WixProductUpdateInfo.Create(product, targetFileName, context.SourceStoreDirectory);
+          updateInfo.Save(string.Format("{0}.{1}", outFileName, WixProductUpdateInfo.FilenameExtension), true);
+        }
+      }
     }
 
     #endregion

@@ -12,8 +12,9 @@
   d:DesignHeight="500" d:DesignWidth="700"
   SelectedDocumentIndex="{Binding ComponentsCategoryIsVisible, Mode=TwoWay,
     Converter={stviewsconverters:BooleanToSpecificIntConverter}, ConverterParameter=0}"
-  BuildMessages="{Binding BuildMessages, Mode=OneWay,
-    Converter={stviewsconverters:ListOfStringToStringConverter}}">
+    BuildMessages="{Binding BuildMessages, Mode=OneWay,
+      Converter={stviewsconverters:ListOfBuildMessageToListOfViewMessageConverter}}">
+<!-- DELETE Converter={stviewsconverters:ListOfStringToStringConverter} -->
   <!-- В App.xaml привязка видимости дополнительной категории осуществляется 
   по свойству IsVisible связанного объекта (IRibbonCustomCategory). Здесь 
   связываемся со свойством модели, которая возвращает и устанавливает 

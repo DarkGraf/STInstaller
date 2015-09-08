@@ -7,6 +7,7 @@ using InstallerStudio.Models;
 using InstallerStudio.ViewModels.Utils;
 using InstallerStudio.WixElements;
 using InstallerStudio.Utils;
+using InstallerStudio.Views.Controls;
 
 namespace InstallerStudio.ViewModels
 {
@@ -28,7 +29,7 @@ namespace InstallerStudio.ViewModels
     /// </summary>
     ICommand RemoveSelectedItemCommand { get; }
 
-    IList<string> BuildMessages { get; }
+    IList<BuildMessage> BuildMessages { get; }
   }
 
   struct FileDescription
@@ -170,7 +171,7 @@ namespace InstallerStudio.ViewModels
 
     public ICommand RemoveSelectedItemCommand { get; private set; }
 
-    public IList<string> BuildMessages 
+    public IList<BuildMessage> BuildMessages 
     {
       get { return Model.BuildMessages; }
     }
@@ -182,7 +183,7 @@ namespace InstallerStudio.ViewModels
       Model.Save(fileName);
     }
 
-    public void Load(string fileName)
+    public virtual void Load(string fileName)
     {
       Model.Load(fileName);
     }

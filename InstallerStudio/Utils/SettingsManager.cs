@@ -9,6 +9,8 @@ namespace InstallerStudio.Utils
     string WixToolsetPath { get; set; }
     string CandleFileName { get; set; }
     string LightFileName { get; set; }
+    string TorchFileName { get; set; }
+    string PyroFileName { get; set; }
     string UIExtensionFileName { get; set; }
   }
 
@@ -24,6 +26,10 @@ namespace InstallerStudio.Utils
       [DataMember]
       public string LightFileName { get; set; }
       [DataMember]
+      public string TorchFileName { get; set; }
+      [DataMember]
+      public string PyroFileName { get; set; }
+      [DataMember]
       public string UIExtensionFileName { get; set; }
 
       public static SettingsInfo CreateDefault()
@@ -32,6 +38,8 @@ namespace InstallerStudio.Utils
         info.WixToolsetPath = "C:\\Program Files\\WiX Toolset\\bin";
         info.CandleFileName = "candle.exe";
         info.LightFileName = "light.exe";
+        info.TorchFileName = "torch.exe";
+        info.PyroFileName = "pyro.exe";
         info.UIExtensionFileName = "wixUIExtension.dll";
         return info;
       }
@@ -43,6 +51,8 @@ namespace InstallerStudio.Utils
           WixToolsetPath = info.WixToolsetPath,
           CandleFileName = info.CandleFileName,
           LightFileName = info.LightFileName,
+          TorchFileName = info.TorchFileName,
+          PyroFileName = info.PyroFileName,
           UIExtensionFileName = info.UIExtensionFileName
         };
       }

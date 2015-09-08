@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,6 +10,7 @@ using System.Windows;
 using System.Windows.Resources;
 
 using InstallerStudio.Utils;
+using InstallerStudio.Models;
 
 namespace InstallerStudio.WixElements.WixBuilders
 {
@@ -50,11 +50,16 @@ namespace InstallerStudio.WixElements.WixBuilders
     protected const string XmlNameSpaceWIX = "{http://schemas.microsoft.com/wix/2006/wi}";
     protected const string XmlNameSpaceST = "{http://www.systemt.ru/STSchema}";
 
+    protected const string CandleDescription = "Запуск компилятора Candle.exe (получение объектных модулей по исходным XML-документам).";
+    protected const string LightDescription = "Запуск компоновщика Light.exe (сборка инсталляционного пакета из объектных модулей и других ресурсов).";
+    protected const string TorchDescription = "Запуск утилиты Torch.exe (генерации различий).";
+    protected const string PyroDescription = "Запуск утилиты Pyro.exe (создание патчей (.msp-пакетов) без использования Windows Installer SDK).";
+
     private void LoadingTemplates(IBuildContext context, CancellationTokenSource cts)
     {
       string[] templateNames = GetTemplateFileNames();
 
-      // У полученных путей определяем общую максимальную директорию.
+      // У полученных путей определяем общую максимальную директорию (только если ресурсов болььше 1).
       // Далее ее удаляем, и во временной директории создаем копию структуры директорий
       // как в ресурсах, без общего пути.
       // Алгоритм поиска общего пути следующий.
@@ -62,11 +67,16 @@ namespace InstallerStudio.WixElements.WixBuilders
       // в путях минус один и реверсируем его.
       // Затем перебираем и берем первый путь, где для всех путей выполняется
       // условие: пути начинаются с заданной строки.
-      string commonPath =
-        (from len in Enumerable.Range(0, templateNames.Min(s => s.Length)).Reverse()
-        let possiblePath = templateNames.First().Substring(0, len)
-        where templateNames.All(f => f.StartsWith(possiblePath))
-        select possiblePath).FirstOrDefault();
+      string commonPath;
+      if (templateNames.Length > 1)
+      {
+        commonPath = (from len in Enumerable.Range(0, templateNames.Min(s => s.Length)).Reverse()
+                      let possiblePath = templateNames.First().Substring(0, len)
+                      where templateNames.All(f => f.StartsWith(possiblePath))
+                      select possiblePath).FirstOrDefault();
+      }
+      else
+        commonPath = Path.GetDirectoryName(templateNames[0]).IncludeTrailingPathDelimiter();
 
       // Создаем анонимный тип с первоначальным путем и с удаленным общим путем.
       // Предусмотрим, что общий тип может быть null.
@@ -83,7 +93,7 @@ namespace InstallerStudio.WixElements.WixBuilders
         string strUri = string.Format("pack://application:,,,/{0};component/{1}",
           Assembly.GetExecutingAssembly().GetName().Name, "WixElements/WixBuilders/" + path.Original);
         Uri uri = new Uri(strUri);
-        
+
         StreamResourceInfo resourceInfo = Application.GetResourceStream(uri);
 
         // Проверим существование директории и при отсутствии ее, создадим.
@@ -128,17 +138,30 @@ namespace InstallerStudio.WixElements.WixBuilders
       File.WriteAllText(path, content);
     }
 
-    protected IProcessRunner CreateProcessRunner()
+    private IProcessRunner CreateProcessRunner()
     {
       // Всегда будем создавать новый процесс, чтобы в наследниках
       // не очищать события привязанные к анонимным методам.
       return new ProcessRunner(new Process());
     }
 
+    protected void RunCommand(IBuildContext context, string fileName, string command)
+    {
+      context.BuildMessageWriteLine(">" + fileName + " " + command, BuildMessageTypes.ConsoleSend);
+      IProcessRunner runner = CreateProcessRunner();
+      runner.OutputMessageReceived += (s, e) =>
+      {
+        context.BuildMessageWriteLine(e.Message, BuildMessageTypes.ConsoleReceive);
+      };
+      runner.Start(fileName, command);
+      if (runner.HasError)
+        throw new Exception(string.Format("Запуск {0} завершился с ошибкой.", Path.GetFileName(fileName)));
+    }
+
     public void Build(IBuildContext context)
     {
       context.ClearBuildMessage();
-      context.BuildMessageWriteLine("Сборка начата.");
+      context.BuildMessageWriteLine("Сборка начата.", BuildMessageTypes.Notification);
 
       // Общее действие для вызова методов с отменой выполнения задач.
       // Параметры: 
@@ -148,14 +171,14 @@ namespace InstallerStudio.WixElements.WixBuilders
       Action<Action<IBuildContext, CancellationTokenSource>, IBuildContext, CancellationTokenSource, string> actionWithErrorHandling =
         (Action<IBuildContext, CancellationTokenSource> a, IBuildContext ctx, CancellationTokenSource c, string m) =>
         {
-          context.BuildMessageWriteLine(m);
+          context.BuildMessageWriteLine(m, BuildMessageTypes.Notification);
           try 
           {
             a(ctx, c);
           }
           catch (Exception e)
           {
-            context.BuildMessageWriteLine(e.Message);
+            context.BuildMessageWriteLine(e.Message, BuildMessageTypes.Error);
             c.Cancel();
             c.Token.ThrowIfCancellationRequested();
           }
@@ -184,7 +207,8 @@ namespace InstallerStudio.WixElements.WixBuilders
           // Здесь должен быть код, выполняющийся в любом случае, завершились задачи или нет.
           context.BuildMessageWriteLine(
             string.Format("Сборка завершена {0} за {1}.", cts.IsCancellationRequested ? "с ошибками" : "успешно",
-            stopwatch.Elapsed.ToString("mm\\:ss")));
+            stopwatch.Elapsed.ToString("mm\\:ss")), 
+            cts.IsCancellationRequested ? BuildMessageTypes.Error : BuildMessageTypes.Information);
           if (context.BuildIsFinished != null)
             context.BuildIsFinished();
         });

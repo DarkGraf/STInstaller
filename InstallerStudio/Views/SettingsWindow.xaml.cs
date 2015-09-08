@@ -17,6 +17,8 @@ namespace InstallerStudio.Views
       private string wixToolsetPath = string.Empty;
       private string candleFileName = string.Empty;
       private string lightFileName = string.Empty;
+      private string torchFileName = string.Empty;
+      private string pyroFileName = string.Empty;
       private string uiExtensionFileName = string.Empty;
 
       public string WixToolsetPath
@@ -30,6 +32,8 @@ namespace InstallerStudio.Views
             // чтобы прошла проверка на ошибки с новым путем.
             NotifyPropertyChanged("CandleFileName");
             NotifyPropertyChanged("LightFileName");
+            NotifyPropertyChanged("TorchFileName");
+            NotifyPropertyChanged("PyroFileName");
             NotifyPropertyChanged("UIExtensionFileName");
           }
         }
@@ -45,6 +49,18 @@ namespace InstallerStudio.Views
       {
         get { return lightFileName; }
         set { SetValue(ref lightFileName, value ?? string.Empty); }
+      }
+
+      public string TorchFileName
+      {
+        get { return torchFileName; }
+        set { SetValue(ref torchFileName, value ?? string.Empty); }
+      }
+
+      public string PyroFileName
+      {
+        get { return pyroFileName; }
+        set { SetValue(ref pyroFileName, value ?? string.Empty); }
       }
 
       public string UIExtensionFileName
@@ -72,6 +88,10 @@ namespace InstallerStudio.Views
               return File.Exists(Path.Combine(WixToolsetPath, CandleFileName)) ? string.Empty : "Неправильный файл компилятора";
             case "LightFileName":
               return File.Exists(Path.Combine(WixToolsetPath, LightFileName)) ? string.Empty : "Неправильный файл компоновщика";
+            case "TorchFileName":
+              return File.Exists(Path.Combine(WixToolsetPath, TorchFileName)) ? string.Empty : "Неправильный файл утилиты генерации различий";
+            case "PyroFileName":
+              return File.Exists(Path.Combine(WixToolsetPath, PyroFileName)) ? string.Empty : "Неправильный файл утилита создания патчей";
             case "UIExtensionFileName":
               return File.Exists(Path.Combine(WixToolsetPath, UIExtensionFileName)) ? string.Empty : "Неправильный файл UI-расширения";
             default:

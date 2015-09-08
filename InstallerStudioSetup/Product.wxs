@@ -2,7 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product 
     Id="*"
-    Name="Installer Studio"
+    Name="Installer Studio (Alfa Version)"
     Manufacturer="ЗАО &quot;НПП Системные Технологии&quot;"
     Version="0.0.0.1" 
     Language="1049"
@@ -37,6 +37,18 @@
     
 			<ComponentGroupRef Id="MainExecutableGroup" />
       <ComponentGroupRef Id="UninstallGroup" />
+
+      <Feature
+        Id="DevExpressFeature"
+        Title="Компоненты DevExpress"
+        Description="Установка комонент DevExpress v15.1"
+        Display="expand"
+        Level="1"
+        AllowAdvertise="no"
+        Absent="disallow"
+        InstallDefault="local">
+        <ComponentGroupRef Id="DevExpressComponentGroup"/>
+      </Feature>
 		</Feature>
   
     <Icon Id="InstallerStudio.exe" SourceFile="$(var.InstallerStudio.TargetPath)" />
@@ -70,6 +82,8 @@
           <Shortcut Id="MainExeProgramMenuShortcut" Name="Installer Studio" Description="Запуск Installer Studio" 
                     WorkingDirectory="INSTALLFOLDER" Directory="ProgramMenuDir" Advertise="yes" Icon="InstallerStudio.exe" />
         </File>
+        <File Id="NLogDllFile" Name="NLog.dll" Source="$(var.InstallerStudio.ProjectDir)" DiskId="1" />
+        <File Id="NLogConfigFile" Name="NLog.config" Source="$(var.InstallerStudio.ProjectDir)" DiskId="1" />
       </Component>
 		</ComponentGroup>
   

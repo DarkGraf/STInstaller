@@ -1,0 +1,84 @@
+﻿<dxc:DXWindow x:Class="InstallerStudio.Views.MspWizardWindow"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/core"
+  xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+  xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+  xmlns:viewsconvertes="clr-namespace:InstallerStudio.Views.Converters"
+  ShowInTaskbar="False"
+  WindowStartupLocation="CenterOwner"
+  Title="Создание MSP" Height="270" Width="500" 
+  ResizeMode="NoResize"
+  SizeToContent="WidthAndHeight">
+
+  <dxc:DXWindow.DataContext>
+    <Binding RelativeSource="{RelativeSource Self}" />
+  </dxc:DXWindow.DataContext>
+  
+  <Window.Resources>
+    <viewsconvertes:EnumToBooleanConverter x:Key="converter" />
+    <Style x:Key="OpenButton" x:Shared="false" TargetType="{x:Type dxe:ButtonEdit}">
+      <Setter Property="AllowDefaultButton" Value="False" />
+      <Setter Property="Width" Value="350" />
+      <Setter Property="Buttons">
+        <Setter.Value>
+          <dxe:ButtonInfoCollection>
+            <dxe:ButtonInfo>
+              <dxe:ButtonInfo.Content>
+                <Image Source="Images/OpenSmall.png" />
+              </dxe:ButtonInfo.Content>
+            </dxe:ButtonInfo>
+          </dxe:ButtonInfoCollection>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <StackPanel Orientation="Vertical">
+    <StackPanel Orientation="Horizontal">
+      <dxlc:LayoutControl Orientation="Vertical">
+        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Файлы содержащие информацию обновления">
+          <dxlc:LayoutItem Label="Базовая сборка:">
+            <dxe:ButtonEdit
+              Name="edtBase"
+              Style="{StaticResource OpenButton}" 
+              Text="{Binding Path=Settings.PathToBaseSource, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+              Tag="PathToBase"/>
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Целевая сборка:">
+            <dxe:ButtonEdit
+              Name="edtTarget"
+              Style="{StaticResource OpenButton}" 
+              Text="{Binding Path=Settings.PathToTargetSource, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+              Tag="PathToTarget" />
+          </dxlc:LayoutItem>
+        </dxlc:LayoutGroup>
+        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Содержимое">
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition />
+              <RowDefinition />
+              <RowDefinition />
+            </Grid.RowDefinitions>
+            <RadioButton 
+              Grid.Row="0" Margin="5,0,5,0" Content="Создать пакеты для каждого компонента"
+              IsChecked="{Binding Path=Settings.ContentType, Converter={StaticResource converter}, ConverterParameter=EachInOne}" />
+            <RadioButton 
+              Grid.Row="1" Margin="5,0,5,0" Content="Создать один пакет со всеми компонентами"
+              IsChecked="{Binding Path=Settings.ContentType, Converter={StaticResource converter}, ConverterParameter=AllInOne}" />
+            <RadioButton 
+              Grid.Row="2" Margin="5,0,5,0" Content="Не создавать пакеты"
+              IsChecked="{Binding Path=Settings.ContentType, Converter={StaticResource converter}, ConverterParameter=Empty}" />
+          </Grid>
+        </dxlc:LayoutGroup>
+      </dxlc:LayoutControl>
+    </StackPanel>
+    
+    <DockPanel LastChildFill="False">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Button Content="Создать" Margin="10,0,5,10" Width="100" IsDefault="True" Command="{Binding OkCloseCommand}" />
+        <Button Content="Отмена" Margin="5,0,10,10" Width="100" IsCancel="True" />
+      </StackPanel>
+    </DockPanel>
+  </StackPanel>
+</dxc:DXWindow>

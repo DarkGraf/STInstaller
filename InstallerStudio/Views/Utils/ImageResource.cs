@@ -39,7 +39,9 @@ namespace InstallerStudio.Views.Utils
     [UriImage("Views/Images/Components/SqlExtentedProceduresSmall.png")]
     SqlExtentedProcedures,
     [UriImage("Views/Images/Components/MefPluginSmall.png")]
-    MefPlugin
+    MefPlugin,
+    [UriImage("Views/Images/Components/PatchSmall.png")]
+    Patch
   }
 
   /// <summary>

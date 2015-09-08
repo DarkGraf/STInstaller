@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-using InstallerStudio.Utils;
 using InstallerStudio.WixElements.WixBuilders;
 
 namespace InstallerStudio.WixElements

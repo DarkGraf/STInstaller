@@ -35,7 +35,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="mscorlib.4.0.0.0.Fakes">
+      <HintPath>FakesAssemblies\mscorlib.4.0.0.0.Fakes.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.4.0.0.0.Fakes">
+      <HintPath>FakesAssemblies\System.4.0.0.0.Fakes.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <Choose>
@@ -61,6 +68,8 @@
     <Compile Include="Utils\SettingsManagerTest.cs" />
     <Compile Include="Utils\ZipFileStoreTest.cs" />
     <Compile Include="ViewModels\Utils\RibbonManagerTest.cs" />
+    <Compile Include="WixElements\WixMD5Test.cs" />
+    <Compile Include="WixElements\WixProductUpdateInfoTest.cs" />
     <Compile Include="WixElements\XmlSaverLoaderTest.cs" />
     <Compile Include="WixElements\WixElementsTest.cs" />
   </ItemGroup>
@@ -70,7 +79,12 @@
       <Name>InstallerStudio</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Fakes Include="Fakes\System.fakes" />
+  </ItemGroup>
+  <ItemGroup>
+    <Fakes Include="Fakes\mscorlib.fakes" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

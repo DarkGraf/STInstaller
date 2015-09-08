@@ -7,27 +7,53 @@
   xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
   xmlns:stviewscontrols="clr-namespace:InstallerStudio.Views.Controls"
+  xmlns:stviewsconverters="clr-namespace:InstallerStudio.Views.Converters"
   mc:Ignorable="d" 
-  d:DesignHeight="500" d:DesignWidth="700">
+  d:DesignHeight="500" d:DesignWidth="700"
+  BuildMessages="{Binding BuildMessages, Mode=OneWay,
+    Converter={stviewsconverters:ListOfBuildMessageToListOfViewMessageConverter}}">
 
   <stviewscontrols:ChildViewBase.Documents>
     <dxdo:DocumentPanel Caption="Содержание">
       <stviewscontrols:WixTreeListControl />
     </dxdo:DocumentPanel>
-    <dxdo:DocumentPanel Caption="Описание пакета обновления">
+    <dxdo:DocumentPanel Caption="Обновляемые пакеты">
+      <dxdo:DocumentPanel.Resources>
+        <Style TargetType="{x:Type TextBox}">
+          <Setter Property="IsReadOnly" Value="True" />
+        </Style>
+      </dxdo:DocumentPanel.Resources>
       <dxlc:LayoutControl Orientation="Vertical">
-        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Основные свойства пакета">
+        <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Основные свойства пакетов">
+          <dxlc:LayoutItem Label=" ">
+            <stviewscontrols:PairContainer>
+              <TextBlock Text="Базовый пакет" HorizontalAlignment="Center" />
+              <TextBlock Text="Целевой пакет" HorizontalAlignment="Center" />
+            </stviewscontrols:PairContainer>
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Идентификатор продукта:">
+            <stviewscontrols:PairContainer>
+              <TextBox Text="{Binding Path=MainItem.BaseId, Mode=OneWay}" />
+              <TextBox Text="{Binding Path=MainItem.TargetId, Mode=OneWay}" />
+            </stviewscontrols:PairContainer>
+          </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Наименование продукта:">
-            <TextBox />
-          </dxlc:LayoutItem>
-          <dxlc:LayoutItem Label="Описание:">
-            <TextBox />
-          </dxlc:LayoutItem>
-          <dxlc:LayoutItem Label="Комментарий:">
-            <TextBox />
+            <stviewscontrols:PairContainer>
+              <TextBox Text="{Binding Path=MainItem.BaseName, Mode=OneWay}" />
+              <TextBox Text="{Binding Path=MainItem.TargetName, Mode=OneWay}" />
+            </stviewscontrols:PairContainer>
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Разработчик продукта:">
-            <TextBox />
+            <stviewscontrols:PairContainer>
+              <TextBox Text="{Binding Path=MainItem.BaseManufacturer, Mode=OneWay}" />
+              <TextBox Text="{Binding Path=MainItem.TargetManufacturer, Mode=OneWay}" />
+            </stviewscontrols:PairContainer>
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Версия:">
+            <stviewscontrols:PairContainer>
+              <TextBox Text="{Binding Path=MainItem.BaseVersion, Mode=OneWay}" />
+              <TextBox Text="{Binding Path=MainItem.TargetVersion, Mode=OneWay}" />
+            </stviewscontrols:PairContainer>
           </dxlc:LayoutItem>
         </dxlc:LayoutGroup>
       </dxlc:LayoutControl>

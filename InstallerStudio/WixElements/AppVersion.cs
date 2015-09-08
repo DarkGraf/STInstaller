@@ -84,5 +84,17 @@ namespace InstallerStudio.WixElements
     {
       return version.ToString();
     }
+
+    public override bool Equals(object obj)
+    {
+      AppVersion other = obj as AppVersion;
+      return other != null && Major == other.Major && Minor == other.Minor &&
+        Build == other.Build && Revision == other.Revision;
+    }
+
+    public override int GetHashCode()
+    {
+      return ToString().GetHashCode();
+    }
   }
 }

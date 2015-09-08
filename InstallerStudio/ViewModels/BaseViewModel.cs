@@ -21,7 +21,8 @@ namespace InstallerStudio.ViewModels
     [DebuggerStepThrough]
     public void VerifyPropertyName(string propertyName)
     {
-      if (TypeDescriptor.GetProperties(this)[propertyName] == null)
+      // Если равно null - уведомление всех свойств.
+      if (propertyName != null && TypeDescriptor.GetProperties(this)[propertyName] == null)
       {
         string msg = "Недействительное свойство: " + propertyName;
         if (ThrowOnInvalidPropertyName)

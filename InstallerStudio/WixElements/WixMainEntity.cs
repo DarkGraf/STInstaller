@@ -34,7 +34,7 @@ namespace InstallerStudio.WixElements
     /// <summary>
     /// Вывод сообщений о построении.
     /// </summary>
-    void BuildMessageWriteLine(string message);
+    void BuildMessageWriteLine(string message, BuildMessageTypes messageType);
     /// <summary>
     /// Очистка сообщений о построении.
     /// </summary>

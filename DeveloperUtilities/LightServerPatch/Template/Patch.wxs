@@ -20,10 +20,12 @@
     <!-- Version используется для связей с другими патчами. -->
     <!-- Supersede="yes" - патч должен переписывать все патчи из этого семейства. -->
     <PatchFamily Id="AspoPatchFamily" Version="1.0.1.0" ProductCode="c51280e3-8837-4ddd-888e-12df6168ec29" Supersede="yes">
+      <!--DEVELOPMENT_INFO_BEGIN-->
       <!-- Если не укажем явно компоненты, то обновятся все изменные файлы. Если укажем, то для
       изменения версии необходимо указать PropertyRef. -->
       <!--ComponentRef Id="SqlComponent"/>
       <PropertyRef Id="ProductVersion"/-->
+      <!--DEVELOPMENT_INFO_END-->
     </PatchFamily>
   </Patch>
 </Wix>

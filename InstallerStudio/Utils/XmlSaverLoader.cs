@@ -21,6 +21,20 @@ namespace InstallerStudio.Utils
       }
     }
 
+    public static void Save<T>(T element, Stream stream)
+      where T : class
+    {
+      // Так как может быть в T указан базовый тип, для сериализатора необходимо
+      // указать тип объекта, т. е. не typeof(T), а element.GetType().
+      DataContractSerializer serializer = new DataContractSerializer(element.GetType());
+      XmlWriterSettings settings = new XmlWriterSettings();
+      settings.Indent = true;
+      using (XmlWriter writer = XmlWriter.Create(stream, settings))
+      {
+        serializer.WriteObject(writer, element);
+      }
+    }
+
     /// <summary>
     /// Десериализация объекта.
     /// </summary>
@@ -39,6 +53,21 @@ namespace InstallerStudio.Utils
 
       DataContractSerializer serializer = new DataContractSerializer(type);
       using (XmlReader reader = XmlReader.Create(fileName))
+      {
+        return serializer.ReadObject(reader) as T;
+      }
+    }
+
+    public static T Load<T>(Stream stream, Type targetType = null)
+      where T : class
+    {
+      if (targetType != null && !typeof(T).IsAssignableFrom(targetType))
+        throw new InvalidDataException();
+
+      Type type = targetType ?? typeof(T);
+
+      DataContractSerializer serializer = new DataContractSerializer(type);
+      using (XmlReader reader = XmlReader.Create(stream))
       {
         return serializer.ReadObject(reader) as T;
       }

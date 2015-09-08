@@ -39,9 +39,9 @@ namespace InstallerStudio.Models
   /// </summary>
   public class BuildContextWrapper : IBuildContext
   {
-    IList<string> buildMessages;
+    IList<BuildMessage> buildMessages;
 
-    public BuildContextWrapper(IList<string> buildMessages, ISettingsInfo applicationSettings, string projectFileName,
+    public BuildContextWrapper(IList<BuildMessage> buildMessages, ISettingsInfo applicationSettings, string projectFileName,
       Action buildIsFinished, string sourceStoreDirectory)
     {
       this.buildMessages = buildMessages;
@@ -52,10 +52,10 @@ namespace InstallerStudio.Models
     }
 
     #region IBuildContext
-    
-    public void BuildMessageWriteLine(string message)
+
+    public void BuildMessageWriteLine(string message, BuildMessageTypes messageType)
     {
-      buildMessages.Add(message);
+      buildMessages.Add(new BuildMessage(message, messageType));
     }
 
     public void ClearBuildMessage()
@@ -72,6 +72,48 @@ namespace InstallerStudio.Models
     public string SourceStoreDirectory { get; private set; }
 
     #endregion
+  }
+
+  /// <summary>
+  /// Типы сообщений.
+  /// </summary>
+  public enum BuildMessageTypes
+  {
+    /// <summary>
+    /// Сообщение полученное с консоли.
+    /// </summary>
+    ConsoleReceive,
+    /// <summary>
+    /// Сообщение посланное консоли.
+    /// </summary>
+    ConsoleSend,
+    /// <summary>
+    /// Уведомление о текущих операциях.
+    /// </summary>
+    Notification,
+    /// <summary>
+    /// Важная итоговая информация.
+    /// </summary>
+    Information,
+    /// <summary>
+    /// Сообщение об ошибках.
+    /// </summary>
+    Error
+  }
+
+  /// <summary>
+  /// Класс для хранения единицы сообщения о событиях построения.
+  /// </summary>
+  public class BuildMessage
+  {
+    public string Message { get; private set; }
+    public BuildMessageTypes Type { get; private set; }
+
+    public BuildMessage(string message, BuildMessageTypes type)
+    {
+      Message = message;
+      Type = type;
+    }
   }
 
   public enum ModelState
@@ -110,6 +152,8 @@ namespace InstallerStudio.Models
 
     private bool isBuilding;
 
+    private string loadedFileName;
+
     /// <summary>
     /// Словарь количества экзепляров по типам для генерации уникального имени IWixElement.
     /// </summary>
@@ -126,11 +170,15 @@ namespace InstallerStudio.Models
       fileStore = FileStoreCreator.Create();
       // Создадим сообщения о построении и привяжем
       // делегат уведомления об изменении свойства BuildMessages.
-      BuildMessages = new ObservableCollection<string>();
-      ((ObservableCollection<string>)BuildMessages).CollectionChanged += delegate { NotifyPropertyChanged("BuildMessages"); };
+      BuildMessages = new ObservableCollection<BuildMessage>();
+#warning Наверное не нужно.
+      /*((ObservableCollection<BuildMessage>)BuildMessages).CollectionChanged += 
+        (o, e) => { NotifyPropertyChanged("BuildMessages"); };*/
       IsBuilding = false;
       State = ModelState.New;
     }
+
+    protected IFileStore FileStore { get { return fileStore;  } }
 
     /// <summary>
     /// Создание самой главной сущности Wix.
@@ -310,7 +358,7 @@ namespace InstallerStudio.Models
       }
     }
 
-    public IList<string> BuildMessages { get; private set; }
+    public IList<BuildMessage> BuildMessages { get; private set; }
 
     public bool IsBuilding 
     {
@@ -326,8 +374,11 @@ namespace InstallerStudio.Models
     /// <summary>
     /// Имя файла для сохранения/загрузки.
     /// </summary>
-    public string LoadedFileName { get; private set; }
-
+    public string LoadedFileName 
+    {
+      get { return loadedFileName; }
+      private set { SetValue(ref loadedFileName, value); }
+    }
 
     /// <summary>
     /// Обработка события изменения информации о добавлении файла.

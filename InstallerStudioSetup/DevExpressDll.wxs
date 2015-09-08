@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER">
+            <Component Id="cmpC70515B2FDF5426B74099D1ABB987F52" Guid="{E7C5BA4D-C2C5-43D2-B063-CBF3C0E9CE64}">
+                <File Id="fil4A2641C8F99C9E9CB75AB1494508800A" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Data.v15.1.dll" />
+            </Component>
+            <Component Id="cmp01A297FBFC6EF61DA43435D83B2C3F5C" Guid="{37AB8C3D-0704-4424-8187-1ED6C0B33CE5}">
+                <File Id="filD9292CDABE572A71EEC06D13AB2C1E73" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Mvvm.v15.1.dll" />
+            </Component>
+            <Component Id="cmp5C174509BED9E8A4F9E8592C686A66CE" Guid="{0C98676E-092F-4316-882D-0602C14971DC}">
+                <File Id="fil92F896BEE3B4C4AA7ABFA55B50BC0BE3" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Printing.v15.1.Core.dll" />
+            </Component>
+            <Component Id="cmp05E7F16F9DB775B0F1D667112271CBDF" Guid="{4155CEF9-088B-482A-91BA-D97BBC6CFEF5}">
+                <File Id="fil4E21033EB310C0BA483001E9CDE712C1" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Core.v15.1.dll" />
+            </Component>
+            <Component Id="cmpEED592A8910ABFB687C4706B09D79CB9" Guid="{AF4F0C99-BC78-41A6-8D1A-95B3F3143332}">
+                <File Id="fil736731223786314A86D9E97FAA782FD2" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Docking.v15.1.dll" />
+            </Component>
+            <Component Id="cmpC6F995F360E75895CF86906972CE3943" Guid="{75D48DFB-E810-4552-9120-181829F525BE}">
+                <File Id="filB94AA31B28DB1D51B63678EFFEB6C82F" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.DocumentViewer.v15.1.Core.dll" />
+            </Component>
+            <Component Id="cmp3535639DC8D1BE94DD92019127B4F578" Guid="{37EBBF61-83C0-4AB4-A11A-4E89AF9A9617}">
+                <File Id="fil57C25E8506BC0570634EAB1C876030F7" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Grid.v15.1.Core.dll" />
+            </Component>
+            <Component Id="cmp1A513FBCAF58D2E33302F9623AF168CC" Guid="{E8BABDB7-D128-45B9-9E36-5FDC4B78AA00}">
+                <File Id="fil0C0E17B3132C01F50553F835B2670254" KeyPath="yes" Source="$(var.DevExpress)\devexpress.xpf.grid.v15.1.dll" />
+            </Component>
+            <Component Id="cmpD3809E2561301A9E49DDF99B150832EE" Guid="{BE41F174-C12B-4A1B-B689-78CCB2AA0D06}">
+                <File Id="fil3B03AC45F85FEBD0A2D04101D90E02F6" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Layout.v15.1.Core.dll" />
+            </Component>
+            <Component Id="cmpC96FC3878CE3A360AAAB25ECF42201D0" Guid="{60A54EE8-C604-440A-8E89-4B7219F4AF1E}">
+                <File Id="filDA2ADBDB76C1997166334BA1CCE0EAB9" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.LayoutControl.v15.1.dll" />
+            </Component>
+            <Component Id="cmp8CF83A0041D2F109E545C7FF90BF15DA" Guid="{6DC7BF28-146F-4A1B-B427-6E41A230760F}">
+                <File Id="fil7319A0ECB0F4FA13C5CD81741EFA6167" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Printing.v15.1.dll" />
+            </Component>
+            <Component Id="cmpEA26022EF7B02F543467103D54E3E007" Guid="{52A1B375-DF28-48B3-82AF-A33ECF1EB8C2}">
+                <File Id="fil12CBD972416A19642752DEAF20869865" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Printing.v15.1.Service.dll" />
+            </Component>
+            <Component Id="cmp6D98994CCEB4A58C23296C89746A7F99" Guid="{23BAB17B-02B5-40BA-AA01-FC879B7B2F5A}">
+                <File Id="filB3524402939DF1B652CE8183A4EF692F" KeyPath="yes" Source="$(var.DevExpress)\devexpress.xpf.propertygrid.v15.1.dll" />
+            </Component>
+            <Component Id="cmp32D3B424319C78AE8238B5BBB908A000" Guid="{CE1E6351-7737-4DC0-8B03-99F61F156850}">
+                <File Id="fil74F767311F8AFB548A4B0048951A152F" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Ribbon.v15.1.dll" />
+            </Component>
+            <Component Id="cmp47D4DF0B696B1AD8F105D484BFB0D5D6" Guid="{1E586669-97B8-4D54-A2EA-7E09CB171E5F}">
+                <File Id="fil66532839AE9E9F77EA76B2CB10A07C1D" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.DXStyle.v15.1.dll" />
+            </Component>
+            <Component Id="cmpB6BFE69071BACF394D732855C7BFD1C7" Guid="{4524428B-9008-4AE0-9B80-52060DF02EC1}">
+                <File Id="fil1C7DD874C9E54D3527F8916C21D3D809" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.HybridApp.v15.1.dll" />
+            </Component>
+            <Component Id="cmp8CA6BC90A7BED9B381EE648534B76392" Guid="{3E7417E4-238B-4E1A-A1D3-CECF04103A0E}">
+                <File Id="fil9562FBDE75290C47BDE84300AD3ED3F4" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.LightGray.v15.1.dll" />
+            </Component>
+            <Component Id="cmpDAECB8E364CF52B97711FDF9A8C296E2" Guid="{5A2379A1-6FBD-456A-824E-6BC2920BAAB5}">
+                <File Id="fil9BAC9EE84560B30D9CB68F07DA7E8204" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.MetropolisDark.v15.1.dll" />
+            </Component>
+            <Component Id="cmp4467B9D13B522403CCC975E4B158BC18" Guid="{EEADC14C-0DB1-41C2-BFB7-E04D794DB78D}">
+                <File Id="filC5ACE136D3EE005068B6B27E422FEA86" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.MetropolisLight.v15.1.dll" />
+            </Component>
+            <Component Id="cmp540A3528CDC0DC9B47D6982B1064FCBF" Guid="{3F208EFF-42C7-40F7-BE6E-FF9DF2D10A2B}">
+                <File Id="filEA38CBFF0DEA33BA22DDE2B2B89AA865" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2007Black.v15.1.dll" />
+            </Component>
+            <Component Id="cmpE3CF9E67A48414E36FCC22B808FA7B92" Guid="{0B4DE99E-44B4-43F7-930B-C0EBDC919E4D}">
+                <File Id="fil77FC44464B84A502FEA2D48170B3DFCF" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2007Blue.v15.1.dll" />
+            </Component>
+            <Component Id="cmpE8D5D82E7AE64C7715E78461150BF157" Guid="{D502EEF7-E4F0-43FB-B1BB-03FC0EFDDA10}">
+                <File Id="fil652CABC9946977EA74A94E2D841C52A4" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2007Silver.v15.1.dll" />
+            </Component>
+            <Component Id="cmpF1138FCE030EAA90D8B2D319E7B1A5C3" Guid="{886EFF81-E072-4A49-9F85-C7844C4D7922}">
+                <File Id="filAEF289F880CECA88C3A7C52722C0CF10" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2010Black.v15.1.dll" />
+            </Component>
+            <Component Id="cmpE0B08E3264DBBBB106651A5E4148D6B1" Guid="{720A0375-FD1C-46C6-81A3-F0820C9E25DD}">
+                <File Id="fil79AA12ADBD79CDD7BA20720F8196607A" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2010Blue.v15.1.dll" />
+            </Component>
+            <Component Id="cmpB80E33F01E160DD00A6A174C5E679E00" Guid="{95CAA065-E65D-468B-A117-DA5EDDC39743}">
+                <File Id="fil02529203F50C4E0319A870CF3FCCB7DC" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2010Silver.v15.1.dll" />
+            </Component>
+            <Component Id="cmpF72B57DABCCBA9234A9815F2224C44EC" Guid="{9A63E784-2E8B-473B-80DD-7EE7ADCEEDEB}">
+                <File Id="filB5119854D0351D108B0D1FF44CC2B157" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2013.v15.1.dll" />
+            </Component>
+            <Component Id="cmp04B8CB07C036BFE67E80AEA97E5641C1" Guid="{E8349FB0-F1C3-4EDC-B4B0-2C190D962E51}">
+                <File Id="filC370268CAF656AA01233752B38E21089" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2013DarkGray.v15.1.dll" />
+            </Component>
+            <Component Id="cmp29D5D84872C717104C9BFFE18DD3A0FB" Guid="{28BD4218-854A-48B7-A7CE-22A8F289EA65}">
+                <File Id="fil6DB5C46E466E0D1ACFE2B516D770D36F" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Office2013LightGray.v15.1.dll" />
+            </Component>
+            <Component Id="cmpA76961228D27274739D779434E0839C0" Guid="{5EA3D4D4-F21D-49D3-B83D-5267D730044D}">
+                <File Id="fil02555B8A5D4A24C4F482C4EA8FCA13E5" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.Seven.v15.1.dll" />
+            </Component>
+            <Component Id="cmpB37834FE65E58D1F05ADF6A7B2EEFC32" Guid="{8FDA3F23-81EC-45E7-B8D9-FE2044EE138C}">
+                <File Id="fil661EE1D813F8FA2AD050F808FB32E935" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.TouchlineDark.v15.1.dll" />
+            </Component>
+            <Component Id="cmp22107D24654D07C63F243CDC8033F158" Guid="{12871E56-3A30-42E4-87E8-DC78BA24045C}">
+                <File Id="filA5DCF92C718ED5F7F08B3E57E981515D" KeyPath="yes" Source="$(var.DevExpress)\DevExpress.Xpf.Themes.VS2010.v15.1.dll" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="DevExpressComponentGroup">
+            <ComponentRef Id="cmpC70515B2FDF5426B74099D1ABB987F52" />
+            <ComponentRef Id="cmp01A297FBFC6EF61DA43435D83B2C3F5C" />
+            <ComponentRef Id="cmp5C174509BED9E8A4F9E8592C686A66CE" />
+            <ComponentRef Id="cmp05E7F16F9DB775B0F1D667112271CBDF" />
+            <ComponentRef Id="cmpEED592A8910ABFB687C4706B09D79CB9" />
+            <ComponentRef Id="cmpC6F995F360E75895CF86906972CE3943" />
+            <ComponentRef Id="cmp3535639DC8D1BE94DD92019127B4F578" />
+            <ComponentRef Id="cmp1A513FBCAF58D2E33302F9623AF168CC" />
+            <ComponentRef Id="cmpD3809E2561301A9E49DDF99B150832EE" />
+            <ComponentRef Id="cmpC96FC3878CE3A360AAAB25ECF42201D0" />
+            <ComponentRef Id="cmp8CF83A0041D2F109E545C7FF90BF15DA" />
+            <ComponentRef Id="cmpEA26022EF7B02F543467103D54E3E007" />
+            <ComponentRef Id="cmp6D98994CCEB4A58C23296C89746A7F99" />
+            <ComponentRef Id="cmp32D3B424319C78AE8238B5BBB908A000" />
+            <ComponentRef Id="cmp47D4DF0B696B1AD8F105D484BFB0D5D6" />
+            <ComponentRef Id="cmpB6BFE69071BACF394D732855C7BFD1C7" />
+            <ComponentRef Id="cmp8CA6BC90A7BED9B381EE648534B76392" />
+            <ComponentRef Id="cmpDAECB8E364CF52B97711FDF9A8C296E2" />
+            <ComponentRef Id="cmp4467B9D13B522403CCC975E4B158BC18" />
+            <ComponentRef Id="cmp540A3528CDC0DC9B47D6982B1064FCBF" />
+            <ComponentRef Id="cmpE3CF9E67A48414E36FCC22B808FA7B92" />
+            <ComponentRef Id="cmpE8D5D82E7AE64C7715E78461150BF157" />
+            <ComponentRef Id="cmpF1138FCE030EAA90D8B2D319E7B1A5C3" />
+            <ComponentRef Id="cmpE0B08E3264DBBBB106651A5E4148D6B1" />
+            <ComponentRef Id="cmpB80E33F01E160DD00A6A174C5E679E00" />
+            <ComponentRef Id="cmpF72B57DABCCBA9234A9815F2224C44EC" />
+            <ComponentRef Id="cmp04B8CB07C036BFE67E80AEA97E5641C1" />
+            <ComponentRef Id="cmp29D5D84872C717104C9BFFE18DD3A0FB" />
+            <ComponentRef Id="cmpA76961228D27274739D779434E0839C0" />
+            <ComponentRef Id="cmpB37834FE65E58D1F05ADF6A7B2EEFC32" />
+            <ComponentRef Id="cmp22107D24654D07C63F243CDC8033F158" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>

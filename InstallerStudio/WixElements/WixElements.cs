@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.IO;
 
 using InstallerStudio.Common;
 using InstallerStudio.Models;
@@ -17,7 +18,8 @@ namespace InstallerStudio.WixElements
    * Browsable - скрытие свойства для PropertyGrid;
    * ReadOnly - свойство только для чтения в PropertyGrid;
    * Description - подсказка пользователю в PropertyGrid;
-   * DataMember - для сериализации свойства.    
+   * DataMember - для сериализации свойства.
+   * KnownType - для сериализации дочерних элементов, при сериализаци конкретного типа.
    * 
    * Для данных типов, при десериализации конструктор не вызывается,
    * поэтому необходимо предусмотреть метод в базовом типе с аттрибутом [OnDeserializing]
@@ -48,6 +50,12 @@ namespace InstallerStudio.WixElements
     /// Используется массив, так как элемент может поддерживать несколько файлов.
     /// </summary>
     string[] GetInstallDirectories();
+
+    /// <summary>
+    /// Получает файлы с относительными путями (пути инсталляции).
+    /// </summary>
+    /// <returns></returns>
+    string[] GetFilesWithRelativePath();
   }
 
   class FileSupportEventArgs : EventArgs
@@ -84,7 +92,7 @@ namespace InstallerStudio.WixElements
       // передадим для дальнейшего анализа, а в FileName запомним только имя файла.
       // Директория для инсталляции не изменилась, поэтому передаем ее в двух параметрах.
       string oldFileName = fileName;
-      fileName = System.IO.Path.GetFileName(rawFileName);
+      fileName = Path.GetFileName(rawFileName);
       return new FileSupportEventArgs(oldFileName, directory, fileName, directory, rawFileName);
     }
 
@@ -100,6 +108,14 @@ namespace InstallerStudio.WixElements
   #endregion
 
   [DataContract(Namespace = StringResources.Namespace)]
+  [KnownType(typeof(WixFeatureElement))]
+  [KnownType(typeof(WixComponentElement))]
+  [KnownType(typeof(WixDbComponentElement))]
+  [KnownType(typeof(WixSqlScriptElement))]
+  [KnownType(typeof(WixFileElement))]
+  [KnownType(typeof(WixShortcutElement))]
+  [KnownType(typeof(WixSqlExtentedProceduresElement))]
+  [KnownType(typeof(WixMefPluginElement))]
   abstract class WixElementBase : ChangeableObject, IWixElement, IDataErrorInfo
   {
     #region Вложенные типы.
@@ -289,6 +305,8 @@ namespace InstallerStudio.WixElements
 
     #endregion    
   }
+
+  #region Элементы Msi.
 
   [DataContract(Namespace = StringResources.Namespace)]
   class WixFeatureElement : WixElementBase
@@ -518,6 +536,11 @@ namespace InstallerStudio.WixElements
       return new string[] { "" };
     }
 
+    public string[] GetFilesWithRelativePath()
+    {
+      return new string[] { mdfFile, ldfFile };
+    }
+
     #endregion
   }
 
@@ -605,6 +628,11 @@ namespace InstallerStudio.WixElements
     public string[] GetInstallDirectories()
     {
       return new string[] { "" };
+    }
+
+    public string[] GetFilesWithRelativePath()
+    {
+      return new string[] { script };
     }
 
     #endregion
@@ -703,7 +731,12 @@ namespace InstallerStudio.WixElements
 
     public string[] GetInstallDirectories()
     {
-      return new string[] { InstallDirectory ?? "" };
+      return new string[] { installDirectory ?? "" };
+    }
+
+    public string[] GetFilesWithRelativePath()
+    {
+      return new string[] { Path.Combine(installDirectory ?? "", fileName) };
     }
 
     #endregion
@@ -789,6 +822,11 @@ namespace InstallerStudio.WixElements
       return new string[] { "" };
     }
 
+    public string[] GetFilesWithRelativePath()
+    {
+      return new string[] { icon };
+    }
+
     #endregion
   }
 
@@ -849,6 +887,11 @@ namespace InstallerStudio.WixElements
     public string[] GetInstallDirectories()
     {
       return new string[] { "" };
+    }
+
+    public string[] GetFilesWithRelativePath()
+    {
+      return new string[] { fileName };
     }
 
     #endregion
@@ -913,23 +956,104 @@ namespace InstallerStudio.WixElements
       return new string[] { "" };
     }
 
+    public string[] GetFilesWithRelativePath()
+    {
+      return new string[] { fileName };
+    }
+
     #endregion
   }
 
-  class WixPatchFamilyElement : WixElementBase
+  #endregion
+
+  #region Элементы Msp.
+
+  [DataContract(Namespace = StringResources.Namespace)]
+  // Аналог в Wix отсутствует.
+  class WixPatchRootElement : WixElementBase
+  {
+    private Type[] allowedTypesOfChildren;
+
+    #region WixElementBase
+
+    protected override void Initialize()
+    {
+      base.Initialize();
+      allowedTypesOfChildren = new Type[] 
+      { 
+        typeof(WixPatchElement)
+      };
+    }
+
+    protected override IEnumerable<Type> AllowedTypesOfChildren
+    {
+      get { return allowedTypesOfChildren; }
+    }
+
+    public override ElementsImagesTypes ImageType
+    {
+      get { return ElementsImagesTypes.Patch; }
+    }
+
+    public override string ShortTypeName
+    {
+      get { return "PatchRoot"; }
+    }
+
+    #endregion
+  }
+
+  [DataContract(Namespace = StringResources.Namespace)]
+  class WixPatchElement : WixElementBase
+  {
+    private Type[] allowedTypesOfChildren;
+
+    #region WixElementBase
+
+    protected override void Initialize()
+    {
+      base.Initialize();
+      allowedTypesOfChildren = new Type[] 
+      { 
+        typeof(WixPatchComponentElement)
+      };
+    }
+
+    protected override IEnumerable<Type> AllowedTypesOfChildren
+    {
+      get { return allowedTypesOfChildren; }
+    }
+
+    public override ElementsImagesTypes ImageType
+    {
+      get { return ElementsImagesTypes.Patch; }
+    }
+
+    public override string ShortTypeName
+    {
+      get { return "Patch"; }
+    }
+
+    #endregion
+  }
+
+  [DataContract(Namespace = StringResources.Namespace)]
+  class WixPatchComponentElement : WixElementBase
   {
     #region WixElementBase
 
     public override ElementsImagesTypes ImageType
     {
-      get { return ElementsImagesTypes.SqlScript; }
+      get { return ElementsImagesTypes.Component; }
     }
 
     public override string ShortTypeName
     {
-      get { return "PatchFamily"; }
+      get { return "PatchComponent"; }
     }
 
     #endregion
   }
+
+  #endregion
 }

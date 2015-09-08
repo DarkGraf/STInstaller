@@ -9,6 +9,7 @@ InstallerStudio/bin
 InstallerStudio/obj
 InstallerStudioSetup/bin
 InstallerStudioSetup/obj
+InstallerStudioSetup/DevExpress/Dll
 Samples/Plugins/ProgressMessageDemo/bin
 Samples/Plugins/ProgressMessageDemo/obj
 STInstaller/bin
@@ -16,6 +17,7 @@ STInstaller/obj
 TestResults
 UnitsTests/InstallerStudioTest/bin
 UnitsTests/InstallerStudioTest/obj
+UnitsTests/InstallerStudioTest/FakesAssemblies
 UnitsTests/LightServerInstallerTest/bin
 UnitsTests/LightServerInstallerTest/obj
 UnitsTests/WixSTActionsTest/bin
@@ -30,3 +32,4 @@ WiXExtensions/WixSTLibrary/obj
 
 /*.lnk
 /*.xml
+*.dll

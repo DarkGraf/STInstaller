@@ -11,6 +11,7 @@ namespace InstallerStudio.ViewModels.Utils
     IOpenSaveFileDialog OpenFileDialog { get; }
     IOpenSaveFileDialog SaveFileDialog { get; }
     ISettingsDialog SettingsDialog { get;  }
+    IMspWizardDialog MspWizardDialog { get; }
   }
 
   /// <summary>
@@ -45,7 +46,23 @@ namespace InstallerStudio.ViewModels.Utils
     string WixToolsetPath { get; set; }
     string CandleFileName { get; set; }
     string LightFileName { get; set; }
+    string TorchFileName { get; set; }
+    string PyroFileName { get; set; }
     string UIExtensionFileName { get; set; }
+
+    bool? Show();
+  }
+
+  public enum MspWizardContentTypes { AllInOne, EachInOne, Empty }
+
+  /// <summary>
+  /// Диалог получения начальных параметров для создания модели Msp.
+  /// </summary>
+  interface IMspWizardDialog
+  {
+    string PathToBaseSource { get; set; }
+    string PathToTargetSource { get; set; }
+    MspWizardContentTypes ContentType { get; set; }
 
     bool? Show();
   }

@@ -2,11 +2,11 @@
 using System.IO;
 using System.Reflection;
 using System.Windows.Input;
-using System.Windows.Media;
 
 using InstallerStudio.ViewModels.Utils;
 using InstallerStudio.Views.Utils;
 using InstallerStudio.Utils;
+using InstallerStudio.Models;
 
 namespace InstallerStudio.ViewModels
 {
@@ -27,6 +27,7 @@ namespace InstallerStudio.ViewModels
     ICommand SaveCommand { get; }
     ICommand SaveAsCommand { get; }
     ICommand CloseCommand { get; }
+    ICommand ExitCommand { get; }
     ICommand SettingsCommand { get; }
     ICommand CheckCommand { get; }
     ICommand BuildCommand { get; }
@@ -41,6 +42,11 @@ namespace InstallerStudio.ViewModels
 
   class MainViewModel : BaseViewModel, IMainViewModel, IDialogServiceSetter
   {
+    /// <summary>
+    /// Базовый заголовок программы.
+    /// </summary>
+    private readonly string applicationTitleBase;
+
     BuilderViewModel builderViewModel;
     /// <summary>
     /// Настройки программы.
@@ -56,7 +62,7 @@ namespace InstallerStudio.ViewModels
       // Получение заголовка программы.
       AssemblyTitleAttribute title = (AssemblyTitleAttribute)assembly.
         GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0];
-      ApplicationTitle = title.Title;
+      applicationTitleBase = title.Title;
 
       // Получение директории для настроек.
       AssemblyProductAttribute product = (AssemblyProductAttribute)assembly.
@@ -67,14 +73,15 @@ namespace InstallerStudio.ViewModels
 
       Predicate<object> canExecute = (obj) => { return BuilderViewModel != null; };
 
-      CreateMsiCommand = new RelayCommand(param => CreateBuilder(CreatedBuilderType.Msi));
-      CreateMspCommand = new RelayCommand(param => CreateBuilder(CreatedBuilderType.Msp));
+      CreateMsiCommand = new RelayCommand(param => CreateBuilder(CreatedBuilderType.Msi, true));
+      CreateMspCommand = new RelayCommand(param => CreateBuilder(CreatedBuilderType.Msp, true));
       OpenCommand = new RelayCommand(param => Open());
       SaveCommand = new RelayCommand(param => Save(true), canExecute);
-      SaveAsCommand = new RelayCommand(param => Save(false));
-      CloseCommand = new RelayCommand(param => Close());
+      SaveAsCommand = new RelayCommand(param => Save(false), canExecute);
+      CloseCommand = new RelayCommand(param => Close(), canExecute);
+      ExitCommand = new RelayCommand(param => Exit());
       SettingsCommand = new RelayCommand(param => ChangeSettings());
-      CheckCommand = new RelayCommand(param => Check(), canExecute);
+      CheckCommand = new RelayCommand(param => Check(), /*canExecute*/ (o) => false); // Отключим на время разработки.
       BuildCommand = new RelayCommand(param => Build(), canExecute);
 
       CreateRibbon();
@@ -82,7 +89,19 @@ namespace InstallerStudio.ViewModels
 
     #region IMainViewModel
 
-    public string ApplicationTitle { get; private set; }
+    public string ApplicationTitle
+    {
+#warning ApplicationTitle практически не работает.
+      get
+      {
+        string postfix;
+        if (BuilderViewModel == null)
+          postfix = "";
+        else
+          postfix = " - " + (Path.GetFileName(BuilderViewModel.LoadedFileName) ?? "*** Без названия ***");
+        return applicationTitleBase + postfix;
+      }
+    }
 
     public BuilderViewModel BuilderViewModel 
     {
@@ -101,6 +120,7 @@ namespace InstallerStudio.ViewModels
     public ICommand SaveCommand { get; private set; }
     public ICommand SaveAsCommand { get; private set; }
     public ICommand CloseCommand { get; private set; }
+    public ICommand ExitCommand { get; private set; }
     public ICommand SettingsCommand { get; private set; }
     public ICommand CheckCommand { get; private set; }
     public ICommand BuildCommand { get; private set; }
@@ -153,19 +173,36 @@ namespace InstallerStudio.ViewModels
 
     #region Методы для команд.
 
-    private void CreateBuilder(CreatedBuilderType type)
+    private void CreateBuilder(CreatedBuilderType type, bool isNew)
     {
       DisposeBuilderViewModel();
+      BuilderViewModel = null;
       switch (type)
       { 
         case CreatedBuilderType.Msi:
           BuilderViewModel = new MsiViewModelFactory().Create(RibbonManager);
           break;
         case CreatedBuilderType.Msp:
-          BuilderViewModel = new MspViewModelFactory().Create(RibbonManager);
-          break;
-        default:
-          BuilderViewModel = null;
+          // Если флаг isNew установлен, то это создание нового, иначе открытие.
+          // Показываем диалог для выбора параметров для заполенния модели.
+          if (isNew)
+          {
+            IMspWizardDialog dialog = DialogService.MspWizardDialog;
+            if (dialog.Show().GetValueOrDefault())
+            {
+              // Для разделения модели и представления реализованы два типа перечисления
+              // с одинаковыми по смыслу элементами.
+              MspCreationTypes creationtype = (MspCreationTypes)Enum.Parse(typeof(MspCreationTypes), dialog.ContentType.ToString());
+
+              IMspModelLoadingParamters parameters = new MspModelLoadingParameters(dialog.PathToBaseSource, dialog.PathToTargetSource, creationtype);
+              BuilderViewModel = new MspViewModelFactory().Create(RibbonManager);
+              ((MspViewModel)BuilderViewModel).Load(parameters);
+            }
+          }
+          else
+          {
+            BuilderViewModel = new MspViewModelFactory().Create(RibbonManager);
+          }
           break;
       }
 
@@ -176,14 +213,21 @@ namespace InstallerStudio.ViewModels
         {
           if (e.PropertyName == "IsBuilding")
             NotifyPropertyChanged("IsBuilding");
+          if (e.PropertyName == "LoadedFileName")
+            NotifyPropertyChanged("ApplicationTitle");
         };
       }
     }
 
     private void Open()
     {
+      // Если BuilderViewModel нулевой или открыт Msi, то фильтр формируем в
+      // следующем порядке: Msi, Msp, All.
+      // Если открыт Msp - Msp, Msi, All.
       IOpenSaveFileDialog dialog = DialogService.OpenFileDialog;
-      dialog.Filter = "Msi Zip (*.msizip)|*.msizip|Msp Zip (*.mspzip)|*.mspzip|All Files (*.*)|*.*";
+      dialog.Filter = BuilderViewModel == null || BuilderViewModel is MsiViewModel ? 
+        "Msi Zip (*.msizip)|*.msizip|Msp Zip (*.mspzip)|*.mspzip|All Files (*.*)|*.*" :
+        "Msp Zip (*.mspzip)|*.mspzip|Msi Zip (*.msizip)|*.msizip|All Files (*.*)|*.*";
       dialog.FilterIndex = 1;
       dialog.Title = "Открытие";
       dialog.FileName = "";
@@ -193,11 +237,11 @@ namespace InstallerStudio.ViewModels
         switch (Path.GetExtension(dialog.FileName))
         {
           case ".msizip":
-            CreateBuilder(CreatedBuilderType.Msi);
+            CreateBuilder(CreatedBuilderType.Msi, false);
             BuilderViewModel.Load(dialog.FileName);
             break;
           case ".mspzip":
-            CreateBuilder(CreatedBuilderType.Msp);
+            CreateBuilder(CreatedBuilderType.Msp, false);
             BuilderViewModel.Load(dialog.FileName);
             break;
         }
@@ -225,6 +269,14 @@ namespace InstallerStudio.ViewModels
 
     private void Close()
     {
+      DisposeBuilderViewModel();
+      BuilderViewModel = null;
+    }
+
+    private void Exit()
+    {
+#warning Закрытия окна не по методики MVVM.
+      System.Windows.Application.Current.MainWindow.Close();
     }
 
     private void ChangeSettings()
@@ -233,12 +285,16 @@ namespace InstallerStudio.ViewModels
       dialog.WixToolsetPath = settingsInfo.WixToolsetPath;
       dialog.CandleFileName = settingsInfo.CandleFileName;
       dialog.LightFileName = settingsInfo.LightFileName;
+      dialog.TorchFileName = settingsInfo.TorchFileName;
+      dialog.PyroFileName = settingsInfo.PyroFileName;
       dialog.UIExtensionFileName = settingsInfo.UIExtensionFileName;
       if (dialog.Show().GetValueOrDefault())
       {
         settingsInfo.WixToolsetPath = dialog.WixToolsetPath;
         settingsInfo.CandleFileName = dialog.CandleFileName;
         settingsInfo.LightFileName = dialog.LightFileName;
+        settingsInfo.TorchFileName = dialog.TorchFileName;
+        settingsInfo.PyroFileName = dialog.PyroFileName;
         settingsInfo.UIExtensionFileName = dialog.UIExtensionFileName;
         new SettingsManager().Save(settingsInfo);
       }

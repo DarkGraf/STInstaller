@@ -111,7 +111,9 @@
     <Resource Include="Images\BuildLarge.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Template\Patch.wxs" />
+    <Resource Include="Template\Patch.wxs">
+      <SubType>Designer</SubType>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LightServerLib\LightServerLib.csproj">

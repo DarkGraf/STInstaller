@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Threading;
+using System.Windows.Media;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 
 using DevExpress.Xpf.Docking;
 using DevExpress.Xpf.Layout.Core;
-using DevExpress.Xpf.PropertyGrid;
 using DevExpress.Xpf.Bars;
 
 namespace InstallerStudio.Views.Controls
@@ -17,13 +21,16 @@ namespace InstallerStudio.Views.Controls
    *      |      +---LayoutPanel (есть свойство PropertyPanel)
    *      +---AutoHideGroups
    *             +---LayoutPanel
-   *                    +---TextBox
+   *                    +---RichTextBox
    */
   public class ChildViewBase : DockLayoutManager
   {
+    SynchronizationContext synchronizationContext;
+    int managedThreadId;
+
     DocumentGroup documentGroup;
     LayoutPanel propLayoutPanel;
-    TextBox txtMessages;
+    RichTextBox txtMessages;
 
     #region Зависимое свойство Documents.
 
@@ -102,23 +109,69 @@ namespace InstallerStudio.Views.Controls
 
     public static readonly DependencyProperty BuildMessagesProperty =
       DependencyProperty.Register("BuildMessages",
-      typeof(string),
+      typeof(ObservableCollection<ViewMessage>),
       typeof(ChildViewBase),
-      new FrameworkPropertyMetadata(BuildMessagesPropertyChangedCallback));
+      new FrameworkPropertyMetadata(null, BuildMessagesPropertyChangedCallback));
 
-    public string BuildMessages
+    public ObservableCollection<ViewMessage> BuildMessages
     {
-      get { return (string)GetValue(BuildMessagesProperty); }
+      get { return (ObservableCollection<ViewMessage>)GetValue(BuildMessagesProperty); }
       set { SetValue(BuildMessagesProperty, value); }
     }
 
     private static void BuildMessagesPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       ChildViewBase obj = d as ChildViewBase;
-      if (obj != null)
-        obj.txtMessages.Text = (e.NewValue ?? "").ToString();
+      // Если это инициализация.
+      if (e.NewValue != null)
+      {
+        if (obj != null)
+          obj.BuildMessages.CollectionChanged += obj.BuildMessages_CollectionChanged;
+      }
     }
 
+    void BuildMessages_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+      // Этот код может выполнятся не из UI-потока.
+      // Поэтому проверим, и если это чужой поток, отошлем UI.
+      SendOrPostCallback callback = null;
+
+      switch (e.Action)
+      {
+        case NotifyCollectionChangedAction.Add:
+          callback = delegate
+          {
+            foreach (var v in e.NewItems)
+            {
+              ViewMessage m = v as ViewMessage;
+              if (m != null)
+              {
+                TextRange range = new TextRange(txtMessages.Document.ContentEnd, txtMessages.Document.ContentEnd);
+                // В RichTextBox есть ошибка, не всегда переносит строки если
+                // указывать Environment.NewLine. Укажем "\r".
+                range.Text = m.Message + "\r";
+                range.ApplyPropertyValue(TextElement.ForegroundProperty, m.Brush);
+              }
+            }
+          };
+          break;
+        case NotifyCollectionChangedAction.Reset:
+          callback = delegate { txtMessages.Document.Blocks.Clear(); };
+          break;
+      }
+
+      if (callback != null)
+      {
+        lock (lockObj)
+        {
+        if (Thread.CurrentThread.ManagedThreadId == managedThreadId)
+          callback(null);
+        else
+          synchronizationContext.Post(callback, null);
+        }
+      }
+    }
+    object lockObj = new object();
     #endregion
 
     public ChildViewBase()
@@ -159,18 +212,35 @@ namespace InstallerStudio.Views.Controls
       autoHideGroup.Add(outLayoutPanel);
 
       // Элемент для вывода информации о построении.
-      txtMessages = new TextBox();
-      txtMessages.TextWrapping = TextWrapping.Wrap;
-      txtMessages.AcceptsReturn = true;
+      txtMessages = new RichTextBox();
       txtMessages.IsReadOnly = true;
       txtMessages.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+      // Уберем отступы между параграфами.
+      Style noSpaceStyle = new Style(typeof(Paragraph));
+      noSpaceStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0)));
+      txtMessages.Resources.Add(typeof(Paragraph), noSpaceStyle);
       // При изменении содержимого активируем панель и будем прокручивать текст вниз.
       txtMessages.TextChanged += (s, e) => 
       {
         Activate(outLayoutPanel);
-        (s as TextBox).ScrollToEnd();
+        (s as RichTextBox).ScrollToEnd();
       };
       outLayoutPanel.Content = txtMessages;
+
+      synchronizationContext = SynchronizationContext.Current;
+      managedThreadId = Thread.CurrentThread.ManagedThreadId;
+    }
+  }
+
+  public class ViewMessage
+  {
+    public string Message { get; private set; }
+    public Brush Brush { get; private set; }
+
+    public ViewMessage(string message, Brush brush)
+    {
+      Message = message;
+      Brush = brush;
     }
   }
 }

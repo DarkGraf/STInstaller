@@ -34,14 +34,16 @@
       <dxb:BarButtonItem Name="btnOpen" Content="Открыть" LargeGlyph="Images\OpenLarge.png" Command="{Binding OpenCommand}" />
       <dxb:BarButtonItem Name="btnSave" Content="Сохранить" LargeGlyph="Images\SaveLarge.png" Command="{Binding SaveCommand}" />
       <dxb:BarButtonItem Name="btnSaveAs" Content="Сохранить как..." LargeGlyph="Images\SaveLarge.png" Command="{Binding SaveAsCommand}" />
-      <dxb:BarButtonItem Name="btnClose" Content="Выход" LargeGlyph="Images\CloseLarge.png" Command="{Binding CloseCommand}" />
+      <dxb:BarButtonItem Name="btnClose" Content="Закрыть" LargeGlyph="Images\CloseLarge.png" Command="{Binding CloseCommand}" />
     </dxb:BarManager.Items>
 
     <DockPanel>
       <dxr:RibbonControl
         DockPanel.Dock="Top"
         CategoriesSource="{Binding Path=RibbonManager.Categories}" 
-        CategoryTemplateSelector="{StaticResource ribbonCategoryTemplateSelector}">
+        CategoryTemplateSelector="{StaticResource ribbonCategoryTemplateSelector}"
+        ApplicationButtonSmallIcon="{dx:DXImage Image=Home_16x16.png}" 
+        ApplicationButtonLargeIcon="{dx:DXImage Image=Home_32x32.png}" >
         <dxr:RibbonControl.ApplicationMenu>
           <dxr:ApplicationMenu ShowRightPane="True">
             <dxr:ApplicationMenu.ItemLinks>
@@ -55,7 +57,24 @@
 
             <dxr:ApplicationMenu.BottomPane>
               <StackPanel Orientation="Horizontal">
-                <Button Content="Параметры" Command="{Binding SettingsCommand}" />
+                <Button Command="{Binding SettingsCommand}" Margin="2">
+                  <StackPanel Orientation="Horizontal">
+                    <!-- Чтобы WPF не растягивало изображение, привязываемся к реальным размерам. -->
+                    <Image Source="Images/SettingsSmall.png" Stretch="Fill" 
+                      Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" 
+                      Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" />
+                    <TextBlock Padding="5,0,0,0" Text="Параметры" />
+                  </StackPanel>
+                </Button>
+                
+                <Button Command="{Binding ExitCommand}" Margin="2">
+                  <StackPanel Orientation="Horizontal">
+                    <Image Source="Images/ExitSmall.png" Stretch="Fill" 
+                      Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" 
+                      Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" />
+                    <TextBlock Padding="5,0,0,0" Text="Выход" />
+                  </StackPanel>
+                </Button>
               </StackPanel>
             </dxr:ApplicationMenu.BottomPane>
           </dxr:ApplicationMenu>

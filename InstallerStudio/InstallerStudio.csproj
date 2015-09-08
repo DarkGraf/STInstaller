@@ -50,6 +50,9 @@
     <Reference Include="devexpress.xpf.propertygrid.v15.1, Version=15.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="devexpress.xpf.ribbon.v15.1, Version=15.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="NLog">
+      <HintPath>.\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -87,9 +90,14 @@
     <Compile Include="Utils\StringExtension.cs" />
     <Compile Include="Utils\TempFileStoreBase.cs" />
     <Compile Include="Utils\ZipFileStore.cs" />
+    <Compile Include="Views\Controls\PairContainer.cs" />
     <Compile Include="Views\Controls\WixInternalPropertyGridControl.cs" />
     <Compile Include="Views\Converters\AppVersionToStringConverter.cs" />
-    <Compile Include="Views\Converters\ListOfStringToStringConverter.cs" />
+    <Compile Include="Views\Converters\EnumToBooleanConverter.cs" />
+    <Compile Include="Views\Converters\ListOfBuildMessageToListOfViewMessageConverter.cs" />
+    <Compile Include="Views\MspWizardWindow.xaml.cs">
+      <DependentUpon>MspWizardWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WixElements\AppVersion.cs" />
     <Compile Include="Utils\IFileStore.cs" />
     <Compile Include="Utils\TempFileStore.cs" />
@@ -128,8 +136,10 @@
     <Compile Include="WixElements\WixElementsExtension.cs" />
     <Compile Include="WixElements\WixElements.cs" />
     <Compile Include="Utils\XmlSaverLoader.cs" />
-    <Compile Include="WixElements\WixPatch.cs" />
+    <Compile Include="WixElements\WixMD5.cs" />
+    <Compile Include="WixElements\WixPatchProduct.cs" />
     <Compile Include="WixElements\WixProduct.cs" />
+    <Compile Include="WixElements\WixProductUpdateInfo.cs" />
     <Compile Include="WixElements\XmlLinqExtension.cs" />
     <Page Include="Views\Controls\WixPropertyGridControl.xaml">
       <SubType>Designer</SubType>
@@ -163,6 +173,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\MspWizardWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -189,6 +203,10 @@
     <Resource Include="..\STInstaller\Resources\License.rtf">
       <Link>WixElements\WixBuilders\MsiTemplate\Resources\License.rtf</Link>
     </Resource>
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -230,9 +248,7 @@
   <ItemGroup>
     <Resource Include="Views\Images\Components\ShortcutSmall.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="WixElements\WixBuilders\MspTemplate\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="..\STInstaller\Components.wxs">
       <Link>WixElements\WixBuilders\MsiTemplate\Components.wxs</Link>
@@ -269,6 +285,27 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="ApplicationIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Views\Images\OpenSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Views\Images\Components\PatchSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NLog.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Views\Images\ExitSmall.png" />
+    <Resource Include="Views\Images\SettingsSmall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="..\DeveloperUtilities\LightServerPatch\Template\Patch.wxs">
+      <Link>WixElements\WixBuilders\MspTemplate\Patch.wxs</Link>
+      <SubType>Designer</SubType>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

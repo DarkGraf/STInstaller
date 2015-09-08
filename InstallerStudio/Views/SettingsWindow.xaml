@@ -6,7 +6,7 @@
   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
   ShowInTaskbar="False"
   WindowStartupLocation="CenterOwner"
-  Title="Параметры" Height="200" Width="500" 
+  Title="Параметры" Height="280" Width="500" 
   ResizeMode="NoResize"
   SizeToContent="WidthAndHeight">
 
@@ -22,7 +22,6 @@
     </Style>
   </Window.Resources>
 
-
   <dxc:DXWindow.DataContext>
     <Binding RelativeSource="{RelativeSource Self}" />
   </dxc:DXWindow.DataContext>
@@ -33,13 +32,19 @@
         <dxlc:LayoutItem Label="Путь к WIX Toolset:">
           <TextBox Width="300" Text="{Binding Settings.WixToolsetPath, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
         </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="Имя компилятора:">
+        <dxlc:LayoutItem Label="Компилятор:">
           <TextBox Width="300" Text="{Binding Settings.CandleFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
         </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="Имя компоновщика:">
+        <dxlc:LayoutItem Label="Компоновщик:">
           <TextBox Width="300" Text="{Binding Settings.LightFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
         </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="Имя UI-расширения:">
+        <dxlc:LayoutItem Label="Утилита генерации различий:">
+          <TextBox Width="300" Text="{Binding Settings.TorchFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+        </dxlc:LayoutItem>
+        <dxlc:LayoutItem Label="Утилита создания патчей:">
+          <TextBox Width="300" Text="{Binding Settings.PyroFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+        </dxlc:LayoutItem>
+        <dxlc:LayoutItem Label="UI-расширение:">
           <TextBox Width="300" Text="{Binding Settings.UIExtensionFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
         </dxlc:LayoutItem>
       </dxlc:LayoutGroup>
