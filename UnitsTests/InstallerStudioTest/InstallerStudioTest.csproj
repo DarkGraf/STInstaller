@@ -67,6 +67,7 @@
     <Compile Include="Utils\TempFileStoreTest.cs" />
     <Compile Include="Utils\SettingsManagerTest.cs" />
     <Compile Include="Utils\ZipFileStoreTest.cs" />
+    <Compile Include="ViewModels\MainViewModelTest.cs" />
     <Compile Include="ViewModels\Utils\RibbonManagerTest.cs" />
     <Compile Include="WixElements\WixMD5Test.cs" />
     <Compile Include="WixElements\WixProductUpdateInfoTest.cs" />

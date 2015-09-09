@@ -91,16 +91,25 @@ namespace InstallerStudio.ViewModels
 
     public string ApplicationTitle
     {
-#warning ApplicationTitle практически не работает.
       get
       {
         string postfix;
+        // Если модель не создана, то показываем заголовок без названия файла.
+        // Если модель создана и имя файла в ней определено, то показываем
+        // с этим именем. Если имя неопределено, покажем "*** Без названия ***".
+        // Имя файла может измениться: при создании нового, при открытии при сохранении 
+        // и при закрытии документа.
         if (BuilderViewModel == null)
           postfix = "";
         else
           postfix = " - " + (Path.GetFileName(BuilderViewModel.LoadedFileName) ?? "*** Без названия ***");
         return applicationTitleBase + postfix;
       }
+      // Если нет сеттера, то в некоторых ситуациях заголовок не обновляется,
+      // например: создать msi, сохранить, создать msi, открыть сохраненную.
+      // Возможно ошибка DevExpress. На формуме информации не найдено.
+      // Также в свойстве привязке установлено Mode=TwoWay.
+      set { }
     }
 
     public BuilderViewModel BuilderViewModel 
@@ -213,10 +222,11 @@ namespace InstallerStudio.ViewModels
         {
           if (e.PropertyName == "IsBuilding")
             NotifyPropertyChanged("IsBuilding");
-          if (e.PropertyName == "LoadedFileName")
-            NotifyPropertyChanged("ApplicationTitle");
         };
       }
+
+      // Чтобы не произошло, перегрузим заголовок программы.
+      NotifyPropertyChanged("ApplicationTitle");
     }
 
     private void Open()
@@ -246,6 +256,9 @@ namespace InstallerStudio.ViewModels
             break;
         }
       }
+
+      // Чтобы не произошло, перегрузим заголовок программы.
+      NotifyPropertyChanged("ApplicationTitle");
     }
 
     private void Save(bool withoutQuery)
@@ -265,12 +278,17 @@ namespace InstallerStudio.ViewModels
           BuilderViewModel.Save(dialog.FileName);
         }
       }
+
+      // Чтобы не произошло, перегрузим заголовок программы.
+      NotifyPropertyChanged("ApplicationTitle");
     }
 
     private void Close()
     {
       DisposeBuilderViewModel();
       BuilderViewModel = null;
+      // Перегнузим заголовок программы.
+      NotifyPropertyChanged("ApplicationTitle");
     }
 
     private void Exit()

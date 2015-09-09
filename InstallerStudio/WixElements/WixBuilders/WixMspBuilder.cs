@@ -129,8 +129,11 @@ namespace InstallerStudio.WixElements.WixBuilders
         xmlPatch.Attribute("TargetProductName").Value = product.TargetName;
 
         XElement xmlPatchFamily = xmlPatch.GetXElement("PatchFamily");
-        xmlPatchFamily.Attribute("Version").Value = product.BaseVersion;
-        xmlPatchFamily.Attribute("ProductCode").Value = product.BaseId.ToString();
+        // Важно, указываем новую версию. Эта версия ни как не связана с версией MSI,
+        // только для msp. Но она должна быть больше чем у ранних MSP. Будем использовать
+        // версию нового продукта.
+        xmlPatchFamily.Attribute("Version").Value = product.TargetVersion;
+        xmlPatchFamily.Attribute("ProductCode").Value = product.TargetId.ToString();
 
         // Добавляем компоненты.
         // Если указаны все компоненты, то ничего не добавляем. Патч сформируется полным.
@@ -164,12 +167,16 @@ namespace InstallerStudio.WixElements.WixBuilders
         msiFiles.Add(InternalCompilationAndBuild(context, cts, wxsFile));
       }
 
-      string outDir = string.Format("{0} v{1}.{2}.{3}.{4} Patches", 
+      string outDir = string.Format("{0} v{1}.{2}.{3}.{4} Patches v{5}.{6}.{7}.{8}", 
         product.BaseName,
         product.BaseVersion.Major, 
         product.BaseVersion.Minor, 
         product.BaseVersion.Build,
-        product.BaseVersion.Revision);
+        product.BaseVersion.Revision,
+        product.TargetVersion.Major,
+        product.TargetVersion.Minor,
+        product.TargetVersion.Build,
+        product.TargetVersion.Revision);
 
       outDir = Path.Combine(Path.GetDirectoryName(context.ProjectFileName), outDir);
 
@@ -177,7 +184,7 @@ namespace InstallerStudio.WixElements.WixBuilders
         Directory.Delete(outDir, true);
       Directory.CreateDirectory(outDir);
 
-      context.BuildMessageWriteLine("Построенные MSI-файлы:", BuildMessageTypes.Information);
+      context.BuildMessageWriteLine("Построенные MSP-файлы:", BuildMessageTypes.Information);
 
       foreach (string msiFile in msiFiles)
       {

@@ -6,7 +6,7 @@
   xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
   xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
   xmlns:stviewmodels="clr-namespace:InstallerStudio.ViewModels"
-  Title="{Binding ApplicationTitle}" 
+  Title="{Binding ApplicationTitle, Mode=TwoWay}" 
   Height="600" 
   Width="800" 
   WindowState="Maximized"

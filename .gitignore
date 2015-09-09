@@ -32,4 +32,5 @@ WiXExtensions/WixSTLibrary/obj
 
 /*.lnk
 /*.xml
-*.dll
+;WiXExtensions/WixSTExtension/WixSTLibrary.wixlib
+STInstaller/WixSTExtension.dll

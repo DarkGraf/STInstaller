@@ -171,9 +171,6 @@ namespace InstallerStudio.Models
       // Создадим сообщения о построении и привяжем
       // делегат уведомления об изменении свойства BuildMessages.
       BuildMessages = new ObservableCollection<BuildMessage>();
-#warning Наверное не нужно.
-      /*((ObservableCollection<BuildMessage>)BuildMessages).CollectionChanged += 
-        (o, e) => { NotifyPropertyChanged("BuildMessages"); };*/
       IsBuilding = false;
       State = ModelState.New;
     }
