@@ -21,7 +21,7 @@
         <st:SqlExtendedProcedures Id="SqlExtendedProceduresIniId" Name="ASPO_XP_MSSQL.ini" BinaryKey="ExtednedProceduresIniFile" />
         
         <!-- Ключевой компонент. -->
-        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="SqlComponent" Type="integer" Value="1"  KeyPath="yes" />
+        <RegistryValue Root="HKLM" Key="$(var.MainRegistryPath)" Name="SqlComponent" Type="integer" Value="1"  KeyPath="yes" />
       </Component>
     </Directory>
   </DirectoryRef>

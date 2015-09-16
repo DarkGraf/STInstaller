@@ -20,6 +20,7 @@ namespace InstallerStudio.Views
       private string torchFileName = string.Empty;
       private string pyroFileName = string.Empty;
       private string uiExtensionFileName = string.Empty;
+      private string suppressIce = string.Empty;
 
       public string WixToolsetPath
       {
@@ -69,6 +70,12 @@ namespace InstallerStudio.Views
         set { SetValue(ref uiExtensionFileName, value ?? string.Empty); }
       }
 
+      public string SuppressIce
+      {
+        get { return suppressIce; }
+        set { SetValue(ref suppressIce, value ?? string.Empty); }
+      }
+
       #region IDataErrorInfo
 
       public string Error
@@ -80,6 +87,7 @@ namespace InstallerStudio.Views
       {
         get
         {
+#warning реализовать проверку для SuppressIce.
           switch (columnName)
           {
             case "WixToolsetPath":

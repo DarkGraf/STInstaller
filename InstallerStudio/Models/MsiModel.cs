@@ -20,19 +20,31 @@ namespace InstallerStudio.Models
       get { return predefinedInstallDirectories.Select(v => v.Key).ToList(); } 
     }
 
-    internal static IDictionary<string, string> predefinedInstallDirectories = new Dictionary<string, string>
+    /// <summary>
+    /// Предопределенные директории профиля пользователя.
+    /// </summary>
+    internal static IList<string> PredefinedUserProfileInstallDirectories
     {
-      { "[ProgramFilesFolder]", "ProgramFilesFolder" }, // Program Files.
-      { "[ProgramFilesFamilyFolder]", "INSTALLLOCATION" }, // Общий каталог для семейства продуктов.
-      { "[ProgramFilesProductFolder]", "ProductFolder" }, // Каталог для конкретного продукта.      
-      { "[ProgramMenuFolder]", "ProgramMenuFolder" }, // Пуск.
-      { "[ProgramMenuFamilyDir]", "ProgramMenuFamilyDir" }, // Меню общее для семейства продуктов.
-      { "[ProgramMenuProductDir]", "ProgramMenuProductDir" }, // Меню для конкретного продукта.
-      { "[DesktopFolder]", "DesktopFolder" }, // Рабочий стол.
-      { "[StartMenuFolder]", "StartMenuFolder" },
-      { "[StartupFolder]", "StartupFolder" },
-      { "[WindowsFolder]", "WindowsFolder" }
-    };
+      get { return predefinedInstallDirectories.Where(v => v.Value.Item2).Select(v => v.Key).ToList(); }
+    }
+
+    /// <summary>
+    /// Ключ - имя предопределенной директории
+    /// Значение - Item1 - идертификатор в Wix, Item2 - признак директории профиля пользователя.
+    /// </summary>
+    static IDictionary<string, Tuple<string, bool>> predefinedInstallDirectories = new Dictionary<string, Tuple<string, bool>>
+    {
+      { "[ProgramFilesFolder]", Tuple.Create("ProgramFilesFolder", false) }, // Program Files.
+      { "[ProgramFilesFamilyFolder]", Tuple.Create("INSTALLLOCATION", false) }, // Общий каталог для семейства продуктов.
+      { "[ProgramFilesProductFolder]", Tuple.Create("ProductFolder", false) }, // Каталог для конкретного продукта.      
+      { "[ProgramMenuFolder]", Tuple.Create("ProgramMenuFolder", true) }, // Пуск.
+      { "[ProgramMenuFamilyDir]", Tuple.Create("ProgramMenuFamilyDir", true) }, // Меню общее для семейства продуктов.
+      { "[ProgramMenuProductDir]", Tuple.Create("ProgramMenuProductDir", true) }, // Меню для конкретного продукта.
+      { "[DesktopFolder]", Tuple.Create("DesktopFolder", true) }, // Рабочий стол.
+      { "[StartMenuFolder]", Tuple.Create("StartMenuFolder", true) },
+      { "[StartupFolder]", Tuple.Create("StartupFolder", true) },
+      { "[WindowsFolder]", Tuple.Create("WindowsFolder", false) }
+    };    
 
     /// <summary>
     /// Приводит предопределенную директорию к формату для использования в
@@ -42,7 +54,7 @@ namespace InstallerStudio.Models
     internal static string FormatInstallDirectory(string directory)
     {
       if (predefinedInstallDirectories.Keys.Contains(directory))
-        return predefinedInstallDirectories[directory];
+        return predefinedInstallDirectories[directory].Item1;
       else
         return directory;
     }
@@ -103,6 +115,7 @@ namespace InstallerStudio.Models
         new CommandMetadata("Общие", typeof(WixFeatureElement)),
         new CommandMetadata("Общие", typeof(WixComponentElement)),
         new CommandMetadata("Общие", typeof(WixMefPluginElement)),
+        new CommandMetadata("Общие", typeof(WixLicenseElement)),
 
         new CommandMetadata("Файлы", typeof(WixFileElement)),
         new CommandMetadata("Файлы", typeof(WixShortcutElement)),

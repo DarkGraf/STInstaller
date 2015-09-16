@@ -12,7 +12,7 @@
         <RemoveFolder Id="ProgramMenuFamilyDir" On="uninstall" />
         <!-- KeyPath - признак ключевой сущности, факт установки компонента контролируется по ее наличию или отсутствию. -->
         <!-- Так как компонент не содержит файлов, для контроля необходимо использовать запись в реестре. -->
-        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="ProgramMenuFamilyDir" Type="integer" Value="1" KeyPath="yes" />
+        <RegistryValue Root="HKLM" Key="$(var.MainRegistryPath)" Name="ProgramMenuFamilyDir" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </DirectoryRef>
 
@@ -23,7 +23,7 @@
         <RemoveFolder Id="ProgramMenuProductDir" On="uninstall" />
         <!-- KeyPath - признак ключевой сущности, факт установки компонента контролируется по ее наличию или отсутствию. -->
         <!-- Так как компонент не содержит файлов, для контроля необходимо использовать запись в реестре. -->
-        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="ProgramMenuProductDir" Type="integer" Value="1" KeyPath="yes" />
+        <RegistryValue Root="HKLM" Key="$(var.MainRegistryPath)" Name="ProgramMenuProductDir" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </DirectoryRef>
 
@@ -32,7 +32,7 @@
       <Component Id="ReinstallComponent" Guid="$(var.ProgramMenuReinstallComponentGuid)">
         <Shortcut Id="ReinstallShortcut" Name="Изменение компонентов программы" Description="Позволяет изменить, восстановить и удалить компоненты программы."
           Target="[System64Folder]msiexec.exe" Arguments="/i [ProductCode]" />
-        <RegistryValue Root="HKCU" Key="$(var.MainRegistryPath)" Name="ShortcutReinstall" Type="integer" Value="1" KeyPath="yes" />
+        <RegistryValue Root="HKLM" Key="$(var.MainRegistryPath)" Name="ShortcutReinstall" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </DirectoryRef>
 

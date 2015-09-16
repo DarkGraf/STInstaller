@@ -40,9 +40,13 @@ namespace InstallerStudio.WixElements
     /// </summary>
     void ClearBuildMessage();
     /// <summary>
-    /// Установки программы.
+    /// Настройки программы.
     /// </summary>
     ISettingsInfo ApplicationSettings { get; }
+    /// <summary>
+    /// Данные приложения.
+    /// </summary>
+    IApplicationInfo ApplicationInfo { get; }
     /// <summary>
     /// Имя файла загруженного проекта.
     /// </summary>
@@ -58,9 +62,41 @@ namespace InstallerStudio.WixElements
     string SourceStoreDirectory { get; }
   }
 
-  [DataContract(Namespace = StringResources.Namespace)]
-  abstract class WixMainEntity : ChangeableObject, IWixMainEntity
+  /// <summary>
+  /// Данные для приложения необходимые в процессе построения.
+  /// </summary>
+  public interface IApplicationInfo
   {
+    /// <summary>
+    ///  Возвращает директорию запуска приложения.
+    /// </summary>
+    string ApplicationDirectory { get; }
+  }
+
+  [DataContract(Namespace = StringResources.Namespace)]
+  abstract class WixMainEntity : ChangeableObject, IWixMainEntity, IDataErrorInfo
+  {
+    IDataErrorHandler errorHandler;
+
+    public WixMainEntity()
+    {
+      Initialize();
+    }
+
+    [OnDeserializing]
+    private void OnDeserializing(StreamingContext context)
+    {
+      Initialize();
+    }
+
+    protected virtual void Initialize()
+    {
+      // При десериализации DataContractSerializer не вызывается конструктор
+      // по умолчанию, поэтому вызываем данный метод из конструктора и из
+      // метода OnDeserializing(). В нем производим всю необходимую инициализацию.
+      errorHandler = new DataErrorHandler(this);
+    }
+
     protected abstract WixBuilderBase CreateBuilder();
 
     #region IWixMainEntity
@@ -76,6 +112,20 @@ namespace InstallerStudio.WixElements
       // ресурсы после освобождения всех ссылок.
       WixBuilderBase builder = CreateBuilder();
       builder.Build(buildContext);
+    }
+
+    #endregion
+
+    #region IDataErrorInfo
+
+    public string Error
+    {
+      get { return string.Empty; }
+    }
+
+    public string this[string columnName]
+    {
+      get { return errorHandler.Check(columnName); }
     }
 
     #endregion

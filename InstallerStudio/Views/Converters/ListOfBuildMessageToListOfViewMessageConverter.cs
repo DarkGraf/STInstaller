@@ -17,7 +17,7 @@ namespace InstallerStudio.Views.Converters
     ObservableCollection<ViewMessage> destination;
     Brush defaultForeground;
 
-    public ListOfBuildMessageToListOfViewMessageConverter() 
+    public ListOfBuildMessageToListOfViewMessageConverter()
     {
       destination = new ObservableCollection<ViewMessage>();
       defaultForeground = GetDefaultForeground();
@@ -28,10 +28,19 @@ namespace InstallerStudio.Views.Converters
     /// </summary>
     Brush GetDefaultForeground()
     {
-      string themeName = DevExpress.Xpf.Core.ThemeManager.GetThemeName(System.Windows.Application.Current.MainWindow);
-      DevExpress.Xpf.Core.BackgroundPanel panel = new DevExpress.Xpf.Core.BackgroundPanel();
-      DevExpress.Xpf.Core.ThemeManager.SetThemeName(panel, themeName);
-      return panel.Foreground;
+      Brush brush;
+      try
+      {
+        string themeName = DevExpress.Xpf.Core.ThemeManager.GetThemeName(System.Windows.Application.Current.MainWindow);
+        DevExpress.Xpf.Core.BackgroundPanel panel = new DevExpress.Xpf.Core.BackgroundPanel();
+        DevExpress.Xpf.Core.ThemeManager.SetThemeName(panel, themeName);
+        brush = panel.Foreground;
+      }
+      catch
+      {
+        brush = Brushes.Black;
+      }
+      return brush;
     }
 
     Brush GetMessageProperties(BuildMessageTypes type)

@@ -4,7 +4,7 @@
     Id="*"
     Name="Installer Studio (Alfa Version)"
     Manufacturer="ЗАО &quot;НПП Системные Технологии&quot;"
-    Version="0.0.0.1" 
+    Version="0.0.0.2" 
     Language="1049"
     Codepage="1251"
     UpgradeCode="FCFD20DC-4CE8-4BFA-B0B1-AA7ECF049A94">
@@ -82,8 +82,25 @@
           <Shortcut Id="MainExeProgramMenuShortcut" Name="Installer Studio" Description="Запуск Installer Studio" 
                     WorkingDirectory="INSTALLFOLDER" Directory="ProgramMenuDir" Advertise="yes" Icon="InstallerStudio.exe" />
         </File>
+
+        <File Id="WixSTExtensionDllFile" Name="WixSTExtension.dll" Source="$(var.InstallerStudio.TargetDir)" DiskId="1" />
+        
+        <!-- Зарегистрируем расширения файлов. -->
+        <ProgId Id="MainExe.msizip" Description="Исходный файл MSI Installer Studio" Icon="MainExeFile">
+          <Extension Id="msizip">
+            <Verb Id="OpenMsizip" Command="Открыть" TargetFile="MainExeFile" Argument='"%1"' />
+          </Extension>
+        </ProgId>
+        <ProgId Id="MainExe.mspzip" Description="Исходный файл MSP Installer Studio" Icon="MainExeFile">
+          <Extension Id="mspzip">
+            <Verb Id="OpenMspzip" Command="Открыть" TargetFile="MainExeFile" Argument='"%1"' />
+          </Extension>
+        </ProgId>
+      
         <File Id="NLogDllFile" Name="NLog.dll" Source="$(var.InstallerStudio.ProjectDir)" DiskId="1" />
         <File Id="NLogConfigFile" Name="NLog.config" Source="$(var.InstallerStudio.ProjectDir)" DiskId="1" />
+
+        <File Id="UpdateFile" Name="UPDATE.txt" Source="$(var.SolutionDir)" DiskId="1" />
       </Component>
 		</ComponentGroup>
   

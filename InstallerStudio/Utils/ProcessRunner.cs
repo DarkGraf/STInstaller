@@ -57,7 +57,8 @@ namespace InstallerStudio.Utils
       process.BeginErrorReadLine();
       process.WaitForExit();
 
-      HasError = process.ExitCode != 0;
+      if (HasError = process.ExitCode != 0)
+        OnOutputMessageReceived("Код ошибки: " + process.ExitCode.ToString());
       process.Close();
     }
 

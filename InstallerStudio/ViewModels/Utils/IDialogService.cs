@@ -12,6 +12,7 @@ namespace InstallerStudio.ViewModels.Utils
     IOpenSaveFileDialog SaveFileDialog { get; }
     ISettingsDialog SettingsDialog { get;  }
     IMspWizardDialog MspWizardDialog { get; }
+    IMessageBoxDialog MessageBoxInfo { get; }
   }
 
   /// <summary>
@@ -49,6 +50,7 @@ namespace InstallerStudio.ViewModels.Utils
     string TorchFileName { get; set; }
     string PyroFileName { get; set; }
     string UIExtensionFileName { get; set; }
+    string SuppressIce { get; set; }
 
     bool? Show();
   }
@@ -64,6 +66,19 @@ namespace InstallerStudio.ViewModels.Utils
     string PathToTargetSource { get; set; }
     MspWizardContentTypes ContentType { get; set; }
 
+    bool? Show();
+  }
+
+  public enum MessageBoxDialogTypes { None, Error, Question, Exclamation, Information }
+
+  interface IMessageBoxDialog
+  {
+    MessageBoxDialogTypes Type { get; set; }
+    string Message { get; set; }
+    /// <summary>
+    /// Показать окно.
+    /// </summary>
+    /// <returns>Истино если да, ложно если нет, null если отмена.</returns>
     bool? Show();
   }
 }

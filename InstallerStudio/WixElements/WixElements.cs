@@ -10,6 +10,7 @@ using InstallerStudio.Common;
 using InstallerStudio.Models;
 using InstallerStudio.Views.Utils;
 using InstallerStudio.Views.Controls;
+using InstallerStudio.Utils;
 
 namespace InstallerStudio.WixElements
 {
@@ -142,6 +143,8 @@ namespace InstallerStudio.WixElements
 
     #endregion
 
+    IDataErrorHandler errorHandler;
+
     private string id;
 
     [DataMember(Name = "Items")]
@@ -173,6 +176,7 @@ namespace InstallerStudio.WixElements
       // При десериализации DataContractSerializer не вызывается конструктор
       // по умолчанию, поэтому вызываем данный метод из конструктора и из
       // метода OnDeserializing(). В нем производим всю необходимую инициализацию.
+      errorHandler = new DataErrorHandler(this);
     }
 
     /// <summary>
@@ -214,6 +218,7 @@ namespace InstallerStudio.WixElements
     [Category(StringResources.CategoryMain)]
     [DataMember]
     [Description(StringResources.WixElementBaseIdDescription)]
+    [CheckingRequired(StringResources.IdCheckingRequired)]
     public string Id 
     {
       get { return id; }
@@ -288,19 +293,7 @@ namespace InstallerStudio.WixElements
 
     public virtual string this[string columnName]
     {
-      get 
-      {
-        string result = string.Empty;
-        switch (columnName)
-        {
-          case "Id":
-            if (string.IsNullOrEmpty(Id))
-              result = "Идентификатор не должен быть пустым.";
-            break;
-        }
-
-        return result;
-      }
+      get { return errorHandler.Check(columnName); }
     }
 
     #endregion    
@@ -457,6 +450,7 @@ namespace InstallerStudio.WixElements
     [EditorInfo("*.mdf|*.mdf|*.*|*.*")]
     [Category(StringResources.CategoryDBFiles)]
     [Description(StringResources.WixDbComponentElementMdfFileDescription)]
+    [CheckingRequired(StringResources.DbFileCheckingRequired)]
     public string MdfFile 
     {
       get { return mdfFile; }
@@ -476,6 +470,7 @@ namespace InstallerStudio.WixElements
     [EditorInfo("*.ldf|*.ldf|*.*|*.*")]
     [Category(StringResources.CategoryDBFiles)]
     [Description(StringResources.WixDbComponentElementLdfFileDescription)]
+    [CheckingRequired(StringResources.DbFileCheckingRequired)]
     public string LdfFile 
     {
       get { return ldfFile; }
@@ -548,6 +543,11 @@ namespace InstallerStudio.WixElements
   class WixSqlScriptElement : WixElementBase, IFileSupport
   {
     private string script;
+    // Связанные параметры. При изменении одного из них
+    // необходимо обновить другие (нужно для отображение ошибок).
+    private bool executeOnInstall;
+    private bool executeOnReinstall;
+    private bool executeOnUninstall;
 
     public WixSqlScriptElement()
     {
@@ -560,6 +560,7 @@ namespace InstallerStudio.WixElements
     [EditorInfo("*.sql|*.sql|*.*|*.*")]
     [Category(StringResources.CategoryMain)]
     [Description(StringResources.WixSqlScriptElementScriptDescription)]
+    [CheckingRequired(StringResources.ScriptCheckingRequired)]
     public string Script 
     {
       get { return script; }
@@ -577,17 +578,50 @@ namespace InstallerStudio.WixElements
     [DataMember]
     [Category(StringResources.CategoryRunModes)]
     [Description(StringResources.WixSqlScriptElementExecuteOnInstallDescription)]
-    public bool ExecuteOnInstall { get; set; }
+    [CheckingFromGroup(StringResources.ExecuteCheckingFromGroup)]
+    public bool ExecuteOnInstall 
+    {
+      get { return executeOnInstall; }
+      set 
+      { 
+        executeOnInstall = value;
+        NotifyPropertyChanged("ExecuteOnInstall");
+        NotifyPropertyChanged("ExecuteOnReinstall");
+        NotifyPropertyChanged("ExecuteOnUninstall");
+      }
+    }
 
     [DataMember]
     [Category(StringResources.CategoryRunModes)]
     [Description(StringResources.WixSqlScriptElementExecuteOnReinstallDescription)]
-    public bool ExecuteOnReinstall { get; set; }
+    [CheckingFromGroup(StringResources.ExecuteCheckingFromGroup)]
+    public bool ExecuteOnReinstall
+    {
+      get { return executeOnReinstall; }
+      set
+      {
+        executeOnReinstall = value;
+        NotifyPropertyChanged("ExecuteOnInstall");
+        NotifyPropertyChanged("ExecuteOnReinstall");
+        NotifyPropertyChanged("ExecuteOnUninstall");
+      }
+    }
 
     [DataMember]
     [Category(StringResources.CategoryRunModes)]
     [Description(StringResources.WixSqlScriptElementExecuteOnUninstallDescription)]
-    public bool ExecuteOnUninstall { get; set; }
+    [CheckingFromGroup(StringResources.ExecuteCheckingFromGroup)]
+    public bool ExecuteOnUninstall
+    {
+      get { return executeOnUninstall; }
+      set
+      {
+        executeOnUninstall = value;
+        NotifyPropertyChanged("ExecuteOnInstall");
+        NotifyPropertyChanged("ExecuteOnReinstall");
+        NotifyPropertyChanged("ExecuteOnUninstall");
+      }
+    }
 
     [DataMember]
     [Editor(WixPropertyEditorsNames.SqlScriptSequenceSpinEditPropertyEditor, WixPropertyEditorsNames.SqlScriptSequenceSpinEditPropertyEditor)]
@@ -655,6 +689,8 @@ namespace InstallerStudio.WixElements
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
     [EditorInfo("*.*|*.*|*.exe|*.exe|*.dll|*.dll")]
     [Category(StringResources.CategoryFiles)]
+    [Description(StringResources.WixFileElementFileNameDescription)]
+    [CheckingRequired(StringResources.FileCheckingRequired)]
     public string FileName
     {
       get { return fileName; }
@@ -672,6 +708,8 @@ namespace InstallerStudio.WixElements
     [DataMember]
     [Editor(WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor, WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor)]
     [Category(StringResources.CategoryFiles)]
+    [Description(StringResources.WixFileElementInstallDirectoryDescription)]
+    [CheckingRequired(StringResources.InstallDirectoryCheckingRequired)]
     public string InstallDirectory
     {
       get { return installDirectory; }
@@ -750,6 +788,7 @@ namespace InstallerStudio.WixElements
     [DataMember]
     [Category(StringResources.CategoryMain)]
     [Description(StringResources.WixShortcutElementNameDescription)]
+    [CheckingRequired(StringResources.DisplayNameCheckingRequired)]
     public string Name { get; set; }
 
     [DataMember]
@@ -761,6 +800,7 @@ namespace InstallerStudio.WixElements
     [Category(StringResources.CategoryMain)]
     [Description(StringResources.WixShortcutElementDirectoryDescription)]
     [Editor(WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor, WixPropertyEditorsNames.DirectoryComboBoxPropertyEditor)]
+    [CheckingRequired(StringResources.DirectoryCheckingRequired)]
     public string Directory { get; set; }
 
     [DataMember]
@@ -840,6 +880,7 @@ namespace InstallerStudio.WixElements
     [Description(StringResources.WixSqlExtentedProceduresElementFileNameDescription)]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
     [EditorInfo("*.dll|*.dll|*.*|*.*")]
+    [CheckingRequired(StringResources.FileCheckingRequired)]
     public string FileName 
     {
       get { return fileName; }
@@ -907,6 +948,7 @@ namespace InstallerStudio.WixElements
     [Description(StringResources.WixMefPluginElementFileNameDescription)]
     [Editor(WixPropertyEditorsNames.FilePropertyEditor, WixPropertyEditorsNames.FilePropertyEditor)]
     [EditorInfo("*.dll|*.dll")]
+    [CheckingRequired(StringResources.FileCheckingRequired)]
     public string FileName
     {
       get { return fileName; }
@@ -959,6 +1001,24 @@ namespace InstallerStudio.WixElements
     public string[] GetFilesWithRelativePath()
     {
       return new string[] { fileName };
+    }
+
+    #endregion
+  }
+
+  [DataContract(Namespace = StringResources.Namespace)]
+  class WixLicenseElement : WixElementBase
+  {
+    #region WixElementBase
+
+    public override ElementsImagesTypes ImageType
+    {
+      get { return ElementsImagesTypes.License; }
+    }
+
+    public override string ShortTypeName
+    {
+      get { return "License"; }
     }
 
     #endregion

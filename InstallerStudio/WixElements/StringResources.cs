@@ -10,16 +10,16 @@ namespace InstallerStudio.WixElements
     public const string WixElementBaseIsFrozenDescription = "Признак зафиксированного элемента. У зафиксированного элемента нельзя изменять свойства.";
     public const string WixElementBaseIsPredefinedDescription = "Признак предопределенного элемента. Является служебным элементом.";
 
-    public const string WixFeatureElementTitleDescription = "Заголовок набора, отображается в соответствующем диалоговом окне. Необязятельное поле.";
-    public const string WixFeatureElementDescriptionDescription = "Описание набора, отображается в соответствующем диалоговом окне. Необязятельное поле.";
+    public const string WixFeatureElementTitleDescription = "Заголовок набора, отображается в соответствующем диалоговом окне. Необязательное поле.";
+    public const string WixFeatureElementDescriptionDescription = "Описание набора, отображается в соответствующем диалоговом окне. Необязательное поле.";
     public const string WixFeatureElementDisplayDescription = "Управляет отображением набора в соответствующем диалоге. Collapse отображает содержимое набора свернутым, Expand – развернутым, а Hidden скрывает набор. Необязательное поле (Collapse по умолчанию).";
     public const string WixFeatureElementAbsentDescription = "Принимает два значения: Allow и Disallow. В первом случае пользователь получит возможность не устанавливать набор совсем; во втором – набор будет устанавливаться в любом случае – так следует помечать необходимые для работы компоненты. Необязательное поле (Allow по умолчанию).";
 
     public const string WixShortcutElementNameDescription = "Отображаемое имя.";
-    public const string WixShortcutElementDescriptionDescription = "Описание, отображаемое во всплывающей подсказке при наведении курсора мыши. Необязятельное поле.";
+    public const string WixShortcutElementDescriptionDescription = "Описание, отображаемое во всплывающей подсказке при наведении курсора мыши. Необязательное поле.";
     public const string WixShortcutElementDirectoryDescription = "Идентификатор каталога, где будет располагаться ярлык.";
-    public const string WixShortcutElementIconDescription = "Пиктограмма для ярлыка. Необязятельное поле (в этом случае для exe-файлов будет использоваться их значок, для других - значок по умолчанию).";
-    public const string WixShortcutElementArgumentsDescription = "Параметры командной строки для ярлыка. Необязятельное поле.";
+    public const string WixShortcutElementIconDescription = "Пиктограмма для ярлыка. Необязательное поле (в этом случае для exe-файлов будет использоваться их значок, для других - значок по умолчанию).";
+    public const string WixShortcutElementArgumentsDescription = "Параметры командной строки для ярлыка. Необязательное поле.";
 
     public const string WixDbComponentElementMdfFileDescription = "Файл данных базы данных.";
     public const string WixDbComponentElementLdfFileDescription = "Журнал базы данных.";
@@ -29,6 +29,9 @@ namespace InstallerStudio.WixElements
     public const string WixSqlScriptElementExecuteOnInstallDescription = "Выполнение скрипта во время установки. Должен быть выбран хотя бы один режим.";
     public const string WixSqlScriptElementExecuteOnReinstallDescription = "Выполнение скрипта во время переустановки. Должен быть выбран хотя бы один режим.";
     public const string WixSqlScriptElementExecuteOnUninstallDescription = "Выполнения скрипта во время удаления. Должен быть выбран хотя бы один режим.";
+
+    public const string WixFileElementFileNameDescription = "Файл для установки.";
+    public const string WixFileElementInstallDirectoryDescription = "Директория для установки файла.";
 
     public const string WixSqlExtentedProceduresElementFileNameDescription = "Файл содержащий хранимые процедуры или необходимый для их работы (настройки и прочее).";
 
@@ -40,5 +43,14 @@ namespace InstallerStudio.WixElements
     public const string CategoryMiscellaneous = "Разное";
     public const string CategoryDBFiles = "Файлы базы данных";
     public const string CategoryRunModes = "Режимы выполнения";
+
+    public const string IdCheckingRequired = "Идентификатор не должен быть пустым.";
+    public const string DbFileCheckingRequired = "Необходимо указать файл базы данных.";
+    public const string ScriptCheckingRequired = "Необходимо указать файл скрипта.";
+    public const string ExecuteCheckingFromGroup = "Необходимо выбрать хотя бы один режим выполнения.";
+    public const string FileCheckingRequired = "Необходимо выбрать файл.";
+    public const string InstallDirectoryCheckingRequired = "Необходимо указать директорию для установки.";
+    public const string DisplayNameCheckingRequired = "Необходимо указать отображаемое имя.";
+    public const string DirectoryCheckingRequired = "Необходимо указать идентификатор каталога.";
   }
 }

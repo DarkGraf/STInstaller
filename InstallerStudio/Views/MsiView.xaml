@@ -5,6 +5,7 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+  xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
   xmlns:stviewscontrols="clr-namespace:InstallerStudio.Views.Controls"
   xmlns:stviewsconverters="clr-namespace:InstallerStudio.Views.Converters"
@@ -12,9 +13,8 @@
   d:DesignHeight="500" d:DesignWidth="700"
   SelectedDocumentIndex="{Binding ComponentsCategoryIsVisible, Mode=TwoWay,
     Converter={stviewsconverters:BooleanToSpecificIntConverter}, ConverterParameter=0}"
-    BuildMessages="{Binding BuildMessages, Mode=OneWay,
+  BuildMessages="{Binding BuildMessages, Mode=OneWay,
       Converter={stviewsconverters:ListOfBuildMessageToListOfViewMessageConverter}}">
-<!-- DELETE Converter={stviewsconverters:ListOfStringToStringConverter} -->
   <!-- В App.xaml привязка видимости дополнительной категории осуществляется 
   по свойству IsVisible связанного объекта (IRibbonCustomCategory). Здесь 
   связываемся со свойством модели, которая возвращает и устанавливает 
@@ -32,37 +32,37 @@
         
         <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Cвойства продукта">
           <dxlc:LayoutItem Label="Идентификатор продукта:">
-            <TextBox IsReadOnly="True" Text="{Binding Path=MainItem.Id}" />
+            <dxe:TextEdit IsReadOnly="True" Text="{Binding Path=MainItem.Id}" />
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Идентификатор обновления:">
-            <TextBox IsReadOnly="True" Text="{Binding Path=MainItem.UpgradeCode}" />
+            <dxe:TextEdit IsReadOnly="True" Text="{Binding Path=MainItem.UpgradeCode}" />
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Наименование продукта:">
-            <TextBox Text="{Binding Path=MainItem.Name}" />
+            <dxe:TextEdit Text="{Binding Path=MainItem.Name, ValidatesOnDataErrors=True}" />
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Разработчик продукта:">
-            <TextBox Text="{Binding Path=MainItem.Manufacturer}" />
+            <dxe:TextEdit Text="{Binding Path=MainItem.Manufacturer, ValidatesOnDataErrors=True}" />
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Версия:">
-            <TextBox Text="{Binding Path=MainItem.Version, Converter={stviewsconverters:AppVersionToStringConverter}}" />
+            <dxe:TextEdit Text="{Binding Path=MainItem.Version, Converter={stviewsconverters:AppVersionToStringConverter}}" />
           </dxlc:LayoutItem>
         </dxlc:LayoutGroup>
         
         <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Свойства msi-пакета">
           <dxlc:LayoutItem Label="Описание:">
-            <TextBox Text="{Binding Path=MainItem.PackageDescription}" />
+            <dxe:TextEdit Text="{Binding Path=MainItem.PackageDescription, ValidatesOnDataErrors=True}" />
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Комментарий:">
-            <TextBox Text="{Binding Path=MainItem.PackageComments}" />
+            <dxe:TextEdit Text="{Binding Path=MainItem.PackageComments, ValidatesOnDataErrors=True}" />
           </dxlc:LayoutItem>
         </dxlc:LayoutGroup>
 
         <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Установочные директории">
           <dxlc:LayoutItem Label="Директория семейства продуктов:">
-            <TextBox Text="{Binding Path=MainItem.InstallLocationFamilyFolder}" />
+            <dxe:TextEdit Text="{Binding Path=MainItem.InstallLocationFamilyFolder, ValidatesOnDataErrors=True}" />
           </dxlc:LayoutItem>
-          <dxlc:LayoutItem Label="Директория продукта:" ToolTip="Будет добавлено окончание в виде основной версии.">
-            <TextBox Text="{Binding Path=MainItem.InstallLocationProductFolder}" />
+          <dxlc:LayoutItem Label="Директория продукта:" ToolTip="К данной директории будет добавлено окончание в виде основной версии.">
+            <dxe:TextEdit Text="{Binding Path=MainItem.InstallLocationProductFolder, ValidatesOnDataErrors=True}" />
           </dxlc:LayoutItem>
         </dxlc:LayoutGroup>
 

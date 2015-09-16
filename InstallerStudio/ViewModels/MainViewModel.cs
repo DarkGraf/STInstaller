@@ -7,6 +7,7 @@ using InstallerStudio.ViewModels.Utils;
 using InstallerStudio.Views.Utils;
 using InstallerStudio.Utils;
 using InstallerStudio.Models;
+using InstallerStudio.WixElements;
 
 namespace InstallerStudio.ViewModels
 {
@@ -34,13 +35,55 @@ namespace InstallerStudio.ViewModels
     IRibbonManager RibbonManager { get; }
   }
 
+  /// <summary>
+  /// Интерфейс для связи в View.
+  /// </summary>
+  interface IMainView
+  {
+    /// <summary>
+    /// Закрыть View.
+    /// </summary>
+    void Close();
+    /// <summary>
+    /// Возвращает строковый массив, содержащий аргументы командной строки.
+    /// </summary>
+    string[] CommandLineArgs { get; }
+    /// <summary>
+    ///  Возвращает директорию запуска приложения.
+    /// </summary>
+    string ApplicationDirectory { get; }
+    /// <summary>
+    /// Завершает редактирование в элементах управления.
+    /// </summary>
+    void EditEnd();
+  }
+
+  interface IMainViewSetter
+  {
+    IMainView MainView { get; set; }
+    /// <summary>
+    /// Вызывается во View в конце работы конструктора.
+    /// </summary>
+    void ViewInitialized();
+  }
+
   enum CreatedBuilderType
   {
     Msi,
     Msp
   }
 
-  class MainViewModel : BaseViewModel, IMainViewModel, IDialogServiceSetter
+  class ApplicationInfo : IApplicationInfo
+  {
+    public ApplicationInfo(string applicationDirectory)
+    {
+      ApplicationDirectory = applicationDirectory;
+    }
+
+    public string ApplicationDirectory { get; private set; }
+  }
+
+  class MainViewModel : BaseViewModel, IMainViewModel, IDialogServiceSetter, IMainViewSetter
   {
     /// <summary>
     /// Базовый заголовок программы.
@@ -229,6 +272,25 @@ namespace InstallerStudio.ViewModels
       NotifyPropertyChanged("ApplicationTitle");
     }
 
+    private void InternalOpen(string fileName)
+    {
+      // Диспетчер открываемых файлов.
+      switch (Path.GetExtension(fileName))
+      {
+        case ".msizip":
+          CreateBuilder(CreatedBuilderType.Msi, false);
+          BuilderViewModel.Load(fileName);
+          break;
+        case ".mspzip":
+          CreateBuilder(CreatedBuilderType.Msp, false);
+          BuilderViewModel.Load(fileName);
+          break;
+      }
+
+      // Чтобы не произошло, перегрузим заголовок программы.
+      NotifyPropertyChanged("ApplicationTitle");
+    }
+
     private void Open()
     {
       // Если BuilderViewModel нулевой или открыт Msi, то фильтр формируем в
@@ -243,26 +305,15 @@ namespace InstallerStudio.ViewModels
       dialog.FileName = "";
       if (dialog.Show().GetValueOrDefault())
       {
-        // Диспетчер открываемых файлов.
-        switch (Path.GetExtension(dialog.FileName))
-        {
-          case ".msizip":
-            CreateBuilder(CreatedBuilderType.Msi, false);
-            BuilderViewModel.Load(dialog.FileName);
-            break;
-          case ".mspzip":
-            CreateBuilder(CreatedBuilderType.Msp, false);
-            BuilderViewModel.Load(dialog.FileName);
-            break;
-        }
+        InternalOpen(dialog.FileName);
       }
-
-      // Чтобы не произошло, перегрузим заголовок программы.
-      NotifyPropertyChanged("ApplicationTitle");
     }
 
     private void Save(bool withoutQuery)
     {
+      // Обновим привязки.
+      MainView.EditEnd();
+
       if (withoutQuery && BuilderViewModel.LoadedFileName != null)
         BuilderViewModel.Save(BuilderViewModel.LoadedFileName);
       else
@@ -293,27 +344,16 @@ namespace InstallerStudio.ViewModels
 
     private void Exit()
     {
-#warning Закрытия окна не по методики MVVM.
-      System.Windows.Application.Current.MainWindow.Close();
+      MainView.Close();
     }
 
     private void ChangeSettings()
     {
       ISettingsDialog dialog = DialogService.SettingsDialog;
-      dialog.WixToolsetPath = settingsInfo.WixToolsetPath;
-      dialog.CandleFileName = settingsInfo.CandleFileName;
-      dialog.LightFileName = settingsInfo.LightFileName;
-      dialog.TorchFileName = settingsInfo.TorchFileName;
-      dialog.PyroFileName = settingsInfo.PyroFileName;
-      dialog.UIExtensionFileName = settingsInfo.UIExtensionFileName;
+      SettingsInfoCopier.Copy(dialog, settingsInfo);
       if (dialog.Show().GetValueOrDefault())
       {
-        settingsInfo.WixToolsetPath = dialog.WixToolsetPath;
-        settingsInfo.CandleFileName = dialog.CandleFileName;
-        settingsInfo.LightFileName = dialog.LightFileName;
-        settingsInfo.TorchFileName = dialog.TorchFileName;
-        settingsInfo.PyroFileName = dialog.PyroFileName;
-        settingsInfo.UIExtensionFileName = dialog.UIExtensionFileName;
+        SettingsInfoCopier.Copy(settingsInfo, dialog);
         new SettingsManager().Save(settingsInfo);
       }
     }
@@ -325,7 +365,8 @@ namespace InstallerStudio.ViewModels
 
     private void Build()
     {
-      builderViewModel.Build(settingsInfo);
+      ApplicationInfo applicationInfo = new ApplicationInfo(MainView.ApplicationDirectory);
+      builderViewModel.Build(settingsInfo, applicationInfo);
     }
 
     #endregion
@@ -333,6 +374,34 @@ namespace InstallerStudio.ViewModels
     #region IDialogServiceSetter
 
     public IDialogService DialogService { get; set; }
+
+    #endregion
+
+    #region IMainViewSetter
+
+    public IMainView MainView { get; set; }
+
+    public void ViewInitialized()
+    {
+      // Если указаны дополнительные агрументы.
+      // Проверим существование файла.
+      if (MainView.CommandLineArgs.Length > 1)
+      {
+        string fileName = MainView.CommandLineArgs[1];
+        if (File.Exists(fileName))
+        {
+          // Возьмем второй аргумент и откроем.
+          InternalOpen(fileName);
+        }
+        else
+        {
+          IMessageBoxDialog dialog = DialogService.MessageBoxInfo;
+          dialog.Type = MessageBoxDialogTypes.Exclamation;
+          dialog.Message = string.Format("Не найден файл \"{0}\" или к нему нет доступа.", fileName);
+          dialog.Show();
+        }
+      }
+    }
 
     #endregion
   }

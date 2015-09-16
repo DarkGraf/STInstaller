@@ -42,8 +42,8 @@
         DockPanel.Dock="Top"
         CategoriesSource="{Binding Path=RibbonManager.Categories}" 
         CategoryTemplateSelector="{StaticResource ribbonCategoryTemplateSelector}"
-        ApplicationButtonSmallIcon="{dx:DXImage Image=Home_16x16.png}" 
-        ApplicationButtonLargeIcon="{dx:DXImage Image=Home_32x32.png}" >
+        ApplicationButtonSmallIcon="Images\Home_16x16.png" 
+        ApplicationButtonLargeIcon="Images\Home_32x32.png">
         <dxr:RibbonControl.ApplicationMenu>
           <dxr:ApplicationMenu ShowRightPane="True">
             <dxr:ApplicationMenu.ItemLinks>

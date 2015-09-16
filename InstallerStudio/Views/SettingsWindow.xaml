@@ -3,24 +3,13 @@
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/core"
+  xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
   ShowInTaskbar="False"
   WindowStartupLocation="CenterOwner"
-  Title="Параметры" Height="280" Width="500" 
+  Title="Параметры" Height="300" Width="530" 
   ResizeMode="NoResize"
   SizeToContent="WidthAndHeight">
-
-  <Window.Resources>
-    <Style TargetType="TextBox">
-      <Style.Triggers>
-        <Trigger Property="Validation.HasError" Value="true">
-          <Setter 
-            Property="ToolTip" 
-            Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors).CurrentItem.ErrorContent}" />
-        </Trigger>
-      </Style.Triggers>
-    </Style>
-  </Window.Resources>
 
   <dxc:DXWindow.DataContext>
     <Binding RelativeSource="{RelativeSource Self}" />
@@ -28,28 +17,34 @@
   
   <StackPanel Orientation="Vertical">
     <dxlc:LayoutControl Orientation="Vertical">
-      <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Настройки WIX">
-        <dxlc:LayoutItem Label="Путь к WIX Toolset:">
-          <TextBox Width="300" Text="{Binding Settings.WixToolsetPath, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-        </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="Компилятор:">
-          <TextBox Width="300" Text="{Binding Settings.CandleFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-        </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="Компоновщик:">
-          <TextBox Width="300" Text="{Binding Settings.LightFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-        </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="Утилита генерации различий:">
-          <TextBox Width="300" Text="{Binding Settings.TorchFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-        </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="Утилита создания патчей:">
-          <TextBox Width="300" Text="{Binding Settings.PyroFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-        </dxlc:LayoutItem>
-        <dxlc:LayoutItem Label="UI-расширение:">
-          <TextBox Width="300" Text="{Binding Settings.UIExtensionFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-        </dxlc:LayoutItem>
+      <dxlc:LayoutGroup View="Tabs" Height="205" Width="500">
+        <dxlc:LayoutGroup Orientation="Vertical" Header="Настройки WIX">
+          <dxlc:LayoutItem Label="Путь к WIX Toolset:">
+            <dxe:TextEdit Text="{Binding Settings.WixToolsetPath, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Компилятор:">
+            <dxe:TextEdit Text="{Binding Settings.CandleFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Компоновщик:">
+            <dxe:TextEdit Text="{Binding Settings.LightFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Утилита генерации различий:">
+            <dxe:TextEdit Text="{Binding Settings.TorchFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="Утилита создания патчей:">
+            <dxe:TextEdit Text="{Binding Settings.PyroFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+          </dxlc:LayoutItem>
+          <dxlc:LayoutItem Label="UI-расширение:">
+            <dxe:TextEdit Text="{Binding Settings.UIExtensionFileName, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+          </dxlc:LayoutItem>
+        </dxlc:LayoutGroup>
+        <dxlc:LayoutGroup Orientation="Vertical" Header="Построение">
+          <dxlc:LayoutItem Label="Подавлять указанные ICE:">
+            <dxe:TextEdit Text="{Binding Settings.SuppressIce, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+          </dxlc:LayoutItem>
+        </dxlc:LayoutGroup>
       </dxlc:LayoutGroup>
     </dxlc:LayoutControl>
-  
     <DockPanel LastChildFill="False">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
         <Button Content="Ok" Margin="10,0,5,10" Width="100" IsDefault="True" Click="ButtonOk_Click" />

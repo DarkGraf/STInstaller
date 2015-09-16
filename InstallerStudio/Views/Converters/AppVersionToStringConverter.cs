@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
@@ -24,22 +25,21 @@ namespace InstallerStudio.Views.Converters
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if (value is AppVersion && targetType == typeof(string))
-      {
-        return (value).ToString();
-      }
-      else
-        throw new ArgumentException();
+      // AppVersion -> string.
+      return (value).ToString();
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if (value is string && targetType == typeof(AppVersion))
+      // string -> AppVersion.
+      try
       {
         return new AppVersion(value.ToString());
       }
-      else
-        throw new ArgumentException();
+      catch
+      {
+        return DependencyProperty.UnsetValue;
+      }
     }
 
     #endregion

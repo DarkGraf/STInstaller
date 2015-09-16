@@ -1,9 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using DevExpress.Xpf.Core;
 
 using InstallerStudio.ViewModels.Utils;
-using System.IO;
+using InstallerStudio.Utils;
 
 namespace InstallerStudio.Views.Utils
 {
@@ -14,6 +15,7 @@ namespace InstallerStudio.Views.Utils
     Lazy<SaveFileDialog> saveFileLazy;
     Lazy<SettingsDialog> settingsLazy;
     Lazy<MspWizardDialog> mspWizardLazy;
+    Lazy<MessageBoxDialog> messageBoxInfoLazy;
 
     public DialogService(Window owner)
     {
@@ -22,6 +24,7 @@ namespace InstallerStudio.Views.Utils
       saveFileLazy = new Lazy<SaveFileDialog>(() => new SaveFileDialog(owner));
       settingsLazy = new Lazy<SettingsDialog>(() => new SettingsDialog(owner));
       mspWizardLazy = new Lazy<MspWizardDialog>(() => new MspWizardDialog(owner));
+      messageBoxInfoLazy = new Lazy<MessageBoxDialog>(() => new MessageBoxDialog(owner));
     }
 
     #region IDialogService
@@ -44,6 +47,11 @@ namespace InstallerStudio.Views.Utils
     public IMspWizardDialog MspWizardDialog
     {
       get { return mspWizardLazy.Value; }
+    }
+
+    public IMessageBoxDialog MessageBoxInfo
+    {
+      get { return messageBoxInfoLazy.Value; }
     }
 
     #endregion
@@ -147,25 +155,17 @@ namespace InstallerStudio.Views.Utils
 
     public string UIExtensionFileName { get; set; }
 
+    public string SuppressIce { get; set; }
+
     public override bool? Show()
     {
       SettingsWindow window = new SettingsWindow();
       window.Owner = Owner;
-      window.Settings.WixToolsetPath = WixToolsetPath;
-      window.Settings.CandleFileName = CandleFileName;
-      window.Settings.LightFileName = LightFileName;
-      window.Settings.TorchFileName = TorchFileName;
-      window.Settings.PyroFileName = PyroFileName;
-      window.Settings.UIExtensionFileName = UIExtensionFileName;
+      SettingsInfoCopier.Copy(window.Settings, this);
       bool? result = window.ShowDialog();
       if (result.GetValueOrDefault())
       {
-        WixToolsetPath = window.Settings.WixToolsetPath;
-        CandleFileName = window.Settings.CandleFileName;
-        LightFileName = window.Settings.LightFileName;
-        TorchFileName = window.Settings.TorchFileName;
-        PyroFileName = window.Settings.PyroFileName;
-        UIExtensionFileName = window.Settings.UIExtensionFileName;
+        SettingsInfoCopier.Copy(this, window.Settings);
       }
       return result;
     }
@@ -197,6 +197,26 @@ namespace InstallerStudio.Views.Utils
         ContentType = window.Settings.ContentType;
       }
       return result;
+    }
+
+    #endregion
+  }
+
+  class MessageBoxDialog : DialogBase, IMessageBoxDialog
+  {
+    public MessageBoxDialog(Window owner) : base(owner) { }
+
+    #region IMessageBoxDialog
+
+    public MessageBoxDialogTypes Type { get; set; }
+
+    public string Message { get; set; }
+
+    public override bool? Show()
+    {
+      MessageBox.Show(Message ?? "", Owner.Title, MessageBoxButton.OK, 
+        (MessageBoxImage)Enum.Parse(typeof(MessageBoxImage), Type.ToString()));
+      return true;
     }
 
     #endregion

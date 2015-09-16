@@ -16,6 +16,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug;PathToFiles=..\..\..\..\..\ASPO_7\\</DefineConstants>
     <LinkerAdditionalOptions>-cultures:ru-RU%3ben-US</LinkerAdditionalOptions>
+    <SuppressIces>ICE38;ICE43;ICE57</SuppressIces>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>

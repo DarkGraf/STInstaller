@@ -5,6 +5,7 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+  xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
   xmlns:stviewscontrols="clr-namespace:InstallerStudio.Views.Controls"
   xmlns:stviewsconverters="clr-namespace:InstallerStudio.Views.Converters"
@@ -19,7 +20,7 @@
     </dxdo:DocumentPanel>
     <dxdo:DocumentPanel Caption="Обновляемые пакеты">
       <dxdo:DocumentPanel.Resources>
-        <Style TargetType="{x:Type TextBox}">
+        <Style TargetType="{x:Type dxe:TextEdit}">
           <Setter Property="IsReadOnly" Value="True" />
         </Style>
       </dxdo:DocumentPanel.Resources>
@@ -33,26 +34,26 @@
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Идентификатор продукта:">
             <stviewscontrols:PairContainer>
-              <TextBox Text="{Binding Path=MainItem.BaseId, Mode=OneWay}" />
-              <TextBox Text="{Binding Path=MainItem.TargetId, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.BaseId, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.TargetId, Mode=OneWay}" />
             </stviewscontrols:PairContainer>
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Наименование продукта:">
             <stviewscontrols:PairContainer>
-              <TextBox Text="{Binding Path=MainItem.BaseName, Mode=OneWay}" />
-              <TextBox Text="{Binding Path=MainItem.TargetName, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.BaseName, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.TargetName, Mode=OneWay}" />
             </stviewscontrols:PairContainer>
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Разработчик продукта:">
             <stviewscontrols:PairContainer>
-              <TextBox Text="{Binding Path=MainItem.BaseManufacturer, Mode=OneWay}" />
-              <TextBox Text="{Binding Path=MainItem.TargetManufacturer, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.BaseManufacturer, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.TargetManufacturer, Mode=OneWay}" />
             </stviewscontrols:PairContainer>
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Версия:">
             <stviewscontrols:PairContainer>
-              <TextBox Text="{Binding Path=MainItem.BaseVersion, Mode=OneWay}" />
-              <TextBox Text="{Binding Path=MainItem.TargetVersion, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.BaseVersion, Mode=OneWay}" />
+              <dxe:TextEdit Text="{Binding Path=MainItem.TargetVersion, Mode=OneWay}" />
             </stviewscontrols:PairContainer>
           </dxlc:LayoutItem>
         </dxlc:LayoutGroup>

@@ -6,7 +6,7 @@
   <Fragment>
     <!-- Виртуальный корневой каталог. -->
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <!-- Program Files -->
+      <!-- Program Files. -->
       <Directory Id="ProgramFilesFolder">
         <!-- Общий каталог для семейства продуктов. -->
         <Directory Id="INSTALLLOCATION" Name="$(var.InstallLocationFamilyFolder)">

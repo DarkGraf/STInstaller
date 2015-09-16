@@ -21,7 +21,7 @@ namespace InstallerStudio.WixElements
     /// <summary>
     /// Имя файла в архиве содержащий информацию обновления.
     /// </summary>
-    private const string InfoXml = "Info.xlm";
+    private const string InfoXml = "Info.xml";
     /// <summary>
     /// Имя файла в архиве содержащий wixout.
     /// </summary>

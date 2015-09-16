@@ -2,6 +2,7 @@
 using System.Runtime.Serialization;
 
 using InstallerStudio.WixElements.WixBuilders;
+using InstallerStudio.Utils;
 
 namespace InstallerStudio.WixElements
 {
@@ -25,24 +26,30 @@ namespace InstallerStudio.WixElements
     public Guid UpgradeCode { get; set; }
 
     [DataMember]
+    [CheckingRequired]
     public string Name { get; set; }
 
     [DataMember]
+    [CheckingRequired]
     public string Manufacturer { get; set; }
 
     [DataMember]
     public AppVersion Version { get; set; }
 
     [DataMember]
+    [CheckingRequired]
     public string PackageDescription { get; set; }
 
     [DataMember]
+    [CheckingRequired]
     public string PackageComments { get; set; }
 
     [DataMember]
+    [CheckingRequired]
     public string InstallLocationFamilyFolder { get; set; }
 
     [DataMember]
+    [CheckingRequired]
     public string InstallLocationProductFolder { get; set; }
 
     [DataMember]

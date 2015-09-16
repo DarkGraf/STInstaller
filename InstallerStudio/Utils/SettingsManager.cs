@@ -12,6 +12,7 @@ namespace InstallerStudio.Utils
     string TorchFileName { get; set; }
     string PyroFileName { get; set; }
     string UIExtensionFileName { get; set; }
+    string SuppressIce { get; set; }
   }
 
   class SettingsManager
@@ -31,6 +32,19 @@ namespace InstallerStudio.Utils
       public string PyroFileName { get; set; }
       [DataMember]
       public string UIExtensionFileName { get; set; }
+      [DataMember]
+      public string SuppressIce { get; set; }
+
+      [OnDeserializing]
+      void OnDeserializing(StreamingContext context)
+      {
+        // Метод необходим для поддержки уже установленных версий при добавлении новых настроек.
+        // Перед десериализации сохраненных настроек вызовется сначала это метод,
+        // здесь заполняем поля по умолчанию, затем сереализованные поля старой версии
+        // перепишут изменненые пользователем поля, а новые поля сохранят значения по умолчанию.
+        SettingsInfo info = CreateDefault();
+        SettingsInfoCopier.Copy(this, info);
+      }
 
       public static SettingsInfo CreateDefault()
       {
@@ -41,24 +55,20 @@ namespace InstallerStudio.Utils
         info.TorchFileName = "torch.exe";
         info.PyroFileName = "pyro.exe";
         info.UIExtensionFileName = "wixUIExtension.dll";
+        info.SuppressIce = "ICE38;ICE43;ICE57";
         return info;
       }
 
       public static SettingsInfo CreateFrom(ISettingsInfo info)
       {
-        return new SettingsInfo
-        {
-          WixToolsetPath = info.WixToolsetPath,
-          CandleFileName = info.CandleFileName,
-          LightFileName = info.LightFileName,
-          TorchFileName = info.TorchFileName,
-          PyroFileName = info.PyroFileName,
-          UIExtensionFileName = info.UIExtensionFileName
-        };
+        SettingsInfo result = new SettingsInfo();
+        SettingsInfoCopier.Copy(result, info);
+        return result;
       }
     }
 
     internal static string Directory = "";
+
     internal static string FileName 
     { 
       get { return Path.Combine(Directory, "Settings.xml"); } 

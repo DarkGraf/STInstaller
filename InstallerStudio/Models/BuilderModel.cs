@@ -41,11 +41,12 @@ namespace InstallerStudio.Models
   {
     IList<BuildMessage> buildMessages;
 
-    public BuildContextWrapper(IList<BuildMessage> buildMessages, ISettingsInfo applicationSettings, string projectFileName,
-      Action buildIsFinished, string sourceStoreDirectory)
+    public BuildContextWrapper(IList<BuildMessage> buildMessages, ISettingsInfo applicationSettings, IApplicationInfo applicationInfo,
+      string projectFileName, Action buildIsFinished, string sourceStoreDirectory)
     {
       this.buildMessages = buildMessages;
       this.ApplicationSettings = applicationSettings;
+      this.ApplicationInfo = applicationInfo;
       this.ProjectFileName = projectFileName;
       this.BuildIsFinished = buildIsFinished;
       this.SourceStoreDirectory = sourceStoreDirectory;
@@ -64,6 +65,8 @@ namespace InstallerStudio.Models
     }
 
     public ISettingsInfo ApplicationSettings { get; private set; }
+
+    public IApplicationInfo ApplicationInfo { get; private set; }
 
     public string ProjectFileName { get; private set; }
 
@@ -285,11 +288,11 @@ namespace InstallerStudio.Models
       State = ModelState.Saved;
     }
 
-    public void Build(ISettingsInfo settingsInfo)
+    public void Build(ISettingsInfo settingsInfo, IApplicationInfo applicationInfo)
     {
       IsBuilding = true;
       // Внимание!!! Делегат вызовется не из UI потока.
-      BuildContextWrapper context = new BuildContextWrapper(BuildMessages, settingsInfo, LoadedFileName,
+      BuildContextWrapper context = new BuildContextWrapper(BuildMessages, settingsInfo, applicationInfo, LoadedFileName,
         delegate { IsBuilding = false; }, fileStore.StoreDirectory);
       MainItem.Build(context);
     }

@@ -114,7 +114,9 @@ namespace InstallerStudio.WixElements
       if (fileSupport != null)
       {
         filesHashes = new Dictionary<string, string>();
-        foreach (string file in fileSupport.GetFilesWithRelativePath())
+        // Проверяем чтобы имя файла было не равно нулю. Это может быть у необязательных параметров,
+        // например у иконки.
+        foreach (string file in fileSupport.GetFilesWithRelativePath().Where(v => v != null))
         {
           using (FileStream fileStream = new FileStream(Path.Combine(baseDirectory ?? "", file), FileMode.Open))
           {

@@ -41,7 +41,9 @@ namespace InstallerStudio.Views.Utils
     [UriImage("Views/Images/Components/MefPluginSmall.png")]
     MefPlugin,
     [UriImage("Views/Images/Components/PatchSmall.png")]
-    Patch
+    Patch,
+    [UriImage("Views/Images/Components/LicenseSmall.png")]
+    License
   }
 
   /// <summary>

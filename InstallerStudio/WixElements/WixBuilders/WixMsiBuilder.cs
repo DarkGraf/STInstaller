@@ -23,6 +23,25 @@ namespace InstallerStudio.WixElements.WixBuilders
 
   class WixMsiBuilder : WixBuilderBase
   {
+    /// <summary>
+    /// Информация о директории.
+    /// </summary>
+    class DirectoryInfo
+    {
+      /// <summary>
+      /// Идентификатор директории.
+      /// </summary>
+      public string Id { get; set; }
+      /// <summary>
+      /// Имя директории.
+      /// </summary>
+      public string Name { get; set; }
+      /// <summary>
+      /// Признак предопределенной директории.
+      /// </summary>
+      public bool IsPredefined { get; set; }
+    }
+
     private readonly IDictionary<MsiTemplateTypes, string> templates;
     private readonly IList<string> resourcesTemplates;
     private readonly WixProduct product;
@@ -51,7 +70,80 @@ namespace InstallerStudio.WixElements.WixBuilders
 
     #region Обработка шаблонов.
 
-    private void ProcessingTemplateSimpleComponent(IBuildContext context, CancellationTokenSource cts, XElement xmlWix, WixComponentElement component)
+    private IDictionary<string, DirectoryInfo> CreatingDirectoryDictionary()
+    {
+      // Существуют две основные группы каталогов:
+      //   1. Каталоги WIX с системными идентификаторами (ProgramFilesFolder, DesktopFolder).
+      //      Для этой группы указывается только Id. Входят в предопределенные директории 
+      //      в данной программе.
+      //   2. Пользовательские каталоги, которые делятся на две подгруппы (для данной группы
+      //      указывается Id и Name):
+      //      а) Предопределенне пользовательские каталоги.
+      //      б) Введенные пользователем по формату: "предопределенный_католог"\"каталог_пользователя".
+      // В итоге, для каталогов группы 1 и группы 2 подгруппы "а" строить в Directories.wxs ничего не надо.
+      IDictionary<string, DirectoryInfo> directories = new Dictionary<string, DirectoryInfo>();
+
+      // Директории для установки содержаться только в двух элементах: WixFileElement и WixShortcutElement.
+      // Получим все директории которые используются в продукте кроме пустых.
+      IEnumerable<IWixElement> elements = product.RootElement.Items.Descendants();
+      IEnumerable<string> dirs = elements.OfType<WixFileElement>().Select(v => v.InstallDirectory);
+      dirs = dirs.Union(elements.OfType<WixShortcutElement>().Select(v => v.Directory));
+      dirs = dirs.Distinct().Where(v => !string.IsNullOrEmpty(v));
+
+      int folderId = 0;
+      foreach (string dir in dirs)
+      {
+        // Если пришло [ProgramFilesFolder]\D1\D2\D3, то добавим в словарь
+        // четыре значения:
+        // [ProgramFilesFolder]
+        // [ProgramFilesFolder]\D1
+        // [ProgramFilesFolder]\D1\D2
+        // [ProgramFilesFolder]\D1\D2\D3
+
+        string[] hierarchy = dir.Split('\\', '/');
+        for (int i = 1; i <= hierarchy.Length; i++)
+        {
+          string newDir = string.Join("\\", hierarchy, 0, i);
+
+          if (directories.ContainsKey(newDir))
+            continue;
+
+          // Первая директория является предопределенным каталогом,
+          // остальные введенны пользователем.
+          if (i == 1)
+          {
+            // Если предопределенная директория является директорией профиля
+            // пользователя, и к ней добавлена другая директория, то  запрещаем добавление.
+            // Это связано с трудностью формирования: надо предусмотреть удаление директории через
+            // ключ реестра. Иначе компилятор WIX выдаст ошибку, даже не смотря на указание
+            // строить MSI для perMachine.
+            if (MsiModel.PredefinedUserProfileInstallDirectories.Contains(newDir) && hierarchy.Length > 1)
+              throw new Exception(string.Format("Директория профиля пользователя \"{0}\" не может содержать вложенных директорий.", newDir));
+
+            directories.Add(newDir, new DirectoryInfo
+            {
+              Id = MsiModel.FormatInstallDirectory(newDir),
+              Name = null,
+              IsPredefined = true
+            });
+          }
+          else
+          {
+            directories.Add(newDir, new DirectoryInfo
+            {
+              Id = "Folder" + folderId++,
+              Name = Path.GetFileName(newDir),
+              IsPredefined = false
+            });
+          }
+        }
+      }
+
+      return directories;
+    }
+
+    private void ProcessingTemplateSimpleComponent(IBuildContext context, CancellationTokenSource cts, XElement xmlWix, WixComponentElement component,
+      IDictionary<string, DirectoryInfo> directories)
     {
       // Добавляем файлы. В WIX в одном компоненте может быть несколько файлов, но
       // мы будем использовать для каждого файла отдельный компонент. Так не будет
@@ -63,11 +155,11 @@ namespace InstallerStudio.WixElements.WixBuilders
         XElement xmlFile;
         // Словарь для иконок.
         Dictionary<string, string> icons = new Dictionary<string, string>();
-        string installDirectory = MsiModel.FormatInstallDirectory(file.InstallDirectory);
+        string installDirectoryId = directories[file.InstallDirectory].Id;
         string pathToFile = Path.Combine(context.SourceStoreDirectory, file.InstallDirectory, file.FileName);
 
         XElement xmlDirectory = new XElement(XmlNameSpaceWIX + "DirectoryRef",
-          new XAttribute("Id", installDirectory),
+          new XAttribute("Id", installDirectoryId),
           new XElement(XmlNameSpaceWIX + "Component",
             new XAttribute("Id", component.Id),
             new XAttribute("Guid", component.Guid),
@@ -84,8 +176,8 @@ namespace InstallerStudio.WixElements.WixBuilders
           XElement xmlShortcut = new XElement(XmlNameSpaceWIX + "Shortcut",
             new XAttribute("Id", shortcut.Id),
             new XAttribute("Name", shortcut.Name),
-            new XAttribute("WorkingDirectory", installDirectory),
-            new XAttribute("Directory", MsiModel.FormatInstallDirectory(shortcut.Directory)),
+            new XAttribute("WorkingDirectory", installDirectoryId),
+            new XAttribute("Directory", directories[shortcut.Directory].Id),
             new XAttribute("Advertise", "yes"));
 
           // Не обязательные атрибуты.
@@ -202,7 +294,7 @@ namespace InstallerStudio.WixElements.WixBuilders
       }
     }
 
-    private void ProcessingTemplateComponent(IBuildContext context, CancellationTokenSource cts)
+    private void ProcessingTemplateComponent(IBuildContext context, CancellationTokenSource cts, IDictionary<string, DirectoryInfo> directories)
     {
       string path = Path.Combine(StoreDirectory, templates[MsiTemplateTypes.Component]);
       DeleteDevelopmentInfo(path);
@@ -217,7 +309,7 @@ namespace InstallerStudio.WixElements.WixBuilders
         OfType<WixComponentElement>().Where(v => !v.IsPredefined))
       {
         if (typeof(WixComponentElement) == component.GetType())
-          ProcessingTemplateSimpleComponent(context, cts, xmlWix, component);
+          ProcessingTemplateSimpleComponent(context, cts, xmlWix, component, directories);
         else if (typeof(WixDbComponentElement) == component.GetType())
           ProcessingTemplateDbComponent(context, cts, xmlWix, component as WixDbComponentElement);
       }
@@ -225,9 +317,44 @@ namespace InstallerStudio.WixElements.WixBuilders
       xmlWix.Save(path);
     }
 
-    private void ProcessingTemplateDirectory(IBuildContext context, CancellationTokenSource cts)
+    private void ProcessingTemplateDirectory(IBuildContext context, CancellationTokenSource cts, IDictionary<string, DirectoryInfo> directories)
     {
+      var userDirectories = directories.Where(v => !v.Value.IsPredefined);
 
+      // Если есть пользовательские директории, то добавим.
+      if (userDirectories.Count() > 0)
+      {
+        string path = Path.Combine(StoreDirectory, templates[MsiTemplateTypes.Directory]);
+
+        XElement xmlWix = XElement.Load(path);
+
+        XElement xmlFragment = xmlWix.GetXElement("Fragment");
+        XElement xmlTargetDir = xmlFragment.GetXElement("Directory", new XAttribute("Id", "TARGETDIR"));
+
+        foreach (KeyValuePair<string, DirectoryInfo> pair in userDirectories)
+        {
+          // Получаем иерархию директорий.
+          // Идем от корневой директории и проверяем существование.
+          // Если не существует, создаем.
+          string[] hierarchy = pair.Key.Split('\\', '/');
+          XElement xmlCur = xmlTargetDir;
+          for (int i = 1; i <= hierarchy.Length; i++)
+          {
+            string dir = string.Join("\\", hierarchy, 0, i);
+
+            XElement xmlNew = xmlTargetDir.GetXElement("Directory", new XAttribute("Id", directories[dir].Id));
+            if (xmlNew == null)
+            {
+              xmlCur.Add(xmlNew = new XElement(XmlNameSpaceWIX + "Directory",
+                new XAttribute("Id", directories[dir].Id),
+                new XAttribute("Name", directories[dir].Name)));
+            }
+            xmlCur = xmlNew;
+          }
+        }
+
+        xmlWix.Save(path);
+      }
     }
 
     private void ProcessingTemplateFeature(IBuildContext context, CancellationTokenSource cts)
@@ -416,7 +543,7 @@ namespace InstallerStudio.WixElements.WixBuilders
       command.Append(string.Format("-out \"{0}\\\"", StoreDirectory.IncludeTrailingPathDelimiter()));
       command.Append(" -arch x86");
       command.Append(string.Format(" -ext \"{0}\"", Path.Combine(context.ApplicationSettings.WixToolsetPath, context.ApplicationSettings.UIExtensionFileName)));
-      command.Append(string.Format(" -ext \"{0}\"", Path.Combine(Environment.CurrentDirectory, "WixSTExtension.dll")));
+      command.Append(string.Format(" -ext \"{0}\"", Path.Combine(context.ApplicationInfo.ApplicationDirectory, "WixSTExtension.dll")));
       
       // Берем файлы с расширением .wxs.
       foreach (var name in templates.Where(v => v.Value.EndsWith(".wxs")))
@@ -461,8 +588,18 @@ namespace InstallerStudio.WixElements.WixBuilders
           command.Append(string.Format(" -pdbout \"{0}.{1}\"", outFileName, "wixpdb"));
         }
         command.Append(" -cultures:null");
+
+        // Подавление ICE: 
+        //   warning LGHT1076 : ICE17: ListView: 'SELECTEDDATABASE' for Control: 'DatabasesListView' of Dialog: 'DatabasesListDlg' not found in ListView table.
+        //   error LGHT0204 : ICE38: Component ... installs to user profile. It's KeyPath registry key must fall under HKCU.
+        //   error LGHT0204 : ICE43: Component ... has non-advertised shortcuts. It's KeyPath registry key should fall under HKCU.
+        //   error LGHT0204 : ICE57: Component ... has both per-user and per-machine data with a per-machine KeyPath.
+        string[] ices = context.ApplicationSettings.SuppressIce.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (string ice in ices)
+          command.Append(" -sice:" + ice);
+
         command.Append(string.Format(" -ext \"{0}\"", Path.Combine(context.ApplicationSettings.WixToolsetPath, context.ApplicationSettings.UIExtensionFileName)));
-        command.Append(string.Format(" -ext \"{0}\"", Path.Combine(Environment.CurrentDirectory, "WixSTExtension.dll")));
+        command.Append(string.Format(" -ext \"{0}\"", Path.Combine(context.ApplicationInfo.ApplicationDirectory, "WixSTExtension.dll")));
         command.Append(" -cultures:ru-RU;en-US");
         // Берем файлы с расширением .wxs и меняем на .wixobj.
         foreach (var name in templates.Where(v => v.Value.EndsWith(".wxs")).Select(v => Path.ChangeExtension(v.Value, ".wixobj")))
@@ -496,8 +633,11 @@ namespace InstallerStudio.WixElements.WixBuilders
 
     protected override void ProcessingTemplates(IBuildContext context, CancellationTokenSource cts)
     {
-      ProcessingTemplateComponent(context, cts);
-      ProcessingTemplateDirectory(context, cts);
+      // Первым необходимо сформировать словарь директорий.
+      IDictionary<string, DirectoryInfo> directories = CreatingDirectoryDictionary();
+
+      ProcessingTemplateComponent(context, cts, directories);
+      ProcessingTemplateDirectory(context, cts, directories);
       ProcessingTemplateFeature(context, cts);
       ProcessingTemplateProduct(context, cts);
       ProcessingTemplateVariable(context, cts);

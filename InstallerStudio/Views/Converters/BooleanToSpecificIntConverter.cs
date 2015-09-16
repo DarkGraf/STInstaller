@@ -7,7 +7,8 @@ namespace InstallerStudio.Views.Converters
 {
   /// <summary>
   /// Конвертация типа bool и конкретного числа типа int.
-  /// Работает только обратная конвертация. Возвращает истину, если конвертируемое значение
+  /// Прямая конвертация: если истина, то возвращает значение параметра, иначе -1.
+  /// Обратная конвертация: возвращает истину, если конвертируемое значение
   /// равно значению указанному в параметрах конвертера. Ложь в противном случае.
   /// </summary>
   public class BooleanToSpecificIntConverter : MarkupExtension, IValueConverter
@@ -27,7 +28,7 @@ namespace InstallerStudio.Views.Converters
     
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return -1;
+      return (bool)value ? int.Parse(parameter.ToString()) : -1;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
