@@ -15,6 +15,8 @@ namespace InstallerStudio.WixElements
   [KnownType(typeof(WixSqlScriptElement))]
   [KnownType(typeof(WixSqlExtentedProceduresElement))]
   [KnownType(typeof(WixMefPluginElement))]
+  [KnownType(typeof(WixLicenseElement))]
+  [KnownType(typeof(WixSimpleFileSupportElement))]
   class WixProduct : WixMainEntity
   {
     #region Основные свойства.

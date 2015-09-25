@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using InstallerStudio.Utils;
@@ -26,7 +27,7 @@ namespace InstallerStudioTest.Utils
 
       public string Error
       {
-        get { return string.Empty; }
+        get { return errorHandler.Error; }
       }
 
       public string this[string columnName]
@@ -66,6 +67,18 @@ namespace InstallerStudioTest.Utils
       public string BB2 { get; set; }
       [CheckingFromGroup("BB")]
       public object BB3 { get; set; }
+    }
+
+    class TestDataAllErrors : TestDataErrorInfoBase
+    {
+      [CheckingRequired]
+      public string Id { get; set; }
+
+      [CheckingFromGroup("B")]
+      public bool B1 { get; set; }
+
+      [CheckingFromGroup("B")]
+      public bool B2 { get; set; }
     }
 
     #endregion
@@ -146,15 +159,46 @@ namespace InstallerStudioTest.Utils
 
       // Сбросим все.
       obj.BB2 = null;
-      Assert.AreEqual(CheckingFromGroup.DefaultError, obj["BB1"]);
+      Assert.AreEqual(CheckingFromGroupAttribute.DefaultError, obj["BB1"]);
 
       // Проверим частный случай для строки.
       obj.BB2 = "";
-      Assert.AreEqual(CheckingFromGroup.DefaultError, obj["BB2"]);
+      Assert.AreEqual(CheckingFromGroupAttribute.DefaultError, obj["BB2"]);
 
       // Проверим ссылочный тип.
       obj.BB3 = new object();
       Assert.AreEqual(string.Empty, obj["BB3"]);
+    }
+
+    /// <summary>
+    /// Тест свойства IDataErrorInfo.Error - список всех ошибок.
+    /// </summary>
+    [TestMethod]
+    public void DataErrorHandlerError()
+    {
+      string[] errors;
+      TestDataAllErrors obj = new TestDataAllErrors();
+
+      // Получаем общие ошибки.
+      errors = obj.Error.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+      Assert.AreEqual(2, errors.Length);
+      Assert.AreEqual(string.Format(CheckingRequiredAttribute.DefaultError, "Id"), errors[0]);
+      Assert.AreEqual(CheckingFromGroupAttribute.DefaultError, errors[1]);
+
+      // Заполним одно свойство.
+      obj.B1 = true;
+
+      // Получаем общие ошибки.
+      errors = obj.Error.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+      Assert.AreEqual(1, errors.Length);
+      Assert.AreEqual(string.Format(CheckingRequiredAttribute.DefaultError, "Id"), errors[0]);
+
+      // Заполним одно свойство.
+      obj.Id = "0";
+
+      Assert.AreEqual("", obj.Error);
     }
   }
 }

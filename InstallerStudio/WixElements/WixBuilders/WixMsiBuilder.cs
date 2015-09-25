@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
@@ -90,7 +92,6 @@ namespace InstallerStudio.WixElements.WixBuilders
       dirs = dirs.Union(elements.OfType<WixShortcutElement>().Select(v => v.Directory));
       dirs = dirs.Distinct().Where(v => !string.IsNullOrEmpty(v));
 
-      int folderId = 0;
       foreach (string dir in dirs)
       {
         // Если пришло [ProgramFilesFolder]\D1\D2\D3, то добавим в словарь
@@ -129,9 +130,23 @@ namespace InstallerStudio.WixElements.WixBuilders
           }
           else
           {
+            string id;
+
+            // Будем использовать для директории в качестве ключа, хеш MD5.
+            // Это обеспечит одинаковый ключ для одинаковых директорий в разных сеансах работы.
+            using (MD5 md5 = MD5.Create())
+            {
+              byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(newDir));
+              StringBuilder sb = new StringBuilder();
+              foreach (byte b in data)
+              {
+                sb.Append(b.ToString("x2"));
+              }
+              id = sb.ToString();
+            }
             directories.Add(newDir, new DirectoryInfo
             {
-              Id = "Folder" + folderId++,
+              Id = "Folder" + id,
               Name = Path.GetFileName(newDir),
               IsPredefined = false
             });
@@ -242,7 +257,7 @@ namespace InstallerStudio.WixElements.WixBuilders
             new XElement(XmlNameSpaceWIX + "CreateFolder"),
             new XComment("Ключевой компонент."),
             new XElement(XmlNameSpaceWIX + "RegistryValue",
-              new XAttribute("Root", "HKCU"),
+              new XAttribute("Root", "HKLM"),
               new XAttribute("Key", "$(var.MainRegistryPath)"),
               new XAttribute("Name", component.Id),
               new XAttribute("Type", "integer"),
@@ -477,6 +492,14 @@ namespace InstallerStudio.WixElements.WixBuilders
           new XAttribute("SourceFile", Path.Combine(context.SourceStoreDirectory, plugin.FileName))));
       }
 
+      // Файл лицензии. Должен быть один. Бёрем первый.
+      WixLicenseElement license = product.RootElement.Items.OfType<WixLicenseElement>().FirstOrDefault();
+      if (license != null)
+      {
+        XElement xmlLicense = xmlProduct.GetXElement("WixVariable", new XAttribute("Id", "WixUILicenseRtf"));
+        xmlLicense.Attribute("Value").Value = Path.Combine(context.SourceStoreDirectory, license.FileName);
+      }
+
       xmlWix.Save(path);
     }
 
@@ -631,6 +654,11 @@ namespace InstallerStudio.WixElements.WixBuilders
         Union(resourcesTemplates.Select(v => Path.Combine(commonPath, v))).ToArray();
     }
 
+    protected override IDataErrorInfo ProductErrorInfo
+    {
+      get { return product; }
+    }
+
     protected override void ProcessingTemplates(IBuildContext context, CancellationTokenSource cts)
     {
       // Первым необходимо сформировать словарь директорий.
@@ -646,7 +674,8 @@ namespace InstallerStudio.WixElements.WixBuilders
     protected override void CompilationAndBuild(IBuildContext context, CancellationTokenSource cts)
     {
       RunningCandle(context, cts);
-      RunningLight(context, cts);
+      if (!context.OnlyCheck)
+        RunningLight(context, cts);
     }
 
     #endregion

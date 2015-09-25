@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -82,8 +83,16 @@ namespace InstallerStudio.WixElements.WixBuilders
       return new string[] { "MspTemplate/" + mspTemplate };
     }
 
+    protected override IDataErrorInfo ProductErrorInfo
+    {
+      get { return product; }
+    }
+
     protected override void ProcessingTemplates(IBuildContext context, CancellationTokenSource cts)
     {
+      if (context.OnlyCheck)
+        return;
+
       wxsFiles.Clear();
 
       string pathToTemplate = Path.Combine(StoreDirectory, mspTemplate);
@@ -160,6 +169,9 @@ namespace InstallerStudio.WixElements.WixBuilders
 
     protected override void CompilationAndBuild(IBuildContext context, CancellationTokenSource cts)
     {
+      if (context.OnlyCheck)
+        return;
+
       List<string> msiFiles = new List<string>();
 
       foreach (string wxsFile in wxsFiles)

@@ -68,6 +68,7 @@
     <Compile Include="Utils\SettingsManagerTest.cs" />
     <Compile Include="Utils\DataErrorHandlerTest.cs" />
     <Compile Include="Utils\PropertiesCopierTest.cs" />
+    <Compile Include="Utils\SizeAutoFormattingTest.cs" />
     <Compile Include="Utils\ZipFileStoreTest.cs" />
     <Compile Include="ViewModels\MainViewModelTest.cs" />
     <Compile Include="ViewModels\Utils\RibbonManagerTest.cs" />

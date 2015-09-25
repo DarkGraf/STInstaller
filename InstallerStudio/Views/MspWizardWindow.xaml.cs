@@ -5,12 +5,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-using Microsoft.Win32;
-
 using DevExpress.Xpf.Editors;
 
 using InstallerStudio.Common;
 using InstallerStudio.ViewModels.Utils;
+using InstallerStudio.Views.Utils;
 
 namespace InstallerStudio.Views
 {
@@ -82,10 +81,9 @@ namespace InstallerStudio.Views
       #endregion
     }
 
-    // Будем запоминать в статической переменной последний путь.
-    static string lastPath = Environment.CurrentDirectory;
-    static string ParamPathToBase = "PathToBase";
-    static string ParamPathToTarget = "PathToTarget";
+    DialogService dialogService;
+    public const string ParamPathToBase = "PathToBase";
+    public const string ParamPathToTarget = "PathToTarget";
 
     public WizardSettingsInfo Settings { get; set; }
 
@@ -95,9 +93,13 @@ namespace InstallerStudio.Views
     {
       Settings = new WizardSettingsInfo();
       OkCloseCommand = new RelayCommand(param => OkClose(), (obj) => { return Settings.IsValid; });
+
       InitializeComponent();
+
       edtBase.AddHandler(Button.ClickEvent, new RoutedEventHandler(Button_Click));
       edtTarget.AddHandler(Button.ClickEvent, new RoutedEventHandler(Button_Click));
+
+      dialogService = new DialogService(this);
     }
 
     private void Button_Click(object sender, RoutedEventArgs e)
@@ -106,23 +108,19 @@ namespace InstallerStudio.Views
       if (param != ParamPathToBase && param != ParamPathToTarget)
         return;
 
-      OpenFileDialog dialog = new OpenFileDialog();
-      dialog.InitialDirectory = lastPath;
+      IOpenSaveFileDialog dialog = dialogService.OpenFileDialog;
       dialog.Filter = "*.updzip|*.updzip";
-      dialog.AddExtension = true;
-      if (dialog.ShowDialog().GetValueOrDefault())
+      if (dialog.Show().GetValueOrDefault())
       {
         switch (param)
         {
-          case "PathToBase":
+          case ParamPathToBase:
             Settings.PathToBaseSource = dialog.FileName;
             break;
-          case "PathToTarget":
+          case ParamPathToTarget:
             Settings.PathToTargetSource = dialog.FileName;
             break;
         }
-
-        lastPath = Path.GetDirectoryName(dialog.FileName);
       }
     }
 

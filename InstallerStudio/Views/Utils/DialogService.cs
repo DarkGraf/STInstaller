@@ -79,7 +79,7 @@ namespace InstallerStudio.Views.Utils
 
     static OpenSaveFileDialogBase()
     {
-      InitialDirectory = Environment.CurrentDirectory;
+      InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }
 
     public OpenSaveFileDialogBase(Window owner) : base(owner) { }

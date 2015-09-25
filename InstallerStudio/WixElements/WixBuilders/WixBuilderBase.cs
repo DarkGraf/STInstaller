@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -160,8 +161,10 @@ namespace InstallerStudio.WixElements.WixBuilders
 
     public void Build(IBuildContext context)
     {
+      string prefix = context.OnlyCheck ? "Проверка" : "Сборка";
+
       context.ClearBuildMessage();
-      context.BuildMessageWriteLine("Сборка начата.", BuildMessageTypes.Notification);
+      context.BuildMessageWriteLine(prefix + " начата.", BuildMessageTypes.Notification);
 
       // Общее действие для вызова методов с отменой выполнения задач.
       // Параметры: 
@@ -171,7 +174,9 @@ namespace InstallerStudio.WixElements.WixBuilders
       Action<Action<IBuildContext, CancellationTokenSource>, IBuildContext, CancellationTokenSource, string> actionWithErrorHandling =
         (Action<IBuildContext, CancellationTokenSource> a, IBuildContext ctx, CancellationTokenSource c, string m) =>
         {
-          context.BuildMessageWriteLine(m, BuildMessageTypes.Notification);
+          // Не будем выводить названия действия при проверке, так как некоторые могут не выполнятся.
+          if (!context.OnlyCheck)
+            context.BuildMessageWriteLine(m, BuildMessageTypes.Notification);
           try 
           {
             a(ctx, c);
@@ -188,6 +193,10 @@ namespace InstallerStudio.WixElements.WixBuilders
       CancellationTokenSource cts = new CancellationTokenSource();
       Task.Factory.
         StartNew(delegate
+        {
+          actionWithErrorHandling(CheckProduct, context, cts, "");
+        }, cts.Token).
+        ContinueWith(delegate
         {
           // Загружаем шаблоны во временную папку.
           actionWithErrorHandling(LoadingTemplates, context, cts, "Загрузка шаблонов.");
@@ -206,12 +215,24 @@ namespace InstallerStudio.WixElements.WixBuilders
           // Сюда токен не передаем.
           // Здесь должен быть код, выполняющийся в любом случае, завершились задачи или нет.
           context.BuildMessageWriteLine(
-            string.Format("Сборка завершена {0} за {1}.", cts.IsCancellationRequested ? "с ошибками" : "успешно",
+            string.Format(prefix + " завершена {0} за {1}.", cts.IsCancellationRequested ? "с ошибками" : "успешно",
             stopwatch.Elapsed.ToString("mm\\:ss")), 
             cts.IsCancellationRequested ? BuildMessageTypes.Error : BuildMessageTypes.Information);
           if (context.BuildIsFinished != null)
             context.BuildIsFinished();
         });
+    }
+
+    /// <summary>
+    /// Проверка продукта. Здесь должна происходить проверка информации об ошибках
+    /// сгенерированная атрибутами проверки. Остальные проверки могут делаться в 
+    /// других методах выполняющихся при установленном флаге IBuildContext.OnlyCheck.
+    /// </summary>
+    protected void CheckProduct(IBuildContext context, CancellationTokenSource cts)
+    {
+      string error = ProductErrorInfo.Error;
+      if (!string.IsNullOrEmpty(error))
+        throw new Exception(error);
     }
 
     #region Абстрактные защищенные методы и свойства.
@@ -221,6 +242,8 @@ namespace InstallerStudio.WixElements.WixBuilders
     /// </summary>
     /// <returns></returns>
     protected abstract string[] GetTemplateFileNames();
+
+    protected abstract IDataErrorInfo ProductErrorInfo { get; }
 
     /// <summary>
     /// Обработка шаблонов.

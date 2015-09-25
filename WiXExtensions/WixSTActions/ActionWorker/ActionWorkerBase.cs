@@ -256,10 +256,15 @@ namespace WixSTActions.ActionWorker
       return methodName;
     }
 
-    static bool sessionIsInitialized = false;
+    internal static bool sessionIsInitialized = false;
 
     internal static void WriteActionNameToLog(Session session, string className)
     {
+      // Записываем в файл, если он существует.
+      string logFileName = Path.Combine(Path.GetTempPath(), "STInstallLogger.log");
+      if (!File.Exists(logFileName))
+        return;
+
       System.Text.StringBuilder builder = new System.Text.StringBuilder();
 
       if (!sessionIsInitialized)
@@ -269,15 +274,14 @@ namespace WixSTActions.ActionWorker
 
         if (!session.GetMode(InstallRunMode.Scheduled) && !session.GetMode(InstallRunMode.Rollback))
         {
-          try
-          {
-            // try-catch для юнит-теста.
-            builder.AppendLine("Current Install Status: " + session.GetService<ISessionCurrentInstallStatusExtension>().GetStatus());
-          }
-          catch { }
+          builder.AppendLine("Current Install Status: " + session.GetService<ISessionCurrentInstallStatusExtension>().GetStatus());
 
           builder.AppendLine("#Variables");
-          foreach (string state in new string[] { "Installed", "PATCH", "REMOVE", "REINSTALL", "UPGRADINGPRODUCTCODE", "ACTION", "ADDLOCAL", "REINSTALLMODE", "Preselected", "RESUME" })
+
+          string[] variables = new string[] { "Installed", "PATCH", "REMOVE", "REINSTALL", 
+                                              "UPGRADINGPRODUCTCODE", "ACTION", "ADDLOCAL", 
+                                              "REINSTALLMODE", "Preselected", "RESUME" };
+          foreach (string state in variables)
             builder.AppendLine(string.Format(@"{0}=""{1}""", state, session[state]));
         }
 
@@ -294,21 +298,10 @@ namespace WixSTActions.ActionWorker
 
       #region Запись в файл
 
-      using (StreamWriter file = new StreamWriter(Path.Combine(Path.GetTempPath(), "STInstallLogger.log"), true))
+      using (StreamWriter file = new StreamWriter(logFileName, true))
       {
         file.WriteLine(builder.ToString());
       }
-
-      #endregion
-
-      #region Запись в журнал Windows.
-
-      const string loggerName = "ST Install Logger";
-
-      if (!System.Diagnostics.EventLog.SourceExists(loggerName))
-        System.Diagnostics.EventLog.CreateEventSource(loggerName, "Application");
-
-      System.Diagnostics.EventLog.WriteEntry(loggerName, builder.ToString());
 
       #endregion
     }

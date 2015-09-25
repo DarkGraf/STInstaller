@@ -42,7 +42,7 @@ namespace InstallerStudio.Models
     IList<BuildMessage> buildMessages;
 
     public BuildContextWrapper(IList<BuildMessage> buildMessages, ISettingsInfo applicationSettings, IApplicationInfo applicationInfo,
-      string projectFileName, Action buildIsFinished, string sourceStoreDirectory)
+      string projectFileName, Action buildIsFinished, string sourceStoreDirectory, bool onlyCheck)
     {
       this.buildMessages = buildMessages;
       this.ApplicationSettings = applicationSettings;
@@ -50,6 +50,7 @@ namespace InstallerStudio.Models
       this.ProjectFileName = projectFileName;
       this.BuildIsFinished = buildIsFinished;
       this.SourceStoreDirectory = sourceStoreDirectory;
+      this.OnlyCheck = onlyCheck;
     }
 
     #region IBuildContext
@@ -73,6 +74,8 @@ namespace InstallerStudio.Models
     public Action BuildIsFinished { get; private set; }
 
     public string SourceStoreDirectory { get; private set; }
+
+    public bool OnlyCheck { get; private set; }
 
     #endregion
   }
@@ -288,12 +291,12 @@ namespace InstallerStudio.Models
       State = ModelState.Saved;
     }
 
-    public void Build(ISettingsInfo settingsInfo, IApplicationInfo applicationInfo)
+    public void Build(ISettingsInfo settingsInfo, IApplicationInfo applicationInfo, bool onlyCheck)
     {
       IsBuilding = true;
       // Внимание!!! Делегат вызовется не из UI потока.
       BuildContextWrapper context = new BuildContextWrapper(BuildMessages, settingsInfo, applicationInfo, LoadedFileName,
-        delegate { IsBuilding = false; }, fileStore.StoreDirectory);
+        delegate { IsBuilding = false; }, fileStore.StoreDirectory, onlyCheck);
       MainItem.Build(context);
     }
 

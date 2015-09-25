@@ -89,6 +89,7 @@
     <Compile Include="Utils\ProcessRunner.cs" />
     <Compile Include="Utils\PropertiesCopier.cs" />
     <Compile Include="Utils\SettingsManager.cs" />
+    <Compile Include="Utils\SizeAutoFormatting.cs" />
     <Compile Include="Utils\StringExtension.cs" />
     <Compile Include="Utils\TempFileStoreBase.cs" />
     <Compile Include="Utils\UpdateBindingHelperExtension.cs" />
@@ -319,7 +320,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>@echo *** КОПИРОВАНИЕ СБОРКИ WixUIExtension.dll ***
+    <PreBuildEvent>@echo *** КОПИРОВАНИЕ СБОРКИ WixSTExtension.dll ***
 copy ..\..\..\WiXExtensions\WixSTExtension\bin\Debug\WixSTExtension.dll WixSTExtension.dll</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

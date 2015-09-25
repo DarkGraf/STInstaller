@@ -4,6 +4,7 @@
   xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/core"
   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
   xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+  xmlns:views="clr-namespace:InstallerStudio.Views"
   xmlns:viewsconvertes="clr-namespace:InstallerStudio.Views.Converters"
   ShowInTaskbar="False"
   WindowStartupLocation="CenterOwner"
@@ -43,14 +44,14 @@
               Name="edtBase"
               Style="{StaticResource OpenButton}" 
               Text="{Binding Path=Settings.PathToBaseSource, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-              Tag="PathToBase"/>
+              Tag="{x:Static views:MspWizardWindow.ParamPathToBase}"/>
           </dxlc:LayoutItem>
           <dxlc:LayoutItem Label="Целевая сборка:">
             <dxe:ButtonEdit
               Name="edtTarget"
               Style="{StaticResource OpenButton}" 
               Text="{Binding Path=Settings.PathToTargetSource, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-              Tag="PathToTarget" />
+              Tag="{x:Static views:MspWizardWindow.ParamPathToTarget}" />
           </dxlc:LayoutItem>
         </dxlc:LayoutGroup>
         <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Header="Содержимое">

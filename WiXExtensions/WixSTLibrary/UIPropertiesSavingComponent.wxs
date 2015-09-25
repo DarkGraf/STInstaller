@@ -8,7 +8,7 @@
   <Fragment>
     <DirectoryRef Id="INSTALLLOCATION">
       <Component Id="UIPropertiesSavingComponent" Guid="8ACC98EE-0B81-4790-AF91-8C261F4DD9DF">
-        <RegistryValue Root="HKCU" Key="$(var.RegistryPath)" Name="$(var.BackupPathRegistry)" Type="string" Value="[BACKUPPATH]" />
+        <RegistryValue Root="HKLM" Key="$(var.RegistryPath)" Name="$(var.BackupPathRegistry)" Type="string" Value="[BACKUPPATH]" />
       </Component>
     </DirectoryRef>
   </Fragment>

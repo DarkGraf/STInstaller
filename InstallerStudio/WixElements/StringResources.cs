@@ -32,14 +32,21 @@ namespace InstallerStudio.WixElements
 
     public const string WixFileElementFileNameDescription = "Файл для установки.";
     public const string WixFileElementInstallDirectoryDescription = "Директория для установки файла.";
+    public const string WixFileElementVersionDescription = "Версия файла.";
+    public const string WixFileElementCreationDateDescription = "Дата создания файла.";
+    public const string WixFileElementChangeDateDescription = "Дата изменения файла.";
+    public const string WixFileElementSizeDescription = "Размер файла.";
 
     public const string WixSqlExtentedProceduresElementFileNameDescription = "Файл содержащий хранимые процедуры или необходимый для их работы (настройки и прочее).";
 
     public const string WixMefPluginElementFileNameDescription = "Файл содержащий расширение для инсталлятора созданное по технологии Managed Extensibility Framework.";
 
+    public const string WixLicenseElementFileNameDescription = "Файл содержащий текст лиценции.";
+
     public const string CategoryMain = "Основное";
     public const string CategoryAuxiliary = "Служебное";
     public const string CategoryFiles = "Файлы и директории";
+    public const string CategoryFilesProperties = "Свойства файла";
     public const string CategoryMiscellaneous = "Разное";
     public const string CategoryDBFiles = "Файлы базы данных";
     public const string CategoryRunModes = "Режимы выполнения";

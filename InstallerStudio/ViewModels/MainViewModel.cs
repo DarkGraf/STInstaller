@@ -124,8 +124,8 @@ namespace InstallerStudio.ViewModels
       CloseCommand = new RelayCommand(param => Close(), canExecute);
       ExitCommand = new RelayCommand(param => Exit());
       SettingsCommand = new RelayCommand(param => ChangeSettings());
-      CheckCommand = new RelayCommand(param => Check(), /*canExecute*/ (o) => false); // Отключим на время разработки.
-      BuildCommand = new RelayCommand(param => Build(), canExecute);
+      CheckCommand = new RelayCommand(param => Build(true), canExecute);
+      BuildCommand = new RelayCommand(param => Build(false), canExecute);
 
       CreateRibbon();
     }
@@ -358,15 +358,10 @@ namespace InstallerStudio.ViewModels
       }
     }
 
-    private void Check()
-    {
-
-    }
-
-    private void Build()
+    private void Build(bool onlyCheck)
     {
       ApplicationInfo applicationInfo = new ApplicationInfo(MainView.ApplicationDirectory);
-      builderViewModel.Build(settingsInfo, applicationInfo);
+      builderViewModel.Build(settingsInfo, applicationInfo, onlyCheck);
     }
 
     #endregion

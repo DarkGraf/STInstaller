@@ -188,9 +188,9 @@ namespace InstallerStudio.ViewModels
       Model.Load(fileName);
     }
 
-    public void Build(ISettingsInfo settingsInfo, IApplicationInfo applicationInfo)
+    public void Build(ISettingsInfo settingsInfo, IApplicationInfo applicationInfo, bool onlyCheck)
     {
-      Model.Build(settingsInfo, applicationInfo);
+      Model.Build(settingsInfo, applicationInfo, onlyCheck);
     }
 
     public string LoadedFileName { get { return Model.LoadedFileName; } }

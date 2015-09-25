@@ -24,23 +24,25 @@
     </dxg:TreeListControl.Resources>
 
     <dxg:TreeListControl.Columns>
-      <dxg:TreeListColumn FieldName="Id" Header="Идентификатор" ReadOnly="True" />
-      <dxg:TreeListColumn FieldName="ShortTypeName" Header="Тип" />
-      <dxg:TreeListColumn FieldName="Summary" Header="Сводка" />
+      <dxg:TreeListColumn FieldName="Id" Header="Идентификатор" ReadOnly="True" Width="150" />
+      <dxg:TreeListColumn FieldName="ShortTypeName" Header="Тип" Width="100" />
+      <dxg:TreeListColumn FieldName="Summary" Header="Сводка" ReadOnly="True" Width="300" />
       <dxg:TreeListColumn FieldName="ImageColumn" 
         Binding="{Binding ImageType, Converter={stviewsconverters:EnumToImageConverter}}" 
-        Visible="False" 
+        Visible="False"
         ShowInColumnChooser="False" />
     </dxg:TreeListControl.Columns>
 
     <dxg:TreeListControl.View>
       <dxg:TreeListView 
         x:Name="treeListView"
+        AutoWidth="True"
         ShowIndicator="True"
         TreeDerivationMode="HierarchicalDataTemplate"
         AutoExpandAllNodes="True"
         ShowNodeImages="True"
         ImageFieldName="ImageColumn"
+        AllowColumnFiltering="False"
         FocusedRow="{Binding SelectedItem, Mode=TwoWay}">
 
         <!-- Контекстное меню для удаления строк. -->

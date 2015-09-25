@@ -4,6 +4,7 @@ using System.Windows;
 using System.ComponentModel;
 
 using InstallerStudio.Common;
+using System.Text.RegularExpressions;
 
 namespace InstallerStudio.Views
 {
@@ -87,7 +88,6 @@ namespace InstallerStudio.Views
       {
         get
         {
-#warning реализовать проверку для SuppressIce.
           switch (columnName)
           {
             case "WixToolsetPath":
@@ -102,6 +102,8 @@ namespace InstallerStudio.Views
               return File.Exists(Path.Combine(WixToolsetPath, PyroFileName)) ? string.Empty : "Неправильный файл утилита создания патчей";
             case "UIExtensionFileName":
               return File.Exists(Path.Combine(WixToolsetPath, UIExtensionFileName)) ? string.Empty : "Неправильный файл UI-расширения";
+            case "SuppressIce":
+              return CheckSuppressIce() ? string.Empty : "Неправильно указаны ICE, ожидаемый формат: ICE00;ICE01;...ICEXY";
             default:
               return string.Empty;
           }
@@ -109,6 +111,12 @@ namespace InstallerStudio.Views
       }
 
       #endregion
+
+      private bool CheckSuppressIce()
+      {
+        Regex regex = new Regex(@"^(ICE\d+;*)+$");
+        return regex.IsMatch(SuppressIce);
+      }
     }
 
     public SettingsInfo Settings { get; set; }

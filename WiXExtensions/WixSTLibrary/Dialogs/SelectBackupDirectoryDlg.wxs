@@ -50,7 +50,7 @@
     <!-- Инициализируем по умолчанию до действия AppSearch, потом будет чтение из реестра. -->
     <SetProperty Id="BACKUPPATH" Value="C:\" Before="AppSearch" Sequence="first" />
     <Property Id="BACKUPPATH">
-      <RegistrySearch Id="BackupPathRegistrySearch" Root="HKCU" Key="$(var.RegistryPath)" Name="$(var.BackupPathRegistry)" Type="raw" />
+      <RegistrySearch Id="BackupPathRegistrySearch" Root="HKLM" Key="$(var.RegistryPath)" Name="$(var.BackupPathRegistry)" Type="raw" />
     </Property>
   </Fragment>
 </Wix>

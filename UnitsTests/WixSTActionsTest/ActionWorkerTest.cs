@@ -14,7 +14,7 @@ using WixSTActions.SqlWorker;
 
 namespace WixSTActionsTest
 {
-  #region Общие заглушки
+  #region Общие заглушки.
 
   /// <summary>
   /// Заклушка с не реализованными методами.
@@ -196,6 +196,12 @@ namespace WixSTActionsTest
       public string Mode { get; set; }
     }
 
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
+    {
+      DebugHelper.sessionIsInitialized = true;
+    }
+
     /// <summary>
     /// Проверка инициализации состояния клиента (достаточно без проверки сервера).
     /// </summary>
@@ -331,6 +337,12 @@ namespace WixSTActionsTest
     #endregion
 
     IDisposable shimsContext;
+
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
+    {
+      DebugHelper.sessionIsInitialized = true;
+    }
 
     [TestInitialize]
     public void TestInitialize()
@@ -611,6 +623,12 @@ namespace WixSTActionsTest
 
     #endregion
 
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
+    {
+      DebugHelper.sessionIsInitialized = true;
+    }
+
     [TestMethod]
     [TestCategory("ActionWorker")]
     public void ActionDefineSqlServerPathWorkerTesting()
@@ -731,6 +749,12 @@ namespace WixSTActionsTest
     }
 
     #endregion
+
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
+    {
+      DebugHelper.sessionIsInitialized = true;
+    }
 
     [TestMethod]
     [TestCategory("ActionWorker")]
@@ -1000,6 +1024,12 @@ namespace WixSTActionsTest
     }
 
     #endregion
+
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
+    {
+      DebugHelper.sessionIsInitialized = true;
+    }
 
     [TestMethod]
     [TestCategory("ActionWorker")]

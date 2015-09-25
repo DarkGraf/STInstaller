@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.QualityTools.Testing.Fakes;
 
 using InstallerStudio.WixElements;
 using InstallerStudio.Views.Utils;
@@ -86,28 +87,36 @@ namespace InstallerStudioTest.WixElements
     [TestMethod]
     public void WixElementsFileSupport()
     {
-      WixFileElement element = new WixFileElement();
-      element.FileChanged += element_FileChanged;
-      
-      // Меняем FileName, он является исходным путем.
-      element.FileName = "D:\\File.txt";
-      Assert.AreEqual(null, oldFileName);
-      Assert.AreEqual("File.txt", actualFileName);
-      Assert.AreEqual(null, oldDirectory);
-      Assert.AreEqual(null, actualDirectory);
-      Assert.AreEqual("D:\\File.txt", rawFileName);
-      // Проверка директорий.
-      Assert.AreEqual("", element.GetInstallDirectories()[0]);
+      using (ShimsContext.Create())
+      {
+        // WixFileElement получает информацию о файле. Заменим путь на null.
+        // В этом случае получение информации происходить не будет, так как 
+        // будет считаться что не идет добавление нового файла.
+        System.IO.Fakes.ShimPath.GetFullPathString = delegate { return null; };
 
-      // Меняем InstallDirectory, он является исходным путем.
-      element.InstallDirectory = "C:\\Temp";
-      Assert.AreEqual("File.txt", oldFileName);
-      Assert.AreEqual("File.txt", actualFileName);
-      Assert.AreEqual(null, oldDirectory);
-      Assert.AreEqual("C:\\Temp", actualDirectory);
-      Assert.AreEqual("File.txt", rawFileName);
-      // Проверка директорий.
-      Assert.AreEqual("C:\\Temp", element.GetInstallDirectories()[0]);
+        WixFileElement element = new WixFileElement();
+        element.FileChanged += element_FileChanged;
+
+        // Меняем FileName, он является исходным путем.
+        element.FileName = "D:\\File.txt";
+        Assert.AreEqual(null, oldFileName);
+        Assert.AreEqual("File.txt", actualFileName);
+        Assert.AreEqual(null, oldDirectory);
+        Assert.AreEqual(null, actualDirectory);
+        Assert.AreEqual("D:\\File.txt", rawFileName);
+        // Проверка директорий.
+        Assert.AreEqual("", element.GetInstallDirectories()[0]);
+
+        // Меняем InstallDirectory, он является исходным путем.
+        element.InstallDirectory = "C:\\Temp";
+        Assert.AreEqual("File.txt", oldFileName);
+        Assert.AreEqual("File.txt", actualFileName);
+        Assert.AreEqual(null, oldDirectory);
+        Assert.AreEqual("C:\\Temp", actualDirectory);
+        Assert.AreEqual("File.txt", rawFileName);
+        // Проверка директорий.
+        Assert.AreEqual("C:\\Temp", element.GetInstallDirectories()[0]);
+      }
     }
 
     private void element_FileChanged(object sender, FileSupportEventArgs e)
