@@ -5,66 +5,67 @@ using Microsoft.Deployment.WindowsInstaller;
 
 namespace WixSTActions
 {
-  /// <summary>
-  /// Паттрен "Команда".
-  /// </summary>
-  interface IActionWorker
-  {
-    ActionResult Execute();
-  }
-
-  /// <summary>
-  /// Паттерн "Активный объект".
-  /// Паттерн "Одиночка".
-  /// Обработка команд типа IActionWorker.
-  /// </summary>
-  class ActionEngine
-  {
-    #region Паттерн "Активный объект".
-
-    private Queue<IActionWorker> commands = new Queue<IActionWorker>();
-
-    public void AddWorker(IActionWorker worker)
+    /// <summary>
+    /// Паттрен "Команда".
+    /// </summary>
+    interface IActionWorker
     {
-      commands.Enqueue(worker);
+        ActionResult Execute();
     }
 
-    public ActionResult Run()
+    /// <summary>
+    /// Паттерн "Активный объект".
+    /// Паттерн "Одиночка".
+    /// Обработка команд типа IActionWorker.
+    /// </summary>
+    class ActionEngine
     {
-      ActionResult result = ActionResult.Success;
+        #region Паттерн "Активный объект".
 
-      while (commands.Count > 0 && result == ActionResult.Success)
-      {
-        IActionWorker worker = commands.Dequeue();
-        result = worker.Execute();
-      }
+        private Queue<IActionWorker> commands = new Queue<IActionWorker>();
 
-      return result;
+        public void AddWorker(IActionWorker worker)
+        {
+            commands.Enqueue(worker);
+        }
+
+        public ActionResult Run()
+        {
+            System.Diagnostics.Debugger.Launch();
+            ActionResult result = ActionResult.Success;
+
+            while (commands.Count > 0 && result == ActionResult.Success)
+            {
+                IActionWorker worker = commands.Dequeue();
+                result = worker.Execute();
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Паттерн "Одиночка".
+
+        private static ActionEngine instance = null;
+
+        private ActionEngine() { }
+
+        public static ActionEngine Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new ActionEngine();
+                return instance;
+            }
+        }
+
+        #endregion
+
+        internal void ResetWorkers()
+        {
+            commands.Clear();
+        }
     }
-
-    #endregion
-
-    #region Паттерн "Одиночка".
-
-    private static ActionEngine instance = null;
-
-    private ActionEngine() { }
-
-    public static ActionEngine Instance
-    {
-      get
-      {
-        if (instance == null)
-          instance = new ActionEngine();
-        return instance;
-      }
-    }
-
-    #endregion
-
-    internal void ResetWorkers()
-    {
-      commands.Clear();
-    }
-  }
 }

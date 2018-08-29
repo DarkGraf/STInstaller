@@ -111,7 +111,7 @@ namespace WixSTActions.ActionWorker
       Func<string, bool> func = (str) =>
       {
         foreach (char c in str)
-          if (!(c >= 'A' && c <= 'z' || c >= '0' && c <= '9' || c == '_'))
+          if (!(c >= 'A' && c <= 'z' || c >= '0' && c <= '9' || c == '_' || c == '-'))
             return true;
         return false;
       };
